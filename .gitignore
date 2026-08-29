@@ -16,3 +16,19 @@ Desktop.ini
 *.swp
 *.swo
 *~
+
+# Unreal Engine generated data
+.vs/
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+*.sln
+*.suo
+*.opensdf
+*.sdf
+
+# Local packages are generated outside Git by default
+Package/
+StagedBuilds/
+Build/Windows/FileOpenOrder/

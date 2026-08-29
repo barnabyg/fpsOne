@@ -25,13 +25,17 @@ The verifier is green only when every required gate passes for the current worki
 
 Run focused gates while iterating, then run the complete command after all changes. A failed or skipped gate required by the active mode keeps verification red. A visual gate marked not applicable in human-local mode does not prevent the deterministic suite from passing.
 
+### Incremental ticket profiles
+
+Before a ticket introduces the feature exercised by a later gate, the verifier may mark that gate not applicable only when the result names the missing slice and the ticket that activates it. For T01, repository tests cover the configured player input surface and the Development package must pass a launch smoke test; world Interaction functional scenarios activate with T02. The four-view agent visual gate activates with T08. These staged exceptions expire when their activating slices land and do not weaken the complete-prototype profile.
+
 ## Warning exceptions
 
 Treat a diagnostic as an exception only when it originates outside project-controlled content, cannot be removed with the pinned toolchain, and has no effect on the verified workflows. Record its exact stable match, origin, evidence, and consequence in the verifier's exception manifest. Unrecorded warnings fail the run; broad filters are invalid.
 
 ## Multimodal visual gate
 
-In agent mode, the verifier captures the Room A overview, NPC A at dialogue distance, open-door transition, and Room B with NPC B. A multimodal agent must inspect the resulting images at full available detail against the prototype's visual rubric, then write a pass/fail review tied to the tested Git revision and every screenshot hash. The review covers visible rendering failures, composition, lighting, material quality, furnishing density, NPC presentation, UI obstruction, and whether the images plausibly meet the documented unmodded Skyrim Special Edition/Fallout 4 PC Ultra benchmark at normal gameplay distance.
+Once all four acceptance views exist, agent mode captures the Room A overview, NPC A at dialogue distance, open-door transition, and Room B with NPC B. A multimodal agent must inspect the resulting images at full available detail against the prototype's visual rubric, then write a pass/fail review tied to the tested Git revision and every screenshot hash. The review covers visible rendering failures, composition, lighting, material quality, furnishing density, NPC presentation, UI obstruction, and whether the images plausibly meet the documented unmodded Skyrim Special Edition/Fallout 4 PC Ultra benchmark at normal gameplay distance.
 
 This gate is agent-mediated: the local script proves capture freshness and review linkage, while the multimodal inspection supplies the visual judgement. A missing, stale, or unevidenced review fails agent-mode verification. Human-local validation skips visual capture and review without adding an external AI dependency.
 
