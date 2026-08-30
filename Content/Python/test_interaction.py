@@ -82,9 +82,21 @@ def interaction_scenario():
     interaction = player.get_component_by_class(interaction_class)
     interactable = primary_door.get_component_by_class(interactable_class)
     leaf = primary_door.get_component_by_class(unreal.StaticMeshComponent)
+    hinges = [
+        component
+        for component in primary_door.get_components_by_class(unreal.SceneComponent)
+        if component.get_name() == "Hinge"
+    ]
     require(interaction is not None, "Player does not own BPC_Interaction")
     require(interactable is not None, "Door does not supply the Interactable contract")
     require(leaf is not None, "Door has no collision leaf")
+    require(len(hinges) == 1, "Door leaf is not attached to exactly one Hinge")
+    hinge = hinges[0]
+    closed_leaf_location = leaf.get_world_location()
+    require(
+        abs(closed_leaf_location.x) < 1.0 and abs(closed_leaf_location.y) < 1.0,
+        "Closed Door leaf is not centred in the shared opening",
+    )
 
     controller = unreal.GameplayStatics.get_player_controller(world, 0)
     player.set_actor_location(unreal.Vector(-200.0, 0.0, 90.0), False, False)
@@ -170,6 +182,16 @@ def interaction_scenario():
     yield from wait_for(
         lambda: bool(property_value(primary_door, "IsOpen")),
         "Door did not complete its eased 0.75 second open transition",
+    )
+    open_leaf_location = leaf.get_world_location()
+    hinge_rotation = hinge.get_editor_property("relative_rotation")
+    require(
+        abs(hinge_rotation.yaw - 90.0) < 1.0,
+        f"Door Hinge did not complete its 90 degree opening rotation: {hinge_rotation}",
+    )
+    require(
+        open_leaf_location.x > 49.0 and open_leaf_location.y > 49.0,
+        "Door leaf did not swing wholly inward into Room B",
     )
 
     player.set_actor_location(unreal.Vector(120.0, 0.0, 90.0), True, False)

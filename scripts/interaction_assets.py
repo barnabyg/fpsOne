@@ -51,12 +51,12 @@ def class_path(generated_class):
     return generated_class.get_path_name()
 
 
-def add_component(blueprint, component_class, name):
+def add_component_with_handle(blueprint, component_class, name, parent_handle=None):
     subsystem = unreal.get_engine_subsystem(unreal.SubobjectDataSubsystem)
     handles = subsystem.k2_gather_subobject_data_for_blueprint(blueprint)
     require(handles, f"Could not gather components for {blueprint.get_name()}")
     params = unreal.AddNewSubobjectParams(
-        parent_handle=handles[0],
+        parent_handle=handles[0] if parent_handle is None else parent_handle,
         new_class=component_class,
         blueprint_context=blueprint,
     )
@@ -69,6 +69,11 @@ def add_component(blueprint, component_class, name):
     data = subsystem.k2_find_subobject_data_from_handle(handle)
     component = unreal.SubobjectDataBlueprintFunctionLibrary.get_object_for_blueprint(data, blueprint)
     require(component is not None, f"Could not resolve {name}")
+    return component, handle
+
+
+def add_component(blueprint, component_class, name):
+    component, _ = add_component_with_handle(blueprint, component_class, name)
     return component
 
 
@@ -311,9 +316,15 @@ def external_set(graph, owner_node, variable_name, owner_path, value, x, y):
 def create_door(interactable_blueprint, door_interactable_blueprint):
     delete_asset_if_present(DOOR_ASSET)
     blueprint = unreal.BlueprintEditorLibrary.create_blueprint_asset_with_parent(
-        DOOR_ASSET, unreal.StaticMeshActor
+        DOOR_ASSET, unreal.Actor
     )
     require(blueprint is not None, "Could not create BP_Door")
+    hinge, hinge_handle = add_component_with_handle(
+        blueprint, unreal.SceneComponent, "Hinge"
+    )
+    leaf, _ = add_component_with_handle(
+        blueprint, unreal.StaticMeshComponent, "DoorLeaf", hinge_handle
+    )
     interactable = add_component(blueprint, door_interactable_blueprint.generated_class(), "Interactable")
     interaction_zone = add_component(blueprint, unreal.BoxComponent, "InteractionZone")
 
@@ -322,12 +333,13 @@ def create_door(interactable_blueprint, door_interactable_blueprint):
     require(event_graph.add_member_variable("IsMoving", unreal.BlueprintEditorLibrary.get_basic_type_by_name("bool"), "false"), "Could not add Door motion state")
     unreal.BlueprintEditorLibrary.compile_blueprint(blueprint)
 
-    defaults = unreal.get_default_object(blueprint.generated_class())
-    leaf = defaults.get_component_by_class(unreal.StaticMeshComponent)
     cube = unreal.load_asset("/Engine/BasicShapes/Cube.Cube")
     require(leaf is not None and cube is not None, "Could not configure the Door leaf")
+    hinge.set_editor_property("mobility", unreal.ComponentMobility.MOVABLE)
+    hinge.set_editor_property("relative_location", unreal.Vector(0.0, 50.0, 0.0))
     leaf.set_static_mesh(cube)
     leaf.set_editor_property("mobility", unreal.ComponentMobility.MOVABLE)
+    leaf.set_editor_property("relative_location", unreal.Vector(0.0, -50.0, 0.0))
     leaf.set_relative_scale3d(unreal.Vector(0.12, 1.0, 2.1))
     interaction_zone.set_box_extent(unreal.Vector(20.0, 70.0, 105.0), False)
 
@@ -440,7 +452,8 @@ def create_door(interactable_blueprint, door_interactable_blueprint):
     connect(moving_branch.find_else_pin(), open_branch.find_execute_pin(), "stationary Door request")
     connect(open_state.find_result_pin(), open_branch.find_condition_pin(), "Door state toggle")
 
-    leaf_get_open = add_get(graph, "StaticMeshComponent", -80, -420)
+    leaf_get_open = add_get(graph, "DoorLeaf", -80, -420)
+    hinge_get_open = add_get(graph, "Hinge", 780, -240)
     contract_get_open = add_get(graph, "Interactable", -80, -260)
     set_moving_open = add_set(graph, "IsMoving", -40, 40)
     set_pin(member_value_pin(set_moving_open, "IsMoving"), "true", "opening state")
@@ -453,9 +466,9 @@ def create_door(interactable_blueprint, door_interactable_blueprint):
     set_pin(pawn_ignore_open.find_input_pin("NewResponse"), "ECR_Ignore", "opening Pawn response")
     connect(leaf_get_open.find_result_pin(), pawn_ignore_open.find_self_pin(), "opening Door response leaf")
     move_open = add_function_call(graph, "/Script/Engine.KismetSystemLibrary:MoveComponentTo", 1040, 40, "eased Door opening")
-    connect(leaf_get_open.find_result_pin(), move_open.find_input_pin("Component"), "opening component")
-    set_pin(move_open.find_input_pin("TargetRelativeLocation"), "(X=0.0,Y=0.0,Z=0.0)", "opening location")
-    set_pin(move_open.find_input_pin("TargetRelativeRotation"), "(Pitch=0.0,Yaw=90.0,Roll=0.0)", "opening rotation")
+    connect(hinge_get_open.find_result_pin(), move_open.find_input_pin("Component"), "opening Hinge")
+    set_pin(move_open.find_input_pin("TargetRelativeLocation"), "(X=0.0,Y=50.0,Z=0.0)", "opening Hinge location")
+    set_pin(move_open.find_input_pin("TargetRelativeRotation"), "0, 90, 0", "opening rotation")
     set_pin(move_open.find_input_pin("bEaseOut"), "true", "opening ease out")
     set_pin(move_open.find_input_pin("bEaseIn"), "true", "opening ease in")
     set_pin(move_open.find_input_pin("OverTime"), "0.75", "opening duration")
@@ -479,7 +492,8 @@ def create_door(interactable_blueprint, door_interactable_blueprint):
     ]:
         connect(source, target, description)
 
-    leaf_get_close = add_get(graph, "StaticMeshComponent", -80, 500)
+    leaf_get_close = add_get(graph, "DoorLeaf", -80, 500)
+    hinge_get_close = add_get(graph, "Hinge", 780, 580)
     contract_get_close = add_get(graph, "Interactable", -80, 660)
     set_moving_close = add_set(graph, "IsMoving", -40, 860)
     set_pin(member_value_pin(set_moving_close, "IsMoving"), "true", "closing state")
@@ -492,9 +506,9 @@ def create_door(interactable_blueprint, door_interactable_blueprint):
     set_pin(pawn_ignore_close.find_input_pin("NewResponse"), "ECR_Ignore", "closing Pawn response")
     connect(leaf_get_close.find_result_pin(), pawn_ignore_close.find_self_pin(), "closing Door response leaf")
     move_close = add_function_call(graph, "/Script/Engine.KismetSystemLibrary:MoveComponentTo", 1040, 860, "eased Door closing")
-    connect(leaf_get_close.find_result_pin(), move_close.find_input_pin("Component"), "closing component")
-    set_pin(move_close.find_input_pin("TargetRelativeLocation"), "(X=0.0,Y=0.0,Z=0.0)", "closing location")
-    set_pin(move_close.find_input_pin("TargetRelativeRotation"), "(Pitch=0.0,Yaw=0.0,Roll=0.0)", "closing rotation")
+    connect(hinge_get_close.find_result_pin(), move_close.find_input_pin("Component"), "closing Hinge")
+    set_pin(move_close.find_input_pin("TargetRelativeLocation"), "(X=0.0,Y=50.0,Z=0.0)", "closing Hinge location")
+    set_pin(move_close.find_input_pin("TargetRelativeRotation"), "0, 0, 0", "closing rotation")
     set_pin(move_close.find_input_pin("bEaseOut"), "true", "closing ease out")
     set_pin(move_close.find_input_pin("bEaseIn"), "true", "closing ease in")
     set_pin(move_close.find_input_pin("OverTime"), "0.75", "closing duration")
