@@ -1,5 +1,6 @@
 """Player-facing PIE automation for the reusable T02 Interaction seam."""
 
+import math
 import unreal
 
 
@@ -46,7 +47,7 @@ def wait_for(predicate, message, frames=240):
     raise AssertionError(message)
 
 
-def exercise_door_motion(world, controller, hinge, leaf, interaction, interactable, opening):
+def exercise_door_motion(world, controller, leaf, closed_location, interaction, interactable, opening):
     """Inject E through PlayerInput and observe motion, not private Door state."""
     start = unreal.GameplayStatics.get_time_seconds(world)
     samples = []
@@ -55,8 +56,16 @@ def exercise_door_motion(world, controller, hinge, leaf, interaction, interactab
         for frame in range(240):
             yield
             elapsed = unreal.GameplayStatics.get_time_seconds(world) - start
-            angle = hinge.get_world_rotation().yaw
+            angle = leaf.get_world_rotation().yaw
             progress = angle / 90.0 if opening else 1.0 - angle / 90.0
+            radians = math.radians(angle)
+            expected_midpoint = closed_location + unreal.Vector(
+                50.0 * math.sin(radians), 50.0 * (1.0 - math.cos(radians)), 0.0
+            )
+            require(
+                (leaf.get_world_location() - expected_midpoint).length() < 1.0,
+                "Visible Door leaf did not follow its inward swing arc",
+            )
             samples.append((elapsed, progress))
             if frame == 1:
                 unreal.SystemLibrary.execute_console_command(world, "Input.-key E", controller)
@@ -135,16 +144,9 @@ def interaction_scenario():
     interaction = player.get_component_by_class(interaction_class)
     interactable = primary_door.get_component_by_class(interactable_class)
     leaf = primary_door.get_component_by_class(unreal.StaticMeshComponent)
-    hinges = [
-        component
-        for component in primary_door.get_components_by_class(unreal.SceneComponent)
-        if component.get_name() == "Hinge"
-    ]
     require(interaction is not None, "Player does not own BPC_Interaction")
     require(interactable is not None, "Door does not supply the Interactable contract")
     require(leaf is not None, "Door has no collision leaf")
-    require(len(hinges) == 1, "Door leaf is not attached to exactly one Hinge")
-    hinge = hinges[0]
     closed_leaf_location = leaf.get_world_location()
     require(
         abs(closed_leaf_location.x) < 1.0 and abs(closed_leaf_location.y) < 1.0,
@@ -230,13 +232,13 @@ def interaction_scenario():
     interaction.call_method("ScanForInteractionFocus")
 
     yield from exercise_door_motion(
-        world, controller, hinge, leaf, interaction, interactable, opening=True
+        world, controller, leaf, closed_leaf_location, interaction, interactable, opening=True
     )
     open_leaf_location = leaf.get_world_location()
-    hinge_rotation = hinge.get_editor_property("relative_rotation")
+    leaf_rotation = leaf.get_world_rotation()
     require(
-        abs(hinge_rotation.yaw - 90.0) < 1.0,
-        f"Door Hinge did not complete its 90 degree opening rotation: {hinge_rotation}",
+        abs(leaf_rotation.yaw - 90.0) < 1.0,
+        f"Door leaf did not complete its 90 degree opening rotation: {leaf_rotation}",
     )
     require(
         open_leaf_location.x > 49.0 and open_leaf_location.y > 49.0,
@@ -257,7 +259,7 @@ def interaction_scenario():
     )
 
     yield from exercise_door_motion(
-        world, controller, hinge, leaf, interaction, interactable, opening=False
+        world, controller, leaf, closed_leaf_location, interaction, interactable, opening=False
     )
     require(
         (leaf.get_world_location() - closed_leaf_location).length() < 1.0,
