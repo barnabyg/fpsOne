@@ -1,6 +1,6 @@
 # fpsOne
 
-fpsOne is a narrowly scoped first-person Unreal Engine 5.8 testbed. T01 establishes a blank Blueprint-only project, a minimal playable space, conventional keyboard-and-mouse movement, immediate Escape exit, Development packaging, and local verification evidence.
+fpsOne is a narrowly scoped first-person Unreal Engine 5.8 testbed. The current T02 slice provides two directly connected blockout Rooms, conventional keyboard-and-mouse movement, and a reusable player-owned Interaction system driving one animated Door.
 
 ## Prerequisites
 
@@ -24,6 +24,7 @@ The wizard stores only the non-secret Unreal installation path in the ignored `.
 | W / S | Move forward / backward |
 | A / D | Move left / right |
 | Mouse | Point the view |
+| E | Use the focused Interactable |
 | Escape | Exit immediately |
 
 Sprinting, jumping, crouching, controller input, weapons, and menu behavior are intentionally absent.
@@ -36,7 +37,7 @@ Open `FPSOne.uproject` from Epic Games Launcher or run:
 & 'C:\Program Files\Epic Games\UE_5.8\Engine\Binaries\Win64\UnrealEditor.exe' "$PWD\FPSOne.uproject"
 ```
 
-The project starts on `/Game/Maps/L_Testbed` and uses `/Game/Blueprints/BP_TestbedGameMode` with `/Game/Blueprints/BP_Player` as its default pawn. `/Game/Blueprints/BP_TestbedPlayerController` disables motion input at the controlled-player boundary; no controller mappings are present.
+The project starts on `/Game/Maps/L_Testbed` and uses `/Game/Blueprints/BP_TestbedGameMode` with `/Game/Blueprints/BP_Player` as its default pawn. Look directly at the Door from within 250 cm to see `E — Open` or `E — Close`; the centre dot remains visible during free movement and no outline or glow is used. `/Game/Blueprints/BP_TestbedPlayerController` disables motion input at the controlled-player boundary; no controller mappings are present.
 
 ## Validate and package
 
@@ -46,7 +47,7 @@ Agents run the complete current-slice validation:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify.ps1 -RequireVisualReview
 ```
 
-Humans run the same repository tests, deterministic compile, Development package and launch smoke test, and diagnostics without agent visual judgement:
+Humans run the same repository tests, deterministic compile, player-facing PIE Interaction scenario, Development package and launch smoke test, and diagnostics without agent visual judgement:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify.ps1

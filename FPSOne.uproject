@@ -17,6 +17,13 @@
       "TargetAllowList": [
         "Editor"
       ]
+    },
+    {
+      "Name": "PythonAutomationTest",
+      "Enabled": true,
+      "TargetAllowList": [
+        "Editor"
+      ]
     }
   ]
 }

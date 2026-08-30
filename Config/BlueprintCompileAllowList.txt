@@ -1,3 +1,9 @@
 /Game/Blueprints/BP_Player.BP_Player
 /Game/Blueprints/BP_TestbedPlayerController.BP_TestbedPlayerController
 /Game/Blueprints/BP_TestbedGameMode.BP_TestbedGameMode
+/Game/Blueprints/BPC_Interactable.BPC_Interactable
+/Game/Blueprints/BPC_DoorInteractable.BPC_DoorInteractable
+/Game/Blueprints/BPC_Interaction.BPC_Interaction
+/Game/Blueprints/BP_Door.BP_Door
+/Game/Blueprints/BP_InteractionHUD.BP_InteractionHUD
+/Game/Blueprints/BP_InteractionTestTarget.BP_InteractionTestTarget

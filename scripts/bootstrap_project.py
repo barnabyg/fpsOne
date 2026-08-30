@@ -1,6 +1,17 @@
-"""Generate the project-authored T01 Blueprint assets with Unreal Editor 5.8."""
+"""Generate the project-authored T02 Blueprint assets with Unreal Editor 5.8."""
 
+import os
+import sys
 import unreal
+
+sys.path.insert(0, os.path.dirname(__file__))
+sys.dont_write_bytecode = True
+from interaction_assets import (
+    INTERACTION_ASSET_PATHS,
+    configure_player_interaction,
+    create_interaction_assets,
+    require_asset_absent,
+)
 
 
 PLAYER_ASSET = "/Game/Blueprints/BP_Player"
@@ -16,11 +27,6 @@ def require(condition: bool, message: str) -> None:
 
 def connect(output_pin, input_pin, description: str) -> None:
     require(output_pin.try_create_connection(input_pin), f"Could not connect {description}")
-
-
-def delete_asset_if_present(asset_path: str) -> None:
-    if unreal.EditorAssetLibrary.does_asset_exist(asset_path):
-        require(unreal.EditorAssetLibrary.delete_asset(asset_path), f"Could not replace {asset_path}")
 
 
 def add_axis_binding(event_graph, axis_name: str, function_path: str, y: int) -> None:
@@ -128,14 +134,15 @@ def build_player_graph(blueprint: unreal.Blueprint) -> None:
     )
 
 
-def create_player_blueprint() -> unreal.Blueprint:
-    delete_asset_if_present(PLAYER_ASSET)
+def create_player_blueprint(interaction_blueprint) -> unreal.Blueprint:
+    require_asset_absent(PLAYER_ASSET)
     blueprint = unreal.BlueprintEditorLibrary.create_blueprint_asset_with_parent(
         PLAYER_ASSET, unreal.Character
     )
     require(blueprint is not None, "Could not create BP_Player")
 
     build_player_graph(blueprint)
+    configure_player_interaction(blueprint, interaction_blueprint)
     unreal.BlueprintEditorLibrary.compile_blueprint(blueprint)
 
     player_defaults = unreal.get_default_object(blueprint.generated_class())
@@ -172,7 +179,7 @@ def create_player_blueprint() -> unreal.Blueprint:
 
 
 def create_player_controller_blueprint() -> unreal.Blueprint:
-    delete_asset_if_present(PLAYER_CONTROLLER_ASSET)
+    require_asset_absent(PLAYER_CONTROLLER_ASSET)
     blueprint = unreal.BlueprintEditorLibrary.create_blueprint_asset_with_parent(
         PLAYER_CONTROLLER_ASSET, unreal.PlayerController
     )
@@ -187,8 +194,9 @@ def create_player_controller_blueprint() -> unreal.Blueprint:
 def create_game_mode_blueprint(
     player_blueprint: unreal.Blueprint,
     player_controller_blueprint: unreal.Blueprint,
+    hud_blueprint: unreal.Blueprint,
 ) -> unreal.Blueprint:
-    delete_asset_if_present(GAME_MODE_ASSET)
+    require_asset_absent(GAME_MODE_ASSET)
     blueprint = unreal.BlueprintEditorLibrary.create_blueprint_asset_with_parent(
         GAME_MODE_ASSET, unreal.GameModeBase
     )
@@ -201,6 +209,7 @@ def create_game_mode_blueprint(
     game_mode_defaults.set_editor_property(
         "player_controller_class", player_controller_blueprint.generated_class()
     )
+    game_mode_defaults.set_editor_property("hud_class", hud_blueprint.generated_class())
     unreal.EditorAssetLibrary.save_loaded_asset(blueprint, only_if_is_dirty=False)
     return blueprint
 
@@ -224,77 +233,112 @@ def spawn_mesh_actor(
     return actor
 
 
-def create_testbed_map(game_mode_blueprint: unreal.Blueprint) -> None:
+def create_testbed_map(
+    game_mode_blueprint: unreal.Blueprint,
+    door_blueprint: unreal.Blueprint,
+    interaction_test_target_blueprint: unreal.Blueprint,
+) -> None:
     level_subsystem = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
     actor_subsystem = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
-    if unreal.EditorAssetLibrary.does_asset_exist(MAP_ASSET):
-        require(level_subsystem.load_level(MAP_ASSET), "Could not load L_Testbed")
-        for actor in actor_subsystem.get_all_level_actors():
-            require(actor_subsystem.destroy_actor(actor), f"Could not remove {actor.get_name()}")
-    else:
-        require(level_subsystem.new_level(MAP_ASSET, False), "Could not create L_Testbed")
+    require_asset_absent(MAP_ASSET)
+    require(level_subsystem.new_level(MAP_ASSET, False), "Could not create L_Testbed")
 
     cube = unreal.load_asset("/Engine/BasicShapes/Cube.Cube")
     require(cube is not None, "Could not load the engine cube primitive")
 
-    # A deliberately plain 10 m square room: enough space to verify movement,
-    # collision, mouse look, lighting, and packaging without anticipating T02 art.
+    # T02 blockout: a 6 x 5 m Room A joins a 4 x 4 m Room B directly through
+    # one Door opening. Engine primitives keep this functional slice asset-free.
     spawn_mesh_actor(
         actor_subsystem,
         cube,
-        "Floor",
-        unreal.Vector(0.0, 0.0, -10.0),
-        unreal.Vector(10.0, 10.0, 0.2),
+        "RoomA_Floor",
+        unreal.Vector(-300.0, 0.0, -10.0),
+        unreal.Vector(6.0, 5.0, 0.2),
     )
     spawn_mesh_actor(
         actor_subsystem,
         cube,
-        "NorthWall",
-        unreal.Vector(0.0, 500.0, 150.0),
-        unreal.Vector(10.0, 0.2, 3.0),
+        "RoomA_Ceiling",
+        unreal.Vector(-300.0, 0.0, 280.0),
+        unreal.Vector(6.0, 5.0, 0.2),
     )
     spawn_mesh_actor(
         actor_subsystem,
         cube,
-        "SouthWall",
-        unreal.Vector(0.0, -500.0, 150.0),
-        unreal.Vector(10.0, 0.2, 3.0),
+        "RoomA_NorthWall",
+        unreal.Vector(-300.0, 250.0, 135.0),
+        unreal.Vector(6.0, 0.2, 2.7),
     )
     spawn_mesh_actor(
         actor_subsystem,
         cube,
-        "EastWall",
-        unreal.Vector(500.0, 0.0, 150.0),
-        unreal.Vector(0.2, 10.0, 3.0),
+        "RoomA_SouthWall",
+        unreal.Vector(-300.0, -250.0, 135.0),
+        unreal.Vector(6.0, 0.2, 2.7),
     )
     spawn_mesh_actor(
         actor_subsystem,
         cube,
-        "WestWall",
-        unreal.Vector(-500.0, 0.0, 150.0),
-        unreal.Vector(0.2, 10.0, 3.0),
+        "RoomA_WestWall",
+        unreal.Vector(-600.0, 0.0, 135.0),
+        unreal.Vector(0.2, 5.0, 2.7),
     )
     spawn_mesh_actor(
         actor_subsystem,
         cube,
-        "OrientationBlock",
-        unreal.Vector(180.0, 120.0, 60.0),
-        unreal.Vector(1.2, 1.2, 1.2),
+        "SharedWall_North",
+        unreal.Vector(0.0, 150.0, 135.0),
+        unreal.Vector(0.2, 2.0, 2.7),
     )
+    spawn_mesh_actor(
+        actor_subsystem,
+        cube,
+        "SharedWall_South",
+        unreal.Vector(0.0, -150.0, 135.0),
+        unreal.Vector(0.2, 2.0, 2.7),
+    )
+
+    spawn_mesh_actor(actor_subsystem, cube, "RoomB_Floor", unreal.Vector(200.0, 0.0, -10.0), unreal.Vector(4.0, 4.0, 0.2))
+    spawn_mesh_actor(actor_subsystem, cube, "RoomB_Ceiling", unreal.Vector(200.0, 0.0, 280.0), unreal.Vector(4.0, 4.0, 0.2))
+    spawn_mesh_actor(actor_subsystem, cube, "RoomB_NorthWall", unreal.Vector(200.0, 200.0, 135.0), unreal.Vector(4.0, 0.2, 2.7))
+    spawn_mesh_actor(actor_subsystem, cube, "RoomB_SouthWall", unreal.Vector(200.0, -200.0, 135.0), unreal.Vector(4.0, 0.2, 2.7))
+    spawn_mesh_actor(actor_subsystem, cube, "RoomB_EastWall", unreal.Vector(400.0, 0.0, 135.0), unreal.Vector(0.2, 4.0, 2.7))
+
+    primary_door = actor_subsystem.spawn_actor_from_class(
+        door_blueprint.generated_class(), unreal.Vector(0.0, 0.0, 105.0), unreal.Rotator()
+    )
+    require(primary_door is not None, "Could not spawn the Door")
+    primary_door.set_actor_label("Door")
+
+    distractor = actor_subsystem.spawn_actor_from_class(
+        interaction_test_target_blueprint.generated_class(),
+        unreal.Vector(-40.0, 130.0, 105.0),
+        unreal.Rotator(0.0, 90.0, 0.0),
+    )
+    require(distractor is not None, "Could not spawn the singular-focus distractor")
+    distractor.set_actor_label("InteractionDistractor")
+
+    occluder = spawn_mesh_actor(
+        actor_subsystem, cube, "InteractionTestOccluder", unreal.Vector(-100.0, 180.0, 140.0), unreal.Vector(0.2, 0.8, 2.8)
+    )
+    occluder.get_editor_property("static_mesh_component").set_editor_property(
+        "mobility", unreal.ComponentMobility.MOVABLE
+    )
+    occluder.set_editor_property("tags", [unreal.Name("InteractionTestOccluder")])
 
     player_start = actor_subsystem.spawn_actor_from_class(
         unreal.PlayerStart,
-        unreal.Vector(-300.0, 0.0, 90.0),
+        unreal.Vector(-200.0, 0.0, 90.0),
         unreal.Rotator(0.0, 0.0, 0.0),
     )
     require(player_start is not None, "Could not spawn PlayerStart")
-    player_start.set_actor_label("PlayerStart_T01")
+    player_start.set_actor_label("PlayerStart_T02")
 
     sky_light = actor_subsystem.spawn_actor_from_class(
         unreal.SkyLight, unreal.Vector(0.0, 0.0, 250.0), unreal.Rotator()
     )
     require(sky_light is not None, "Could not spawn SkyLight")
-    sky_light.set_actor_label("SkyLight_T01")
+    sky_light.set_actor_label("SkyLight_T02")
 
     directional_light = actor_subsystem.spawn_actor_from_class(
         unreal.DirectionalLight,
@@ -302,7 +346,7 @@ def create_testbed_map(game_mode_blueprint: unreal.Blueprint) -> None:
         unreal.Rotator(-40.0, -35.0, 0.0),
     )
     require(directional_light is not None, "Could not spawn DirectionalLight")
-    directional_light.set_actor_label("DirectionalLight_T01")
+    directional_light.set_actor_label("DirectionalLight_T02")
     directional_light.get_editor_property("directional_light_component").set_editor_property(
         "intensity", 4.0
     )
@@ -311,7 +355,7 @@ def create_testbed_map(game_mode_blueprint: unreal.Blueprint) -> None:
         unreal.PointLight, unreal.Vector(0.0, 0.0, 240.0), unreal.Rotator()
     )
     require(point_light is not None, "Could not spawn PointLight")
-    point_light.set_actor_label("PointLight_T01")
+    point_light.set_actor_label("PointLight_T02")
     point_light.get_editor_property("point_light_component").set_editor_property(
         "intensity", 3500.0
     )
@@ -332,14 +376,25 @@ def create_testbed_map(game_mode_blueprint: unreal.Blueprint) -> None:
 
 
 def main() -> None:
-    unreal.log(f"Generating T01 assets with {unreal.SystemLibrary.get_engine_version()}")
-    player_blueprint = create_player_blueprint()
+    for asset_path in (*INTERACTION_ASSET_PATHS, PLAYER_ASSET, PLAYER_CONTROLLER_ASSET, GAME_MODE_ASSET, MAP_ASSET):
+        require_asset_absent(asset_path)
+    unreal.log(f"Generating T02 assets with {unreal.SystemLibrary.get_engine_version()}")
+    (
+        _,
+        interaction_blueprint,
+        door_blueprint,
+        hud_blueprint,
+        interaction_test_target_blueprint,
+    ) = create_interaction_assets()
+    player_blueprint = create_player_blueprint(interaction_blueprint)
     player_controller_blueprint = create_player_controller_blueprint()
     game_mode_blueprint = create_game_mode_blueprint(
-        player_blueprint, player_controller_blueprint
+        player_blueprint, player_controller_blueprint, hud_blueprint
     )
-    create_testbed_map(game_mode_blueprint)
-    unreal.log("T01 Blueprint generation completed without script errors")
+    create_testbed_map(
+        game_mode_blueprint, door_blueprint, interaction_test_target_blueprint
+    )
+    unreal.log("T02 Blueprint generation completed without script errors")
 
 
 if __name__ == "__main__":

@@ -202,7 +202,7 @@ step "Choose Install, review and accept Epic's current terms, and set the locati
 step "In Options, keep the core engine and Windows target platform enabled. Starter Content, templates, and marketplace content are not required."
 step "Wait for installation and verification to finish; do not create a template project."
 if ! confirm "Have you accepted the terms and completed the Unreal Engine 5.8 installation?"; then
-  warn "Installation is required before T01 assets or packages can be generated."
+  warn "Installation is required before T02 assets or packages can be generated."
   exit 1
 fi
 ask FPS_ONE_ENGINE_ROOT "Engine install path [C:\\Program Files\\Epic Games\\UE_5.8]:"

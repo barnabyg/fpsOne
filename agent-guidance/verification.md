@@ -27,7 +27,7 @@ Run focused gates while iterating, then run the complete command after all chang
 
 ### Incremental ticket profiles
 
-Before a ticket introduces the feature exercised by a later gate, the verifier may mark that gate not applicable only when the result names the missing slice and the ticket that activates it. For T01, repository tests cover the configured player input surface and the Development package must pass a launch smoke test; world Interaction functional scenarios activate with T02. The four-view agent visual gate activates with T08. These staged exceptions expire when their activating slices land and do not weaken the complete-prototype profile.
+Before a ticket introduces the feature exercised by a later gate, the verifier may mark that gate not applicable only when the result names the missing slice and the ticket that activates it. Through T02, repository tests cover the configured input surface, the player-facing world Interaction scenario is required, and the Development package must pass a launch smoke test. The four-view agent visual gate activates with T08. These staged exceptions expire when their activating slices land and do not weaken the complete-prototype profile.
 
 ## Warning exceptions
 
