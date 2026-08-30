@@ -9,6 +9,10 @@ INTERACTION_COMPONENT_ASSET = "/Game/Blueprints/BPC_Interaction"
 DOOR_ASSET = "/Game/Blueprints/BP_Door"
 HUD_ASSET = "/Game/Blueprints/BP_InteractionHUD"
 TEST_INTERACTABLE_ASSET = "/Game/Blueprints/BP_InteractionTestTarget"
+INTERACTION_ASSET_PATHS = (
+    INTERACTABLE_COMPONENT_ASSET, DOOR_INTERACTABLE_COMPONENT_ASSET,
+    INTERACTION_COMPONENT_ASSET, DOOR_ASSET, HUD_ASSET, TEST_INTERACTABLE_ASSET,
+)
 
 
 def require(condition, message):
@@ -25,9 +29,11 @@ def set_pin(pin, value, description):
     require(pin.set_pin_value(str(value)), f"Could not set {description} to {value}")
 
 
-def delete_asset_if_present(asset_path):
-    if unreal.EditorAssetLibrary.does_asset_exist(asset_path):
-        require(unreal.EditorAssetLibrary.delete_asset(asset_path), f"Could not replace {asset_path}")
+def require_asset_absent(asset_path):
+    require(
+        not unreal.EditorAssetLibrary.does_asset_exist(asset_path),
+        f"Refusing to overwrite {asset_path}; use scripts/regenerate-assets.ps1",
+    )
 
 
 def compile_and_save(blueprint):
@@ -106,7 +112,7 @@ def member_value_pin(node, name):
 
 
 def create_interactable_component():
-    delete_asset_if_present(INTERACTABLE_COMPONENT_ASSET)
+    require_asset_absent(INTERACTABLE_COMPONENT_ASSET)
     blueprint = unreal.BlueprintEditorLibrary.create_blueprint_asset_with_parent(
         INTERACTABLE_COMPONENT_ASSET, unreal.ActorComponent
     )
@@ -127,7 +133,7 @@ def create_interactable_component():
 
 
 def create_door_interactable_component(interactable_blueprint):
-    delete_asset_if_present(DOOR_INTERACTABLE_COMPONENT_ASSET)
+    require_asset_absent(DOOR_INTERACTABLE_COMPONENT_ASSET)
     blueprint = unreal.BlueprintEditorLibrary.create_blueprint_asset_with_parent(
         DOOR_INTERACTABLE_COMPONENT_ASSET, interactable_blueprint.generated_class()
     )
@@ -179,7 +185,7 @@ def clear_focus_nodes(graph, execution_pin, x, y):
 
 
 def create_interaction_component(interactable_blueprint):
-    delete_asset_if_present(INTERACTION_COMPONENT_ASSET)
+    require_asset_absent(INTERACTION_COMPONENT_ASSET)
     blueprint = unreal.BlueprintEditorLibrary.create_blueprint_asset_with_parent(
         INTERACTION_COMPONENT_ASSET, unreal.ActorComponent
     )
@@ -314,7 +320,7 @@ def external_set(graph, owner_node, variable_name, owner_path, value, x, y):
 
 
 def create_door(interactable_blueprint, door_interactable_blueprint):
-    delete_asset_if_present(DOOR_ASSET)
+    require_asset_absent(DOOR_ASSET)
     blueprint = unreal.BlueprintEditorLibrary.create_blueprint_asset_with_parent(
         DOOR_ASSET, unreal.Actor
     )
@@ -546,7 +552,7 @@ def create_door(interactable_blueprint, door_interactable_blueprint):
 
 
 def create_interaction_hud(interaction_blueprint):
-    delete_asset_if_present(HUD_ASSET)
+    require_asset_absent(HUD_ASSET)
     blueprint = unreal.BlueprintEditorLibrary.create_blueprint_asset_with_parent(HUD_ASSET, unreal.HUD)
     require(blueprint is not None, "Could not create BP_InteractionHUD")
     graph = unreal.BlueprintGraphEditor.get_graph_editor_by_name(blueprint, "EventGraph")
@@ -598,7 +604,7 @@ def create_interaction_hud(interaction_blueprint):
 
 
 def create_interaction_test_target(interactable_blueprint):
-    delete_asset_if_present(TEST_INTERACTABLE_ASSET)
+    require_asset_absent(TEST_INTERACTABLE_ASSET)
     blueprint = unreal.BlueprintEditorLibrary.create_blueprint_asset_with_parent(
         TEST_INTERACTABLE_ASSET, unreal.StaticMeshActor
     )
@@ -618,6 +624,8 @@ def create_interaction_test_target(interactable_blueprint):
 
 
 def create_interaction_assets():
+    for asset_path in INTERACTION_ASSET_PATHS:
+        require_asset_absent(asset_path)
     interactable = create_interactable_component()
     save_blueprint(interactable)
     door_interactable = create_door_interactable_component(interactable)

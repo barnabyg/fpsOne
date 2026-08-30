@@ -5,7 +5,13 @@ import sys
 import unreal
 
 sys.path.insert(0, os.path.dirname(__file__))
-from interaction_assets import configure_player_interaction, create_interaction_assets
+sys.dont_write_bytecode = True
+from interaction_assets import (
+    INTERACTION_ASSET_PATHS,
+    configure_player_interaction,
+    create_interaction_assets,
+    require_asset_absent,
+)
 
 
 PLAYER_ASSET = "/Game/Blueprints/BP_Player"
@@ -21,11 +27,6 @@ def require(condition: bool, message: str) -> None:
 
 def connect(output_pin, input_pin, description: str) -> None:
     require(output_pin.try_create_connection(input_pin), f"Could not connect {description}")
-
-
-def delete_asset_if_present(asset_path: str) -> None:
-    if unreal.EditorAssetLibrary.does_asset_exist(asset_path):
-        require(unreal.EditorAssetLibrary.delete_asset(asset_path), f"Could not replace {asset_path}")
 
 
 def add_axis_binding(event_graph, axis_name: str, function_path: str, y: int) -> None:
@@ -134,7 +135,7 @@ def build_player_graph(blueprint: unreal.Blueprint) -> None:
 
 
 def create_player_blueprint(interaction_blueprint) -> unreal.Blueprint:
-    delete_asset_if_present(PLAYER_ASSET)
+    require_asset_absent(PLAYER_ASSET)
     blueprint = unreal.BlueprintEditorLibrary.create_blueprint_asset_with_parent(
         PLAYER_ASSET, unreal.Character
     )
@@ -178,7 +179,7 @@ def create_player_blueprint(interaction_blueprint) -> unreal.Blueprint:
 
 
 def create_player_controller_blueprint() -> unreal.Blueprint:
-    delete_asset_if_present(PLAYER_CONTROLLER_ASSET)
+    require_asset_absent(PLAYER_CONTROLLER_ASSET)
     blueprint = unreal.BlueprintEditorLibrary.create_blueprint_asset_with_parent(
         PLAYER_CONTROLLER_ASSET, unreal.PlayerController
     )
@@ -195,7 +196,7 @@ def create_game_mode_blueprint(
     player_controller_blueprint: unreal.Blueprint,
     hud_blueprint: unreal.Blueprint,
 ) -> unreal.Blueprint:
-    delete_asset_if_present(GAME_MODE_ASSET)
+    require_asset_absent(GAME_MODE_ASSET)
     blueprint = unreal.BlueprintEditorLibrary.create_blueprint_asset_with_parent(
         GAME_MODE_ASSET, unreal.GameModeBase
     )
@@ -239,12 +240,8 @@ def create_testbed_map(
 ) -> None:
     level_subsystem = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
     actor_subsystem = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
-    if unreal.EditorAssetLibrary.does_asset_exist(MAP_ASSET):
-        require(level_subsystem.load_level(MAP_ASSET), "Could not load L_Testbed")
-        for actor in actor_subsystem.get_all_level_actors():
-            require(actor_subsystem.destroy_actor(actor), f"Could not remove {actor.get_name()}")
-    else:
-        require(level_subsystem.new_level(MAP_ASSET, False), "Could not create L_Testbed")
+    require_asset_absent(MAP_ASSET)
+    require(level_subsystem.new_level(MAP_ASSET, False), "Could not create L_Testbed")
 
     cube = unreal.load_asset("/Engine/BasicShapes/Cube.Cube")
     require(cube is not None, "Could not load the engine cube primitive")
@@ -379,6 +376,8 @@ def create_testbed_map(
 
 
 def main() -> None:
+    for asset_path in (*INTERACTION_ASSET_PATHS, PLAYER_ASSET, PLAYER_CONTROLLER_ASSET, GAME_MODE_ASSET, MAP_ASSET):
+        require_asset_absent(asset_path)
     unreal.log(f"Generating T02 assets with {unreal.SystemLibrary.get_engine_version()}")
     (
         _,
