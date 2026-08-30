@@ -1,5 +1,24 @@
 $repoRoot = Split-Path -Parent $PSScriptRoot
 
+Describe 'Unreal publication guard' {
+    BeforeEach { . (Join-Path $repoRoot 'scripts\asset-publishing.ps1') }
+
+    It 'allows publication when only non-editor processes exist' {
+        Mock Get-CimInstance { [pscustomobject]@{ Name = 'notepad.exe'; CommandLine = $null } }
+        Assert-UnrealEditorsClosed
+    }
+
+    It 'rejects an editor regardless of project path spelling' {
+        Mock Get-CimInstance { [pscustomobject]@{ Name = 'UnrealEditor.exe'; CommandLine = 'UnrealEditor.exe ./FPSOne.uproject' } }
+        { Assert-UnrealEditorsClosed } | Should Throw 'Close all Unreal Editor'
+    }
+
+    It 'rejects a commandlet even when its command line is inaccessible' {
+        Mock Get-CimInstance { [pscustomobject]@{ Name = 'UnrealEditor-Cmd.exe'; CommandLine = $null } }
+        { Assert-UnrealEditorsClosed } | Should Throw 'Close all Unreal Editor'
+    }
+}
+
 Describe 'validated asset publishing' {
     BeforeEach {
         . (Join-Path $repoRoot 'scripts\asset-publishing.ps1')

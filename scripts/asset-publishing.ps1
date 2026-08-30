@@ -1,3 +1,11 @@
+function Assert-UnrealEditorsClosed {
+    # Fail closed without depending on command-line visibility or path spelling.
+    $active = Get-CimInstance Win32_Process -ErrorAction Stop | Where-Object {
+        $_.Name -match '^UnrealEditor(-Cmd)?\.exe$'
+    }
+    if ($active) { throw 'Close all Unreal Editor and commandlet processes before publishing assets.' }
+}
+
 function Install-GeneratedAsset {
     param([string] $Incoming, [string] $Destination)
 

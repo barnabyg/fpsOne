@@ -43,13 +43,13 @@ Press Play to start in Room A facing the shared Door. The packaged and editor-pl
 
 ## Safe Blueprint regeneration
 
-Committed assets work directly from a fresh clone. To rebuild them after editing the generators, close this project in Unreal Editor and run:
+Committed assets work directly from a fresh clone. To rebuild them after editing the generators, close all Unreal Editor and commandlet processes and run:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\regenerate-assets.ps1
 ```
 
-This creates an isolated project containing only the current project configuration, generators, and PIE test. It generates and compiles every Blueprint there, then runs the E-input Interaction test before touching the checkout's assets. The complete validated set is published with per-file atomic replacement and rollback if a later replacement fails. No editor may be using the destination during publication. Originals, staged assets, logs, and the test report remain under `Saved\AssetRegeneration\<run-id>` for recovery; generation or test failures leave the original asset set untouched.
+This creates an isolated project containing only the current project configuration, generators, and PIE test. It generates and compiles every Blueprint there, then runs the E-input Interaction test before touching the checkout's assets. The complete validated set is published with per-file atomic replacement and rollback if a later replacement fails. The workflow refuses to run or publish while any Unreal Editor process exists, even when its project cannot be identified; do not start an editor during regeneration. Originals, staged assets, logs, and the test report remain under `Saved\AssetRegeneration\<run-id>` for recovery; generation or test failures leave the original asset set untouched.
 
 Direct execution of `bootstrap_project.py` now refuses an existing asset set. Do not delete committed assets to work around that guard. Regeneration intentionally replaces the generated blockout and Blueprints, so preserve any hand-edited asset work before running it.
 

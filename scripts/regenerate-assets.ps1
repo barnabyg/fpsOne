@@ -8,14 +8,6 @@ $editor = Join-Path $EngineRoot 'Engine\Binaries\Win64\UnrealEditor-Cmd.exe'
 if (-not (Test-Path -LiteralPath $editor -PathType Leaf)) { throw "Unreal Editor not found: $editor" }
 . (Join-Path $PSScriptRoot 'asset-publishing.ps1')
 
-function Assert-ProjectEditorClosed {
-    $active = Get-CimInstance Win32_Process | Where-Object {
-        $_.Name -match '^UnrealEditor(-Cmd)?\.exe$' -and
-        $_.CommandLine -and $_.CommandLine.IndexOf($projectPath, [StringComparison]::OrdinalIgnoreCase) -ge 0
-    }
-    if ($active) { throw 'Close this project in Unreal Editor before regenerating its assets.' }
-}
-
 function Invoke-StagingCheck {
     param([string[]] $Arguments, [string] $LogPath, [string] $SuccessMarker)
 
@@ -34,7 +26,7 @@ function Invoke-StagingCheck {
     }
 }
 
-Assert-ProjectEditorClosed
+Assert-UnrealEditorsClosed
 $transactionRoot = Join-Path $repoRoot ('Saved\AssetRegeneration\' + [guid]::NewGuid().ToString('N'))
 $stageRoot = Join-Path $transactionRoot 'project'
 New-Item -ItemType Directory -Path "$stageRoot\scripts", "$stageRoot\Content\Python" -Force | Out-Null
@@ -63,6 +55,6 @@ $paths = @(
     'Content/Blueprints/BP_TestbedGameMode.uasset',
     'Content/Maps/L_Testbed.umap'
 )
-Assert-ProjectEditorClosed
+Assert-UnrealEditorsClosed
 Publish-GeneratedAssetSet $stageRoot $repoRoot (Join-Path $transactionRoot 'backup') $paths
 Write-Output "ASSET_REGENERATION_PASSED: validated assets published; originals and logs retained in $transactionRoot"
