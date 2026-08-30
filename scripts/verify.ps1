@@ -82,7 +82,8 @@ function New-Gate {
         [string] $Status,
         [long] $DurationMs,
         [string] $Details,
-        [AllowEmptyString()][string] $LogPath = ''
+        [AllowEmptyString()][string] $LogPath = '',
+        [string[]] $ReportPaths = @()
     )
 
     return [pscustomobject][ordered]@{
@@ -91,6 +92,7 @@ function New-Gate {
         durationMs = $DurationMs
         details = $Details
         logPath = $LogPath
+        reportPaths = @($ReportPaths)
     }
 }
 
@@ -160,7 +162,11 @@ if ($testExitCode -eq 0 -and (Test-Path -LiteralPath $testReport -PathType Leaf)
     $testDetails = "Repository tests failed or did not export their report (exit code $testExitCode)."
 }
 $testTimer.Stop()
-$gates.Add((New-Gate 'Repository tests' $testStatus $testTimer.ElapsedMilliseconds $testDetails (Get-RelativeEvidencePath $testLog)))
+$repositoryReports = @()
+if (Test-Path -LiteralPath $testReport -PathType Leaf) {
+    $repositoryReports += Get-RelativeEvidencePath $testReport
+}
+$gates.Add((New-Gate 'Repository tests' $testStatus $testTimer.ElapsedMilliseconds $testDetails (Get-RelativeEvidencePath $testLog) $repositoryReports))
 
 $projectTimer = [System.Diagnostics.Stopwatch]::StartNew()
 $projectLog = Join-Path $logsRoot 'project-health.log'
@@ -251,7 +257,8 @@ $gates.Add((New-Gate 'Player locomotion' $playerStatus $playerTimer.ElapsedMilli
 
 $interactionTimer = [System.Diagnostics.Stopwatch]::StartNew()
 $interactionLog = Join-Path $logsRoot 'interaction-functional.log'
-$interactionReport = Join-Path $logsRoot 'interaction-functional-report'
+$interactionReport = Join-Path $logsRoot ('interaction-functional-report-' + [guid]::NewGuid().ToString('N'))
+$interactionReports = @()
 if ($projectStatus -ne 'passed' -or $playerStatus -ne 'passed') {
     $interactionStatus = 'skipped'
     $interactionDetails = 'Interaction functional tests require passing project-health and player-locomotion gates.'
@@ -272,16 +279,22 @@ if ($projectStatus -ne 'passed' -or $playerStatus -ne 'passed') {
     $interactionExitCode = Invoke-LoggedCommand -Executable $editorPath -Arguments $interactionArguments -LogPath $interactionLog
     $interactionSummary = Select-String -LiteralPath $interactionLog -Pattern 'T02_INTERACTION_FUNCTIONAL_TEST_PASSED' -Quiet
     $interactionErrors = Select-String -LiteralPath $interactionLog -Pattern 'LogPython: Error' -Quiet
-    if ($interactionExitCode -eq 0 -and $interactionSummary -and -not $interactionErrors) {
+    foreach ($name in @('index.html', 'index.json')) {
+        $reportPath = Join-Path $interactionReport $name
+        if (Test-Path -LiteralPath $reportPath -PathType Leaf) {
+            $interactionReports += Get-RelativeEvidencePath $reportPath
+        }
+    }
+    if ($interactionExitCode -eq 0 -and $interactionSummary -and -not $interactionErrors -and $interactionReports.Count -eq 2) {
         $interactionStatus = 'passed'
         $interactionDetails = 'The player-facing PIE scenario passed focus, prompt, Door transition, collision, and passage checks.'
     } else {
         $interactionStatus = 'failed'
-        $interactionDetails = "Interaction functional tests failed or did not emit their success marker (exit code $interactionExitCode)."
+        $interactionDetails = "Interaction functional tests failed or did not emit their success marker and reports (exit code $interactionExitCode)."
     }
 }
 $interactionTimer.Stop()
-$gates.Add((New-Gate 'Interaction functional tests' $interactionStatus $interactionTimer.ElapsedMilliseconds $interactionDetails (Get-RelativeEvidencePath $interactionLog)))
+$gates.Add((New-Gate 'Interaction functional tests' $interactionStatus $interactionTimer.ElapsedMilliseconds $interactionDetails (Get-RelativeEvidencePath $interactionLog) $interactionReports))
 
 $packageTimer = [System.Diagnostics.Stopwatch]::StartNew()
 $packageLog = Join-Path $logsRoot 'development-package.log'

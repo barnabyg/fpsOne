@@ -41,12 +41,17 @@ $gateCards = foreach ($gate in @($result.gates)) {
     } else {
         '<span class="muted">No log</span>'
     }
+    $reportLinks = foreach ($reportPath in @($gate.reportPaths)) {
+        if ($reportPath) {
+            '<br><a href="{0}">{1}</a>' -f (ConvertTo-LinkHref $reportPath), (ConvertTo-HtmlText $reportPath)
+        }
+    }
 
     @"
 <article class="gate $(ConvertTo-HtmlText $gate.status)">
   <div class="gate-heading"><h3>$(ConvertTo-HtmlText $gate.name)</h3><span class="badge">$status</span></div>
   <p>$(ConvertTo-HtmlText $gate.details)</p>
-  <dl><dt>Duration</dt><dd>$(ConvertTo-HtmlText $gate.durationMs) ms</dd><dt>Evidence</dt><dd>$logLink</dd></dl>
+  <dl><dt>Duration</dt><dd>$(ConvertTo-HtmlText $gate.durationMs) ms</dd><dt>Evidence</dt><dd>$logLink$($reportLinks -join '')</dd></dl>
 </article>
 "@
 }

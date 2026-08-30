@@ -73,7 +73,7 @@ Generated evidence is under `C:\docs\git\fpsOne\Saved\Verification`:
 
 - `verification-result.json` — machine-readable source of truth;
 - `index.html` — local static dashboard;
-- `logs\` — retained gate logs.
+- `logs\` — retained gate logs, the repository-test XML report, and a run-specific Unreal Automation HTML/JSON report; the dashboard links directly to each current report.
 
 The Development package is archived to `C:\fpsOne-output\Development`. Override either location with `-EvidenceRoot` or `-PackageRoot` when necessary; keep both on C:.
 

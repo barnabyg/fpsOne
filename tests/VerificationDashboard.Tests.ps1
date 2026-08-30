@@ -23,6 +23,14 @@ Describe 'verification dashboard renderer' {
                     durationMs = 1200
                     details = 'Blueprint compilation completed with zero warnings.'
                     logPath = 'logs/project-health.log'
+                    reportPaths = @('logs/interaction-functional-report/index.html', 'logs/interaction-functional-report/index.json')
+                }
+                @{
+                    name = 'Legacy gate without reports'
+                    status = 'passed'
+                    durationMs = 0
+                    details = 'Older result files remain readable.'
+                    logPath = ''
                 }
             )
             packagePath = 'C:\fpsOne-output\Development\FPSOne.exe'
@@ -42,7 +50,10 @@ Describe 'verification dashboard renderer' {
         $dashboard | Should Match 'abc1234'
         $dashboard | Should Match 'Project health'
         $dashboard | Should Match 'logs/project-health\.log'
+        $dashboard | Should Match 'href="logs/interaction-functional-report/index\.html"'
+        $dashboard | Should Match 'href="logs/interaction-functional-report/index\.json"'
         $dashboard | Should Match 'C:\\fpsOne-output\\Development\\FPSOne\.exe'
         $dashboard | Should Match 'CURRENT EVIDENCE'
+        $dashboard | Should Match 'Legacy gate without reports'
     }
 }
