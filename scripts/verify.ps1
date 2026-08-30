@@ -130,7 +130,7 @@ $uatPath = Join-Path $EngineRoot 'Engine\Build\BatchFiles\RunUAT.bat'
 $assetTimer = [System.Diagnostics.Stopwatch]::StartNew()
 $assetManifestPath = Join-Path $repoRoot 'ASSETS.md'
 if (Test-Path -LiteralPath $assetManifestPath) {
-    $assetDetails = 'ASSETS.md is present; T01 contains no third-party assets.'
+    $assetDetails = 'ASSETS.md is present; the current T02 slice contains no third-party assets.'
     $assetStatus = 'passed'
 } else {
     $assetDetails = 'ASSETS.md is missing.'
@@ -173,6 +173,13 @@ $requiredProjectFiles = @(
     (Join-Path $repoRoot 'Content\Blueprints\BP_TestbedGameMode.uasset'),
     (Join-Path $repoRoot 'Content\Blueprints\BP_TestbedPlayerController.uasset'),
     (Join-Path $repoRoot 'Content\Blueprints\BP_Player.uasset'),
+    (Join-Path $repoRoot 'Content\Blueprints\BPC_Interactable.uasset'),
+    (Join-Path $repoRoot 'Content\Blueprints\BPC_DoorInteractable.uasset'),
+    (Join-Path $repoRoot 'Content\Blueprints\BPC_Interaction.uasset'),
+    (Join-Path $repoRoot 'Content\Blueprints\BP_Door.uasset'),
+    (Join-Path $repoRoot 'Content\Blueprints\BP_InteractionHUD.uasset'),
+    (Join-Path $repoRoot 'Content\Blueprints\BP_InteractionTestTarget.uasset'),
+    (Join-Path $repoRoot 'Content\Python\test_interaction.py'),
     (Join-Path $repoRoot 'scripts\validate_player.py')
 )
 $missingProjectFiles = @($requiredProjectFiles | Where-Object { -not (Test-Path -LiteralPath $_ -PathType Leaf) })
@@ -242,13 +249,45 @@ if ($projectStatus -ne 'passed') {
 $playerTimer.Stop()
 $gates.Add((New-Gate 'Player locomotion' $playerStatus $playerTimer.ElapsedMilliseconds $playerDetails (Get-RelativeEvidencePath $playerLog)))
 
-$gates.Add((New-Gate 'Interaction functional tests' 'not_applicable' 0 'World Interaction functional tests activate with T02, which introduces the Interactable seam.'))
+$interactionTimer = [System.Diagnostics.Stopwatch]::StartNew()
+$interactionLog = Join-Path $logsRoot 'interaction-functional.log'
+$interactionReport = Join-Path $logsRoot 'interaction-functional-report'
+if ($projectStatus -ne 'passed' -or $playerStatus -ne 'passed') {
+    $interactionStatus = 'skipped'
+    $interactionDetails = 'Interaction functional tests require passing project-health and player-locomotion gates.'
+    Set-Content -LiteralPath $interactionLog -Value $interactionDetails -Encoding UTF8
+} else {
+    $interactionArguments = @(
+        $projectPath,
+        '-ExecCmds=Automation RunTests Editor.Python.FPSOne.test_interaction',
+        '-TestExit=Automation Test Queue Empty',
+        "-ReportExportPath=$interactionReport",
+        '-unattended',
+        '-nop4',
+        '-nosplash',
+        '-NullRHI',
+        '-stdout',
+        '-FullStdOutLogOutput'
+    )
+    $interactionExitCode = Invoke-LoggedCommand -Executable $editorPath -Arguments $interactionArguments -LogPath $interactionLog
+    $interactionSummary = Select-String -LiteralPath $interactionLog -Pattern 'T02_INTERACTION_FUNCTIONAL_TEST_PASSED' -Quiet
+    $interactionErrors = Select-String -LiteralPath $interactionLog -Pattern 'LogPython: Error' -Quiet
+    if ($interactionExitCode -eq 0 -and $interactionSummary -and -not $interactionErrors) {
+        $interactionStatus = 'passed'
+        $interactionDetails = 'The player-facing PIE scenario passed focus, prompt, Door transition, collision, and passage checks.'
+    } else {
+        $interactionStatus = 'failed'
+        $interactionDetails = "Interaction functional tests failed or did not emit their success marker (exit code $interactionExitCode)."
+    }
+}
+$interactionTimer.Stop()
+$gates.Add((New-Gate 'Interaction functional tests' $interactionStatus $interactionTimer.ElapsedMilliseconds $interactionDetails (Get-RelativeEvidencePath $interactionLog)))
 
 $packageTimer = [System.Diagnostics.Stopwatch]::StartNew()
 $packageLog = Join-Path $logsRoot 'development-package.log'
-if ($projectStatus -ne 'passed' -or $playerStatus -ne 'passed') {
+if ($projectStatus -ne 'passed' -or $playerStatus -ne 'passed' -or $interactionStatus -ne 'passed') {
     $packageStatus = 'skipped'
-    $packageDetails = 'Packaging requires passing project-health and player-locomotion gates.'
+    $packageDetails = 'Packaging requires passing project-health, player-locomotion, and Interaction gates.'
     Set-Content -LiteralPath $packageLog -Value $packageDetails -Encoding UTF8
 } else {
     New-Item -ItemType Directory -Path $PackageRoot -Force | Out-Null
@@ -309,13 +348,13 @@ $gates.Add((New-Gate 'Packaged launch' $launchStatus $launchTimer.ElapsedMillise
 
 $diagnosticTimer = [System.Diagnostics.Stopwatch]::StartNew()
 $diagnosticLog = Join-Path $logsRoot 'diagnostics.log'
-if ($testStatus -ne 'passed' -or $projectStatus -ne 'passed' -or $playerStatus -ne 'passed' -or $packageStatus -ne 'passed' -or $launchStatus -ne 'passed') {
+if ($testStatus -ne 'passed' -or $projectStatus -ne 'passed' -or $playerStatus -ne 'passed' -or $interactionStatus -ne 'passed' -or $packageStatus -ne 'passed' -or $launchStatus -ne 'passed') {
     $diagnosticStatus = 'skipped'
-    $diagnosticDetails = 'Diagnostics require successful test, project, player, package, and packaged-launch logs.'
+    $diagnosticDetails = 'Diagnostics require successful test, project, player, Interaction, package, and packaged-launch logs.'
     Set-Content -LiteralPath $diagnosticLog -Value $diagnosticDetails -Encoding UTF8
 } else {
     $diagnosticCandidates = @(
-        Select-String -Path @($testLog, $projectLog, $playerLog, $packageLog, $launchLog) -Pattern '(?i)\b(Warning|Error)\b' -ErrorAction SilentlyContinue |
+        Select-String -Path @($testLog, $projectLog, $playerLog, $interactionLog, $packageLog, $launchLog) -Pattern '(?i)\b(Warning|Error)\b' -ErrorAction SilentlyContinue |
             Where-Object {
                 $_.Line -notmatch '(?i)(Success|Completed)\s.*0 error(?:\(s\)|s).*0 warning(?:\(s\)|s)' -and
                 $_.Line -notmatch '(?i)Map check complete:\s*0 Error\(s\), 0 Warning\(s\)'
@@ -331,22 +370,28 @@ if ($testStatus -ne 'passed' -or $projectStatus -ne 'passed' -or $playerStatus -
             pattern = 'LogTemp: Error (test: UE::UnifiedErrorTest::Empty: \[Empty error\]|with param: UE::UnifiedErrorTest::WithInt: \[Error with int -7\]|with context: UE::UnifiedErrorTest::Empty: \[Empty error\])$'
             origin = 'Diagnostic examples emitted by Unreal Engine 5.8 Core UnifiedError test code during Python-enabled editor startup.'
             consequence = 'No project code is involved; the Player validator completed with its success marker and no Python errors.'
+        },
+        [pscustomobject]@{
+            pattern = '^Failed reading oplog from Zen at \[::1\]:8558 \(attempt 1/3\): .* Re-checking ZenServer readiness and retrying\.$'
+            origin = 'RunUAT briefly lost its localhost Zen storage connection and invoked its built-in readiness retry.'
+            consequence = 'The retry recovered; cooking reported zero errors and warnings, packaging completed, and the packaged launch passed.'
         }
     )
     $projectDiagnostics = [Collections.Generic.List[object]]::new()
     $unclassifiedDiagnostics = [Collections.Generic.List[object]]::new()
     foreach ($diagnostic in $diagnosticCandidates) {
+        $matchedException = $exceptionDefinitions | Where-Object { $diagnostic.Line -match $_.pattern } | Select-Object -First 1
+        if ($matchedException) {
+            $warningExceptions += "Match: $($matchedException.pattern) | Origin: $($matchedException.origin) | Evidence: $(Get-RelativeEvidencePath $diagnostic.Path) | Consequence: $($matchedException.consequence)"
+            continue
+        }
+
         if ($diagnostic.Line -match '(?i)(LogBlueprint|LogScript|/Game/|FPSOne)') {
             $projectDiagnostics.Add($diagnostic)
             continue
         }
 
-        $matchedException = $exceptionDefinitions | Where-Object { $diagnostic.Line -match $_.pattern } | Select-Object -First 1
-        if ($matchedException) {
-            $warningExceptions += "Match: $($matchedException.pattern) | Origin: $($matchedException.origin) | Evidence: $(Get-RelativeEvidencePath $diagnostic.Path) | Consequence: $($matchedException.consequence)"
-        } else {
-            $unclassifiedDiagnostics.Add($diagnostic)
-        }
+        $unclassifiedDiagnostics.Add($diagnostic)
     }
 
     if ($projectDiagnostics.Count -eq 0 -and $unclassifiedDiagnostics.Count -eq 0) {
@@ -363,10 +408,10 @@ $diagnosticTimer.Stop()
 $gates.Add((New-Gate 'Diagnostics' $diagnosticStatus $diagnosticTimer.ElapsedMilliseconds $diagnosticDetails (Get-RelativeEvidencePath $diagnosticLog)))
 
 if ($RequireVisualReview) {
-    $gates.Add((New-Gate 'Visual acceptance' 'not_applicable' 0 'T01 has no final Room, Door, or NPC acceptance views; the four-view agent gate activates with T08.'))
+    $gates.Add((New-Gate 'Visual acceptance' 'not_applicable' 0 'T02 has no final Room, Door, or NPC acceptance views; the four-view agent gate activates with T08.'))
     $visualReview = [pscustomobject]@{
         status = 'not_applicable'
-        details = 'No final visual-acceptance views apply to the T01 bootstrap profile.'
+        details = 'No final visual-acceptance views apply to the T02 Interaction profile.'
     }
 } else {
     $gates.Add((New-Gate 'Visual acceptance' 'not_applicable' 0 'Human-local validation does not use an AI visual gate.'))

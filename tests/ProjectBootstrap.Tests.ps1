@@ -46,4 +46,12 @@ Describe 'FPSOne project bootstrap' {
         $bootstrapScript = Get-Content -LiteralPath (Join-Path $repoRoot 'scripts\bootstrap_project.py') -Raw
         $bootstrapScript | Should Match 'controller_defaults\.set_editor_property\("enable_motion_controls", False\)'
     }
+
+    It 'binds E as the reusable Interaction input' {
+        $inputConfigPath = Join-Path $repoRoot 'Config\DefaultInput.ini'
+        $inputConfig = Get-Content -LiteralPath $inputConfigPath -Raw
+
+        $inputConfig | Should Match 'ActionName="Interact",Key=E'
+        ([regex]::Matches($inputConfig, 'ActionName="Interact"')).Count | Should Be 1
+    }
 }
