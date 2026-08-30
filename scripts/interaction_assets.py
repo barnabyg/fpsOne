@@ -127,8 +127,10 @@ def create_door_interactable_component(interactable_blueprint):
         DOOR_INTERACTABLE_COMPONENT_ASSET, interactable_blueprint.generated_class()
     )
     require(blueprint is not None, "Could not create BPC_DoorInteractable")
-    event_graph = unreal.BlueprintGraphEditor.get_graph_editor_by_name(blueprint, "EventGraph")
-    require(event_graph.add_member_variable("RequestPending", unreal.BlueprintEditorLibrary.get_basic_type_by_name("bool"), "false"), "Could not add RequestPending")
+    require(
+        blueprint.add_event_dispatcher("InteractionRequested"),
+        "Could not add the Door Interaction dispatcher",
+    )
     unreal.BlueprintEditorLibrary.compile_blueprint(blueprint)
 
     override_graph = unreal.BlueprintEditorLibrary.add_function_override(blueprint, "RequestInteraction")
@@ -138,9 +140,26 @@ def create_door_interactable_component(interactable_blueprint):
     for node in graph.list_all_nodes():
         if "Parent" in node.get_node_title():
             graph.remove_nodes([node])
-    pending = add_set(graph, "RequestPending", 120, 0)
-    set_pin(member_value_pin(pending, "RequestPending"), "true", "pending Door Interaction")
-    connect(entry, pending.find_execute_pin(), "Door Interaction request")
+    available = add_get(
+        graph,
+        "InteractionAvailable",
+        -420,
+        120,
+    )
+    branch = graph.add_branch_node()
+    branch.set_node_pos(unreal.IntPoint(-160, 0))
+    dispatch = graph.create_node_from_name(
+        "Default|CallInteractionRequested", unreal.Vector2D(140.0, 0.0), []
+    )
+    require(dispatch is not None, "Could not call the Door Interaction dispatcher")
+    self_reference = graph.create_node_from_name(
+        "Variables|Getareferencetoself", unreal.Vector2D(-120.0, -200.0), []
+    )
+    require(self_reference is not None, "Could not resolve the Door Interactable self reference")
+    connect(entry, branch.find_execute_pin(), "Door Interaction availability check")
+    connect(available.find_result_pin(), branch.find_condition_pin(), "Door Interaction availability")
+    connect(branch.find_then_pin(), dispatch.find_execute_pin(), "available Door Interaction")
+    connect(self_reference.find_result_pin(), dispatch.find_self_pin(), "Door Interaction dispatcher target")
     compile_and_save(blueprint)
     return blueprint
 
@@ -214,13 +233,21 @@ def create_interaction_component(interactable_blueprint):
     connect(valid.find_result_pin(), component_branch.find_condition_pin(), "valid Interactable")
     clear_focus_nodes(scan, component_branch.find_else_pin(), 1560, 260)
 
-    set_focus = add_set(scan, "CurrentFocus", 1560, -100)
-    set_prompt = add_set(scan, "CurrentPrompt", 1840, -100)
-    prompt = add_get(scan, "InteractionPrompt", 1540, -400, interactable_path)
+    availability = add_get(scan, "InteractionAvailable", 1520, -420, interactable_path)
+    connect(component.find_result_pin(), availability.find_self_pin(), "focused availability source")
+    availability_branch = scan.add_branch_node()
+    availability_branch.set_node_pos(unreal.IntPoint(1560, -80))
+    connect(component_branch.find_then_pin(), availability_branch.find_execute_pin(), "Interactable availability check")
+    connect(availability.find_result_pin(), availability_branch.find_condition_pin(), "available Interactable")
+    clear_focus_nodes(scan, availability_branch.find_else_pin(), 1840, 260)
+
+    set_focus = add_set(scan, "CurrentFocus", 1840, -100)
+    set_prompt = add_set(scan, "CurrentPrompt", 2120, -100)
+    prompt = add_get(scan, "InteractionPrompt", 1820, -400, interactable_path)
     connect(component.find_result_pin(), member_value_pin(set_focus, "CurrentFocus"), "focused Interactable")
     connect(component.find_result_pin(), prompt.find_self_pin(), "focused prompt source")
     connect(prompt.find_result_pin(), member_value_pin(set_prompt, "CurrentPrompt"), "focused prompt")
-    connect(component_branch.find_then_pin(), set_focus.find_execute_pin(), "acquire Interaction Focus")
+    connect(availability_branch.find_then_pin(), set_focus.find_execute_pin(), "acquire Interaction Focus")
     connect(set_focus.find_then_pin(), set_prompt.find_execute_pin(), "present Interaction Prompt")
     scan.set_function_is_public()
 
@@ -233,8 +260,14 @@ def create_interaction_component(interactable_blueprint):
     request_branch.set_node_pos(unreal.IntPoint(60, 0))
     connect(request_entry, request_branch.find_execute_pin(), "TryInteract entry")
     connect(focus_valid.find_result_pin(), request_branch.find_condition_pin(), "valid Interaction Focus")
-    invoke = add_function_call(request, f"{interactable_path}:RequestInteraction", 340, 0, "generic Interaction request")
-    connect(request_branch.find_then_pin(), invoke.find_execute_pin(), "focused Interaction")
+    request_available = add_get(request, "InteractionAvailable", 300, -180, interactable_path)
+    connect(focus.find_result_pin(), request_available.find_self_pin(), "focused availability source")
+    available_branch = request.add_branch_node()
+    available_branch.set_node_pos(unreal.IntPoint(520, 0))
+    connect(request_branch.find_then_pin(), available_branch.find_execute_pin(), "focused Interaction")
+    connect(request_available.find_result_pin(), available_branch.find_condition_pin(), "available focused Interaction")
+    invoke = add_function_call(request, f"{interactable_path}:RequestInteraction", 800, 0, "generic Interaction request")
+    connect(available_branch.find_then_pin(), invoke.find_execute_pin(), "available Interaction dispatch")
     connect(focus.find_result_pin(), invoke.find_self_pin(), "focused Interactable request target")
     request.set_function_is_public()
 
@@ -384,32 +417,21 @@ def create_door(interactable_blueprint, door_interactable_blueprint):
     connect(zone_ignore.find_then_pin(), zone_visibility.find_execute_pin(), "block Interaction Visibility trace")
     connect(zone_visibility.find_then_pin(), begin_prompt.find_execute_pin(), "initial Door prompt")
     connect(begin_prompt.find_then_pin(), begin_available.find_execute_pin(), "initial Door availability")
+    bind_request = graph.create_node_from_name(
+        "Default|BindEventtoInteractionRequested", unreal.Vector2D(0.0, -620.0), []
+    )
+    require(bind_request is not None, "Could not bind the Door Interaction dispatcher")
+    handle_request = graph.add_custom_event_node("HandleInteractionRequest")
+    require(handle_request is not None, "Could not add the Door Interaction handler")
+    handle_request.set_node_pos(unreal.IntPoint(-900, 0))
+    connect(begin_available.find_then_pin(), bind_request.find_execute_pin(), "bind Door Interaction behavior")
+    connect(begin_contract.find_result_pin(), bind_request.find_self_pin(), "Door dispatcher source")
+    connect(handle_request.find_output_pin("OutputDelegate"), bind_request.find_input_pin("Delegate"), "Door Interaction handler")
 
-    event = unreal.BlueprintEditorLibrary.add_event_override(
-        blueprint, "ReceiveTick", unreal.IntPoint(-1160, 0)
-    )
-    require(event is not None, "Could not add Door Tick")
-    contract_request = add_get(graph, "RequestPending", -1160, 180, class_path(door_interactable_blueprint.generated_class()))
-    interactable_get_request = add_get(graph, "Interactable", -1160, 340)
-    connect(interactable_get_request.find_result_pin(), contract_request.find_self_pin(), "Door pending request source")
-    request_branch = graph.add_branch_node()
-    request_branch.set_node_pos(unreal.IntPoint(-900, 0))
-    connect(event.find_then_pin(), request_branch.find_execute_pin(), "Door request poll")
-    connect(contract_request.find_result_pin(), request_branch.find_condition_pin(), "pending Door request")
-    clear_request = external_set(
-        graph,
-        interactable_get_request,
-        "RequestPending",
-        class_path(door_interactable_blueprint.generated_class()),
-        "false",
-        -650,
-        0,
-    )
-    connect(request_branch.find_then_pin(), clear_request.find_execute_pin(), "consume Door request")
     moving = add_get(graph, "IsMoving", -900, 180)
     moving_branch = graph.add_branch_node()
     moving_branch.set_node_pos(unreal.IntPoint(-380, 0))
-    connect(clear_request.find_then_pin(), moving_branch.find_execute_pin(), "Door Interaction request")
+    connect(handle_request.find_output_pin("then"), moving_branch.find_execute_pin(), "Door Interaction request")
     connect(moving.find_result_pin(), moving_branch.find_condition_pin(), "Door motion guard")
 
     open_state = add_get(graph, "IsOpen", -420, 180)

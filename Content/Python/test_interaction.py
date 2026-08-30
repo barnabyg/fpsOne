@@ -154,6 +154,19 @@ def interaction_scenario():
         leaf.get_collision_enabled() == unreal.CollisionEnabled.QUERY_ONLY,
         "Door leaf collision did not stop blocking passage while opening",
     )
+    require(
+        not bool(property_value(interactable, "InteractionAvailable")),
+        "Door remained available while opening",
+    )
+    interaction.call_method("ScanForInteractionFocus")
+    require(
+        property_value(interaction, "CurrentFocus") is None,
+        "An unavailable Interactable retained Interaction Focus",
+    )
+    require(
+        str(property_value(interaction, "CurrentPrompt")) == "",
+        "An unavailable Interactable retained its Interaction Prompt",
+    )
     yield from wait_for(
         lambda: bool(property_value(primary_door, "IsOpen")),
         "Door did not complete its eased 0.75 second open transition",
