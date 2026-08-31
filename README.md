@@ -1,6 +1,6 @@
 # fpsOne
 
-fpsOne is a narrowly scoped first-person Unreal Engine 5.8 testbed. The current T03 slice provides two directly connected blockout Rooms, conventional keyboard-and-mouse movement, and a reusable player-owned Interaction system driving one animated Door and repeatable dialogue with two proxy NPCs.
+fpsOne is a narrowly scoped first-person Unreal Engine 5.8 testbed. T04 furnishes and lights Room A as a modern living room using redistributable CC0 and project-authored art. Room B remains a blockout; the reusable Interaction system still drives one animated Door and repeatable dialogue with two proxy NPCs.
 
 ## Prerequisites
 
@@ -56,3 +56,5 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify.ps1
 ```
 
 Evidence and the local dashboard are written to `Saved\Verification`; the Development package defaults to `C:\fpsOne-output\Development`. Both locations are outside version control.
+
+T04 adds a 2560 × 1440 Room A acceptance image and an agent review linked to its hash and the tested working tree. The initial agent run remains red until that review is completed with `verify.ps1 -RequireVisualReview -CompleteVisualReview`. See [Room A assets, visual review, and manual checks](docs/room-a.md). A normal clone needs Git LFS assets (`git lfs pull`); asset downloads and Blender are unnecessary to open or play it.

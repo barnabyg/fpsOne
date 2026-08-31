@@ -1,8 +1,8 @@
-# T03 setup, editor, validation, and packaging
+# T04 setup, editor, validation, and packaging
 
 ## Pinned environment
 
-The T03 implementation targets:
+The T04 implementation targets:
 
 | Tool | Version | Required C:-drive location |
 | --- | --- | --- |
@@ -13,7 +13,7 @@ The T03 implementation targets:
 | Git LFS | 3.7.1 | Host installation on C: |
 | Windows PowerShell | 5.1.26100.9168 | `C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe` |
 
-The validator records the detected tool versions with every result. Assets committed through T03 were generated and verified with the build above.
+The validator records the detected tool versions with every result. Unreal assets use the build above. T04's authored furniture uses Blender 4.5.3 LTS; Blender is only needed to edit/re-export those sources, not to open or package the committed project. Run `git lfs pull` after cloning to obtain the art binaries.
 
 ## Epic Games Launcher handoff
 
@@ -39,7 +39,7 @@ Open `FPSOne.uproject` or run:
 & 'C:\Program Files\Epic Games\UE_5.8\Engine\Binaries\Win64\UnrealEditor.exe' 'C:\docs\git\fpsOne\FPSOne.uproject'
 ```
 
-Press Play to start in Room A facing the shared Door. The packaged and editor-play controls are identical: W/A/S/D move, the mouse looks, E uses the focused Interactable, and Escape exits.
+Press Play to start facing the furnished Room A, with NPC A off-centre and the shared Door visible but unfocused. The packaged and editor-play controls are identical: W/A/S/D move, the mouse looks, E uses the focused Interactable, and Escape exits.
 
 ## Safe Blueprint regeneration
 
@@ -67,7 +67,7 @@ Human-local mode:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify.ps1
 ```
 
-The command validates the asset manifest, repository tests, project files, Blueprint compilation, the player-facing T03 Interaction scenario, Development Win64 packaging, a real packaged-window launch, project-originated diagnostics, and evidence freshness. T03 uses proxy NPCs and blockout Rooms; the four-view final-art visual gate remains explicitly not applicable until T08. Dialogue, replay, collision, suspended controls, restored controls, and session reset are required functional checks.
+The command validates per-file art provenance and hashes, repository tests, project files, Blueprint compilation, the player-facing Interaction scenario, Development Win64 packaging, a real packaged-window launch, project-originated diagnostics, and evidence freshness. T04 adds the furnished Room A spawn and circulation checks and its 2560 × 1440 capture. Agent mode stays red pending a current Room A visual review; see [the review and completion steps](room-a.md). Room B and the NPCs retain their earlier placeholders, so the four-view final-art benchmark still activates with T08. Dialogue, replay, collision, suspended controls, restored controls, and session reset remain required.
 
 Generated evidence is under `C:\docs\git\fpsOne\Saved\Verification`:
 
@@ -107,4 +107,4 @@ To capture the dialogue and restored HUD for visual inspection, run the function
 
 Captures are retained under `Saved\DialogueReview` at the PIE viewport's actual resolution (recorded by the pixel check; command-line window size does not force the embedded viewport size). The canonical verifier runs this rendered scenario after its headless scenario and checks the actual pixels for dot hiding/restoration and panel dismissal. Both captures and the pixel report appear on the dashboard. This deterministic T03 UI check is separate from the T08 final-art benchmark.
 
-The T03 package uses proxy NPCs and blockout Rooms. Final character art, animation, audio, furnishings, and visual-quality acceptance remain assigned to later tickets.
+The T04 package retains proxy NPCs and a blockout Room B. Final character art/animation, Room B furnishings, and the complete four-view benchmark remain assigned to later tickets. Audio remains outside the prototype's scope.
