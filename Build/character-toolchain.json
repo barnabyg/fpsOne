@@ -1,0 +1,23 @@
+{
+  "blender": {
+    "version": "4.5.3",
+    "url": "https://download.blender.org/release/Blender4.5/blender-4.5.3-windows-x64.zip",
+    "sha256": "6b657c8bdd3a7b65b07b9e1ae17eb4be7dd4aa23121da7f3d3354fc2551330a7",
+    "archive": "blender.zip",
+    "directory": "blender"
+  },
+  "mpfb": {
+    "version": "2.0.8",
+    "url": "https://github.com/makehumancommunity/mpfb2/releases/download/v2.0.8/mpfb-2.0.8.zip",
+    "sha256": "9762c5b478fa3b76e57594f42168cddfec0876d18ab4641df75571b9786ca667",
+    "archive": "mpfb-2.0.8.zip",
+    "directory": "extensions/mpfb"
+  },
+  "makehumanCore": {
+    "version": "2023-07-17 asset pack (SHA-256 pinned)",
+    "url": "https://files.makehumancommunity.org/asset_packs/makehuman_system_assets/makehuman_system_assets_cc0.zip",
+    "sha256": "b542127a8e25547c7c29c19f2d1d2adb9a664c80396ecd694095dbc8028a0107",
+    "archive": "makehuman_system_assets_cc0.zip",
+    "directory": "core"
+  }
+}

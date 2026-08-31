@@ -6,6 +6,8 @@ The accepted PlayerStart is `(-550, -120, 90)` cm with yaw 23° and pitch −6°
 
 ## Reproduce the assets
 
+T06 subsequently replaces NPC A using the [pinned character workflow](npc-a.md); NPC B remains a proxy until T07. The current verifier additionally requires NPC A's conversational-distance review.
+
 A Git LFS clone contains the ready-to-open map, imported assets, and editable sources. After cloning, run `git lfs pull` and `git lfs fsck`. Source and output hashes are recorded in `SourceArt/asset-manifest.json`; no Fab or other account entitlement is required for art.
 
 To rebuild after editing the Unreal generator, close Unreal editors and commandlets, then run the documented `scripts/regenerate-assets.ps1`. It checks pinned source hashes before generation, imports the retained glTF/GLB and 2K textures in an isolated project, builds the Room, compiles Blueprints, and runs the player-facing scenario. It validates the staged provenance manifest before publishing assets and their manifest together with rollback and retained backups. `scripts/room_a_assets.py` owns Room A's material construction, positions, lights, collision, and composition. Generation does not run at game startup.

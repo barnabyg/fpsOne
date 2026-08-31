@@ -1,0 +1,83 @@
+{
+  "macro": {
+    "gender": 1.0,
+    "age": 0.42,
+    "muscle": 0.43,
+    "weight": 0.48,
+    "proportions": 0.55,
+    "height": 0.53,
+    "cupsize": 0.5,
+    "firmness": 0.5,
+    "race": {
+      "caucasian": 0.85,
+      "asian": 0.15,
+      "african": 0.0
+    }
+  },
+  "textures": [
+    {
+      "path": "Textures/middleage_lightskinned_male_diffuse.png",
+      "archivePath": "skins/middleage_caucasian_male/middleage_lightskinned_male_diffuse.png",
+      "upstreamSha256": "3f94f3f6a5cab92dedf5cce392a87332312fc435f1cb44c6e7b897daef9a5fbb",
+      "sha256": "3f94f3f6a5cab92dedf5cce392a87332312fc435f1cb44c6e7b897daef9a5fbb"
+    },
+    {
+      "path": "Textures/male_casualsuit03_diffuse.png",
+      "archivePath": "clothes/male_casualsuit03/male_casualsuit03_diffuse.png",
+      "upstreamSha256": "d9079ed2e52d23e1ccce53ddc3d4397e48883729f9324c97c2737f4f79af5153",
+      "sha256": "d9079ed2e52d23e1ccce53ddc3d4397e48883729f9324c97c2737f4f79af5153"
+    },
+    {
+      "path": "Textures/male_casualsuit03_normal.png",
+      "archivePath": "clothes/male_casualsuit03/male_casualsuit03_normal.png",
+      "upstreamSha256": "412c4610d3b2ea1cb04aa3c0715e747a7c9f61d865133b7d69f70eaa738cf99b",
+      "sha256": "a2147fdfadac651c6960bc56087e26bfcf984038870ff012f2f84de0dcf4e4eb"
+    },
+    {
+      "path": "Textures/shoes01_diffuse.png",
+      "archivePath": "clothes/shoes01/shoes01_diffuse.png",
+      "upstreamSha256": "50c9a406a7f1cb6aa7b42912348e78f09d0252aa3963c8229cf18dfe8353cdbf",
+      "sha256": "50c9a406a7f1cb6aa7b42912348e78f09d0252aa3963c8229cf18dfe8353cdbf"
+    },
+    {
+      "path": "Textures/short02_diffuse.png",
+      "archivePath": "hair/short02/short02_diffuse.png",
+      "upstreamSha256": "47fe33831a3929567c733356dd66243116e05df2ace1f884ddca0080b728229f",
+      "sha256": "47fe33831a3929567c733356dd66243116e05df2ace1f884ddca0080b728229f"
+    },
+    {
+      "path": "Textures/brown_eye.png",
+      "archivePath": "eyes/materials/brown_eye.png",
+      "upstreamSha256": "4659691c7295ad6206c78b003e5fd0e5f91dcd53032fa914a229bb48cabe424b",
+      "sha256": "4659691c7295ad6206c78b003e5fd0e5f91dcd53032fa914a229bb48cabe424b"
+    },
+    {
+      "path": "Textures/eyebrow002.png",
+      "archivePath": "eyebrows/eyebrow002/eyebrow002.png",
+      "upstreamSha256": "1de4e4cb69b3f4324390219ffbeb17a0b2555104d3211d1ac667655b69b64038",
+      "sha256": "1de4e4cb69b3f4324390219ffbeb17a0b2555104d3211d1ac667655b69b64038"
+    },
+    {
+      "path": "Textures/eyelashes01.png",
+      "archivePath": "eyelashes/eyelashes01/eyelashes01.png",
+      "upstreamSha256": "4b69c0fff2648874460e9caf80c31413c444218a5c50afebc425aeaa65484a35",
+      "sha256": "4b69c0fff2648874460e9caf80c31413c444218a5c50afebc425aeaa65484a35"
+    }
+  ],
+  "rig": "MPFB default",
+  "parts": {
+    "Skin": "ResidentA",
+    "ShirtDenim": "ResidentA.male_casualsuit03",
+    "Shoes": "ResidentA.shoes01",
+    "Hair": "ResidentA.short02",
+    "Eyes": "ResidentA.high-poly",
+    "Brows": "ResidentA.eyebrow002",
+    "Lashes": "ResidentA.eyelashes01"
+  },
+  "animations": [
+    "A_Idle",
+    "A_Talk"
+  ],
+  "author": "fpsOne contributors",
+  "license": "CC0-1.0"
+}

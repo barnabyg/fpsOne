@@ -34,6 +34,11 @@ Describe 'Room A visual evidence linkage' {
         $review | ConvertTo-Json -Depth 5 | Set-Content "$captureRoot\review.json"
         { Confirm-RoomAReview $result $captureRoot 'revision' 'fingerprint' } | Should Throw 'lighting'
     }
+    It 'requires NPC presentation and reference-game evidence for the T06 view' {
+        $result | Add-Member -NotePropertyName npcA -NotePropertyValue $result.roomA
+        $review | ConvertTo-Json -Depth 5 | Set-Content "$captureRoot\review.json"
+        { Confirm-RoomReview $result $captureRoot 'revision' 'fingerprint' 'npcA' 'NPC A' } | Should Throw 'npcPresentation'
+    }
     It 'checks each T05 view independently, rejecting a substituted Door image' {
         $result | Add-Member -NotePropertyName roomB -NotePropertyValue $result.roomA
         Set-Content "$captureRoot\door.png" 'distinct Door capture'

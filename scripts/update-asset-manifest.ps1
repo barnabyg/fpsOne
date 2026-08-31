@@ -26,6 +26,12 @@ foreach ($asset in $manifest.assets) {
         }
     }
     $generated = @()
+    if ($asset.id -eq 'makehuman_npc_a') {
+        $characterFolder = Join-Path $Root 'Content\Characters\NPC_A'
+        if (Test-Path -LiteralPath $characterFolder) {
+            $generated += Get-ChildItem -LiteralPath $characterFolder -Recurse -File | ForEach-Object { New-FileEntry $_ }
+        }
+    }
     $importFolder = Join-Path $Root "Content\Environment\RoomA\$($asset.id)"
     if (Test-Path -LiteralPath $importFolder) {
         $generated += Get-ChildItem -LiteralPath $importFolder -Recurse -File | ForEach-Object { New-FileEntry $_ }

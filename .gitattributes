@@ -4,3 +4,9 @@ SourceArt/**/*.jpg filter=lfs diff=lfs merge=lfs -text
 SourceArt/**/*.bin filter=lfs diff=lfs merge=lfs -text
 SourceArt/**/*.glb filter=lfs diff=lfs merge=lfs -text
 SourceArt/**/*.gltf -text
+Content/Characters/**/*.uasset filter=lfs diff=lfs merge=lfs -text
+SourceArt/**/*.blend filter=lfs diff=lfs merge=lfs -text
+SourceArt/**/*.fbx filter=lfs diff=lfs merge=lfs -text
+SourceArt/**/*.png filter=lfs diff=lfs merge=lfs -text
+# Preserve byte-pinned recipes and license evidence across Windows checkouts.
+SourceArt/Characters/** -text
