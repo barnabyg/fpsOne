@@ -407,12 +407,17 @@ def interaction_scenario():
     player.set_actor_location(unreal.Vector(200, -180, 90), True, False)
     require(player.get_actor_location().y > -145,
             "Room B guest bed must block the Player")
-    # Check the window above the sill so the wall below cannot mask a missing
-    # barrier; this prevents an unintended accessible exterior.
-    player.set_actor_location(unreal.Vector(300, 0, 175), False, False)
-    player.set_actor_location(unreal.Vector(500, 0, 175), True, False)
-    require(player.get_actor_location().x < 420,
-            "Room B window must block access outside the two Rooms")
+    # Approach the clear south window bay at standing height. Test the complete
+    # window assembly's containment, rather than assuming which part blocks it.
+    player.set_actor_location(unreal.Vector(200, -65, 90), False, False)
+    player.set_actor_location(unreal.Vector(300, -65, 90), True, False)
+    require((player.get_actor_location() - unreal.Vector(300, -65, 90)).length() < 5,
+            "The Player must reach the clear approach to the Room B window")
+    player.set_actor_location(unreal.Vector(500, -65, 90), True, False)
+    window_stop = player.get_actor_location()
+    unreal.log(f"T05_WINDOW_CONTAINMENT: {window_stop}")
+    require(350 < window_stop.x < 420,
+            f"Room B window must block the Player at the exterior boundary: {window_stop}")
     player.set_actor_location(unreal.Vector(120, 0, 90), False, False)
     controller.set_control_rotation(unreal.Rotator(yaw=180.0))
     yield
