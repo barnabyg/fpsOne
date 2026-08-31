@@ -146,8 +146,9 @@ def rug():
     export("SM_Rug")
 
 
-sofa()
-sideboard()
-floor_lamp()
-rug()
-print("ROOM_A_AUTHORED_MESHES_CREATED")
+if __name__ == "__main__":
+    sofa()
+    sideboard()
+    floor_lamp()
+    rug()
+    print("ROOM_A_AUTHORED_MESHES_CREATED")

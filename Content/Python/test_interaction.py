@@ -89,12 +89,12 @@ def capture_presentation(world, controller, name):
     yield from wait_for(lambda: os.path.exists(filename), f"Presentation capture did not arrive: {filename}")
 
 
-def capture_room_a(world, controller):
-    if "-T04Capture" not in unreal.SystemLibrary.get_command_line():
+def capture_room(world, controller, name="room-a-overview", folder="RoomAReview", flag="-T04Capture"):
+    if flag not in unreal.SystemLibrary.get_command_line():
         return
-    root = os.path.abspath(os.path.join(unreal.Paths.project_saved_dir(), "RoomAReview"))
+    root = os.path.abspath(os.path.join(unreal.Paths.project_saved_dir(), folder))
     os.makedirs(root, exist_ok=True)
-    filename = os.path.join(root, "room-a-overview.png")
+    filename = os.path.join(root, name + ".png")
     if os.path.exists(filename):
         os.remove(filename)
     for _ in range(120):
@@ -102,20 +102,24 @@ def capture_room_a(world, controller):
     unreal.log(f"T04_CAMERA: {controller.get_control_rotation()} / {unreal.GameplayStatics.get_player_pawn(world, 0).get_actor_location()}")
     unreal.SystemLibrary.execute_console_command(world, "r.HighResScreenshotDelay 32", controller)
     unreal.SystemLibrary.execute_console_command(world, f'HighResShot 2560x1440 filename="{filename}"', controller)
-    yield from wait_for(lambda: os.path.exists(filename), "Room A acceptance screenshot did not arrive")
+    yield from wait_for(lambda: os.path.exists(filename), f"Acceptance screenshot did not arrive: {name}")
     for _ in range(5):
         yield
     with open(filename, "rb") as stream:
         data = stream.read()
     width, height = struct.unpack(">II", data[16:24])
-    require((width, height) == (2560, 1440), "Room A acceptance must capture at 2560 x 1440")
-    metadata = dict(screenshot="room-a-overview.png", sha256=hashlib.sha256(data).hexdigest(),
+    require((width, height) == (2560, 1440), "Room acceptance must capture at 2560 x 1440")
+    pawn = unreal.GameplayStatics.get_player_pawn(world, 0)
+    location, rotation = pawn.get_actor_location(), controller.get_control_rotation()
+    metadata = dict(screenshot=name + ".png", sha256=hashlib.sha256(data).hexdigest(),
                     width=width, height=height,
+                    playerLocation=[location.x, location.y, location.z],
+                    viewRotation=[rotation.pitch, rotation.yaw, rotation.roll],
                     frameSeconds=unreal.GameplayStatics.get_world_delta_seconds(world),
                     engine=unreal.SystemLibrary.get_engine_version())
     with open(os.path.join(root, "capture.json"), "w", encoding="utf-8") as stream:
         json.dump(metadata, stream, indent=2)
-    unreal.log("T04_ROOM_A_CAPTURE_PASSED")
+    unreal.log("T04_ROOM_A_CAPTURE_PASSED" if flag == "-T04Capture" else f"T05_CAPTURE_PASSED {name}")
 
 
 def add_test_fixtures(test_target_class):
@@ -275,7 +279,7 @@ def interaction_scenario():
     yield
     require(str(property_value(controller.get_hud(), "PromptText")) == "",
             "Room A spawn must not initially focus the Door or NPC A")
-    yield from capture_room_a(world, controller)
+    yield from capture_room(world, controller)
     # Sweep the real Player capsule through the circulation aisle; furnishings
     # must leave a usable approach to the shared Door from the accepted spawn.
     for destination in (unreal.Vector(-550, -70, 90), unreal.Vector(-170, -70, 90), unreal.Vector(-170, 0, 90)):
@@ -374,12 +378,42 @@ def interaction_scenario():
         open_leaf_location.x > 49.0 and open_leaf_location.y > 49.0,
         "Door leaf did not swing wholly inward into Room B",
     )
+    # Capture only the shipped environment, hiding unsaved test fixtures.
+    test_targets[0].set_actor_hidden_in_game(True)
+    occluder.set_actor_hidden_in_game(True)
+    player.set_actor_location(unreal.Vector(-170, -55, 90), False, False)
+    controller.set_control_rotation(unreal.Rotator(pitch=-6, yaw=15))
+    yield from capture_room(world, controller, "open-door-transition", "DoorReview", "-T05Capture")
+    player.set_actor_location(unreal.Vector(65, 15, 90), False, False)
+    controller.set_control_rotation(unreal.Rotator(pitch=-12, yaw=-8))
+    yield from capture_room(world, controller, "room-b-overview", "RoomBReview", "-T05Capture")
+    player.set_actor_location(unreal.Vector(-200, 0, 90), False, False)
+    controller.set_control_rotation(unreal.Rotator())
 
     player.set_actor_location(unreal.Vector(120.0, 0.0, 90.0), True, False)
     require(
         player.get_actor_location().x > 50.0,
         "The open Door did not permit passage into Room B",
     )
+    # T05: observe the furnished space using the real Player capsule, without
+    # coupling acceptance to actor names or the furniture's implementation.
+    for destination in (unreal.Vector(200, 0, 90), unreal.Vector(200, -70, 90),
+                        unreal.Vector(80, -70, 90), unreal.Vector(80, 100, 90),
+                        unreal.Vector(120, 0, 90)):
+        player.set_actor_location(destination, True, False)
+        require((player.get_actor_location() - destination).length() < 5,
+                f"Room B furnishings obstruct circulation: {destination}")
+    player.set_actor_location(unreal.Vector(200, -70, 90), False, False)
+    player.set_actor_location(unreal.Vector(200, -180, 90), True, False)
+    require(player.get_actor_location().y > -145,
+            "Room B guest bed must block the Player")
+    # Check the window above the sill so the wall below cannot mask a missing
+    # barrier; this prevents an unintended accessible exterior.
+    player.set_actor_location(unreal.Vector(300, 0, 175), False, False)
+    player.set_actor_location(unreal.Vector(500, 0, 175), True, False)
+    require(player.get_actor_location().x < 420,
+            "Room B window must block access outside the two Rooms")
+    player.set_actor_location(unreal.Vector(120, 0, 90), False, False)
     controller.set_control_rotation(unreal.Rotator(yaw=180.0))
     yield
     interaction.call_method("ScanForInteractionFocus")

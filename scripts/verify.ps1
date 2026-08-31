@@ -127,6 +127,11 @@ function Invoke-LoggedCommand {
 $mode = if ($RequireVisualReview) { 'agent' } else { 'human-local' }
 $revision = ([string](Get-GitOutput rev-parse HEAD)).Trim()
 $initialFingerprint = Get-WorkingTreeFingerprint
+$acceptanceViews = @(
+    @{ key = 'roomA'; name = 'Room A'; folder = 'RoomAReview'; image = 'room-a-overview'; marker = 'T04_ROOM_A_CAPTURE_PASSED' },
+    @{ key = 'roomB'; name = 'Room B'; folder = 'RoomBReview'; image = 'room-b-overview'; marker = 'T05_CAPTURE_PASSED room-b-overview' },
+    @{ key = 'doorTransition'; name = 'Open Door'; folder = 'DoorReview'; image = 'open-door-transition'; marker = 'T05_CAPTURE_PASSED open-door-transition' }
+)
 
 # The first agent run captures current evidence and remains red pending visual
 # judgement. This completion mode verifies that exact evidence without taking a
@@ -137,20 +142,24 @@ if ($CompleteVisualReview) {
     $result = Get-Content -LiteralPath $resultPath -Raw | ConvertFrom-Json
     if ($result.mode -ne 'agent') { throw 'Only an agent verification run can accept a visual review.' }
     . (Join-Path $PSScriptRoot 'room-a-review.ps1')
-    $review = Confirm-RoomAReview $result $EvidenceRoot $revision $initialFingerprint
-    $otherFailures = @($result.gates | Where-Object { $_.name -ne 'Room A visual review' -and $_.status -notin @('passed', 'not_applicable') })
+    $reviewNames = @($acceptanceViews | ForEach-Object { "$($_.name) visual review" })
+    $otherFailures = @($result.gates | Where-Object { $_.name -notin $reviewNames -and $_.status -notin @('passed', 'not_applicable') })
     if ($otherFailures.Count) { throw 'Deterministic verification gates must all pass before completing the visual review.' }
-    $reviewGate = @($result.gates | Where-Object name -eq 'Room A visual review')
-    if ($reviewGate.Count -ne 1) { throw 'The Room A visual review gate is missing or duplicated.' }
-    $reviewGate[0].status = 'passed'
-    $reviewGate[0].details = 'Current agent review passed composition, lighting, materials, density, rendering defects, and UI obstruction. NPC A remains the T03 proxy; final NPC art and the four-view benchmark remain T06/T08.'
-    $reviewGate[0].reportPaths = @($result.roomA.screenshotPath, $result.roomA.reviewPath)
-    $result.visualReview = [pscustomobject]@{ status = 'passed'; details = $reviewGate[0].details }
+    foreach ($view in $acceptanceViews) {
+        $review = Confirm-RoomReview $result $EvidenceRoot $revision $initialFingerprint $view.key $view.name
+        $reviewGate = @($result.gates | Where-Object name -eq "$($view.name) visual review")
+        if ($reviewGate.Count -ne 1) { throw "The $($view.name) visual review gate is missing or duplicated." }
+        $reviewGate[0].status = 'passed'
+        $reviewGate[0].details = 'Current agent review passed composition, lighting, materials, density, rendering defects, and UI obstruction. Final NPC art and the four-view benchmark remain T06-T08.'
+        $capture = $result.($view.key)
+        $reviewGate[0].reportPaths = @($capture.screenshotPath, $capture.reviewPath)
+    }
+    $result.visualReview = [pscustomobject]@{ status = 'passed'; details = 'Room A, Room B, and the open-Door transition passed current, individually hash-linked agent reviews.' }
     $result.generatedAtUtc = [DateTime]::UtcNow.ToString('o')
     $result | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $resultPath -Encoding UTF8
     & (Join-Path $PSScriptRoot 'render-dashboard.ps1') -ResultPath $resultPath -OutputPath (Join-Path $EvidenceRoot 'index.html')
     if (-not $NoOpenDashboard) { Start-Process -FilePath (Join-Path $EvidenceRoot 'index.html') }
-    Write-Output 'T04_ROOM_A_VISUAL_REVIEW_PASSED'
+    Write-Output 'T04_ROOM_A_VISUAL_REVIEW_PASSED; T05_ROOM_B_AND_DOOR_VISUAL_REVIEW_PASSED'
     exit 0
 }
 $gates = [System.Collections.Generic.List[object]]::new()
@@ -346,7 +355,7 @@ if ($interactionStatus -ne 'passed') {
         '-ExecCmds=Automation RunTests Editor.Python.FPSOne.test_interaction',
         '-TestExit=Automation Test Queue Empty',
         "-ReportExportPath=$presentationReport",
-        '-T03Capture', '-T04Capture', '-unattended', '-nop4', '-nosplash', '-stdout', '-FullStdOutLogOutput'
+        '-T03Capture', '-T04Capture', '-T05Capture', '-unattended', '-nop4', '-nosplash', '-stdout', '-FullStdOutLogOutput'
     )
     $presentationExitCode = Invoke-LoggedCommand -Executable $editorPath -Arguments $presentationArguments -LogPath $presentationLog
     $presentationSummary = Select-String -LiteralPath $presentationLog -Pattern 'T03_DIALOGUE_FUNCTIONAL_TEST_PASSED' -Quiet
@@ -507,10 +516,10 @@ $diagnosticTimer.Stop()
 $gates.Add((New-Gate 'Diagnostics' $diagnosticStatus $diagnosticTimer.ElapsedMilliseconds $diagnosticDetails (Get-RelativeEvidencePath $diagnosticLog)))
 
 if ($RequireVisualReview) {
-    $gates.Add((New-Gate 'Visual acceptance' 'not_applicable' 0 'The complete four-view environment/NPC benchmark gate activates with T08. T04 Room A has its own current review below.'))
+    $gates.Add((New-Gate 'Visual acceptance' 'not_applicable' 0 'The complete four-view environment/NPC benchmark gate activates with T08. T04/T05 environment views have their own current reviews below.'))
     $visualReview = [pscustomobject]@{
         status = 'pending'
-        details = 'Inspect the Room A screenshot, write the evidence-linked review.json, then run verify.ps1 -RequireVisualReview -CompleteVisualReview.'
+        details = 'Inspect each Room A, Room B, and open-Door screenshot, write each evidence-linked review.json, then run verify.ps1 -RequireVisualReview -CompleteVisualReview.'
     }
 } else {
     $gates.Add((New-Gate 'Visual acceptance' 'not_applicable' 0 'Human-local validation does not use an AI visual gate.'))
@@ -520,31 +529,40 @@ if ($RequireVisualReview) {
     }
 }
 
-$roomA = $null
-$roomASource = Join-Path $repoRoot 'Saved\RoomAReview'
-$roomACaptureMarker = if (Test-Path -LiteralPath $presentationLog) { Select-String -LiteralPath $presentationLog -SimpleMatch 'T04_ROOM_A_CAPTURE_PASSED' -Quiet } else { $false }
-if ($presentationStatus -eq 'passed' -and $roomACaptureMarker) {
-    $roomAPath = Join-Path $EvidenceRoot ('room-a-' + [guid]::NewGuid().ToString('N'))
-    New-Item -ItemType Directory -Path $roomAPath -Force | Out-Null
-    Copy-Item -LiteralPath (Join-Path $roomASource 'room-a-overview.png'), (Join-Path $roomASource 'capture.json') -Destination $roomAPath
-    $capture = Get-Content -LiteralPath (Join-Path $roomAPath 'capture.json') -Raw | ConvertFrom-Json
-    $roomA = [pscustomobject]@{
-        screenshotPath = Get-RelativeEvidencePath (Join-Path $roomAPath 'room-a-overview.png')
-        reviewPath = Get-RelativeEvidencePath (Join-Path $roomAPath 'review.json')
-        sha256 = $capture.sha256
-        width = $capture.width
-        height = $capture.height
-        frameSeconds = $capture.frameSeconds
+$roomCaptures = @{}
+foreach ($view in $acceptanceViews) {
+    $source = Join-Path $repoRoot "Saved\$($view.folder)"
+    $marker = if (Test-Path -LiteralPath $presentationLog) { Select-String -LiteralPath $presentationLog -SimpleMatch $view.marker -Quiet } else { $false }
+    try {
+        if ($presentationStatus -ne 'passed' -or -not $marker) { throw 'A passing rendered scenario with a fresh capture is required.' }
+        $capturePath = Join-Path $EvidenceRoot ($view.image + '-' + [guid]::NewGuid().ToString('N'))
+        New-Item -ItemType Directory -Path $capturePath -Force | Out-Null
+        Copy-Item -LiteralPath (Join-Path $source "$($view.image).png"), (Join-Path $source 'capture.json') -Destination $capturePath
+        $capture = Get-Content -LiteralPath (Join-Path $capturePath 'capture.json') -Raw | ConvertFrom-Json
+        $imagePath = Join-Path $capturePath "$($view.image).png"
+        if ($capture.width -ne 2560 -or $capture.height -ne 1440 -or
+            $capture.sha256 -ne (Get-FileHash -LiteralPath $imagePath -Algorithm SHA256).Hash.ToLowerInvariant()) {
+            throw 'Acceptance capture resolution or hash is invalid.'
+        }
+        $evidence = [pscustomobject]@{
+            screenshotPath = Get-RelativeEvidencePath $imagePath
+            reviewPath = Get-RelativeEvidencePath (Join-Path $capturePath 'review.json')
+            sha256 = $capture.sha256
+            width = $capture.width
+            height = $capture.height
+            frameSeconds = $capture.frameSeconds
+        }
+        $roomCaptures[$view.key] = $evidence
+        $presentationScreenshots += [pscustomobject]@{ name = "$($view.name) (2560 x 1440)"; path = $evidence.screenshotPath }
+        $gates.Add((New-Gate "$($view.name) acceptance capture" 'passed' 0 "Captured at 2560 x 1440. Observed frame: $([Math]::Round($capture.frameSeconds * 1000, 2)) ms; informational only." '' @($evidence.screenshotPath, (Get-RelativeEvidencePath (Join-Path $capturePath 'capture.json')))))
+    } catch {
+        $gates.Add((New-Gate "$($view.name) acceptance capture" 'failed' 0 $_.Exception.Message))
     }
-    $presentationScreenshots += [pscustomobject]@{ name = 'T04 Room A overview (2560 x 1440)'; path = $roomA.screenshotPath }
-    $gates.Add((New-Gate 'Room A acceptance capture' 'passed' 0 "Captured the accepted Player spawn at $($capture.width) x $($capture.height). Observed frame: $([Math]::Round($capture.frameSeconds * 1000, 2)) ms; informational only." '' @($roomA.screenshotPath, (Get-RelativeEvidencePath (Join-Path $roomAPath 'capture.json')))))
-} else {
-    $gates.Add((New-Gate 'Room A acceptance capture' 'failed' 0 'A passing rendered scenario with a fresh Room A capture is required.'))
-}
-if ($RequireVisualReview) {
-    $gates.Add((New-Gate 'Room A visual review' 'missing' 0 $visualReview.details))
-} else {
-    $gates.Add((New-Gate 'Room A visual review' 'not_applicable' 0 'Human-local validation does not require agent visual judgement.'))
+    if ($RequireVisualReview) {
+        $gates.Add((New-Gate "$($view.name) visual review" 'missing' 0 $visualReview.details))
+    } else {
+        $gates.Add((New-Gate "$($view.name) visual review" 'not_applicable' 0 'Human-local validation does not require agent visual judgement.'))
+    }
 }
 
 $dashboardTimer = [System.Diagnostics.Stopwatch]::StartNew()
@@ -567,7 +585,9 @@ $result = [pscustomobject][ordered]@{
     packagePath = [string] $packageExecutable
     screenshots = $presentationScreenshots
     visualReview = $visualReview
-    roomA = $roomA
+    roomA = $roomCaptures.roomA
+    roomB = $roomCaptures.roomB
+    doorTransition = $roomCaptures.doorTransition
     warningExceptions = $warningExceptions
 }
 
