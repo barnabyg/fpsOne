@@ -12,11 +12,14 @@ from interaction_assets import (
     compile_and_save, connect, member_value_pin, require, save_blueprint, set_pin,
 )
 import room_a_assets as art
+from character_recipes import resident_recipe
 
 ROOT = Path(unreal.Paths.project_dir()).resolve()
-SOURCE = ROOT / 'SourceArt/Characters/NPC_A'
-DEST = '/Game/Characters/NPC_A'
-BLUEPRINT = '/Game/Blueprints/BP_NPC_A'
+RESIDENT = 'B' if '-NPCB' in unreal.SystemLibrary.get_command_line() else 'A'
+RECIPE = resident_recipe(RESIDENT)
+SOURCE = ROOT / 'SourceArt/Characters' / ('NPC_' + RESIDENT)
+DEST = '/Game/Characters/NPC_' + RESIDENT
+BLUEPRINT = '/Game/Blueprints/BP_NPC_' + RESIDENT
 
 
 def import_fbx(name, skeleton=None):
@@ -70,7 +73,19 @@ def character_material(name, filename, roughness, masked=False, normal=None):
         node = art.expression(material, unreal.MaterialExpressionTextureSample, texture=texture)
         if channel == 'normal':
             node.set_editor_property('sampler_type', unreal.MaterialSamplerType.SAMPLERTYPE_NORMAL)
-        if name == 'Skin' and channel == 'color':
+        tint = RECIPE.get('materialTints', {}).get(name)
+        if tint and channel == 'color':
+            luminance = art.expression(material, unreal.MaterialExpressionDesaturation)
+            fraction = art.expression(material, unreal.MaterialExpressionConstant, r=1.0)
+            color = art.expression(material, unreal.MaterialExpressionConstant3Vector, constant=unreal.LinearColor(*tint, 1))
+            gain = art.expression(material, unreal.MaterialExpressionMultiply)
+            # Desaturation's primary input is unnamed in the pinned editor API.
+            require(unreal.MaterialEditingLibrary.connect_material_expressions(node, 'RGB', luminance, ''), 'clothing luminance input')
+            require(unreal.MaterialEditingLibrary.connect_material_expressions(fraction, '', luminance, 'Fraction'), 'full clothing desaturation')
+            require(unreal.MaterialEditingLibrary.connect_material_expressions(luminance, '', gain, 'A'), 'clothing detail')
+            require(unreal.MaterialEditingLibrary.connect_material_expressions(color, '', gain, 'B'), 'clothing palette')
+            require(unreal.MaterialEditingLibrary.connect_material_property(gain, '', unreal.MaterialProperty.MP_BASE_COLOR), 'tinted clothing output')
+        elif name == 'Skin' and channel == 'color':
             # The core skin's bright albedo needs calibration under the apartment
             # sun. Avoid broad subsurface scattering that washes out the face.
             gain = art.expression(material, unreal.MaterialExpressionMultiply, const_b=0.72)
@@ -89,7 +104,7 @@ def character_material(name, filename, roughness, masked=False, normal=None):
     return material
 
 
-def add_presentation_graph(blueprint, idle, talk):
+def add_presentation_graph(blueprint, idle, talk, rest_yaw):
     construction = unreal.BlueprintGraphEditor.get_graph_editor_by_name(blueprint, 'UserConstructionScript')
     execution = construction.find_graph_entry_pin()
     for index, name in enumerate(('ProxyBody', 'ProxyHead')):
@@ -171,8 +186,11 @@ def add_presentation_graph(blueprint, idle, talk):
     look = add_function_call(graph, '/Script/Engine.KismetMathLibrary:FindLookAtRotation', -900, 500, 'acknowledge Player')
     connect(location.find_result_pin(), look.find_input_pin('Start'), 'resident position')
     connect(player_location.find_result_pin(), look.find_input_pin('Target'), 'Player position')
+    relative_look = add_function_call(graph, '/Script/Engine.KismetMathLibrary:NormalizedDeltaRotator', -750, 350, 'attention relative to rest')
+    connect(look.find_result_pin(), relative_look.find_input_pin('A'), 'Player direction')
+    set_pin(relative_look.find_input_pin('B'), f'(Pitch=0,Yaw={rest_yaw},Roll=0)', 'resident rest direction')
     split = add_function_call(graph, '/Script/Engine.KismetMathLibrary:BreakRotator', -650, 500, 'attention yaw')
-    connect(look.find_result_pin(), split.find_input_pin('InRot'), 'attention direction')
+    connect(relative_look.find_result_pin(), split.find_input_pin('InRot'), 'relative attention direction')
     clamp = add_function_call(graph, '/Script/Engine.KismetMathLibrary:FClamp', -400, 500, 'subtle attention limit')
     connect(split.find_output_pin('Yaw'), clamp.find_input_pin('Value'), 'look yaw')
     set_pin(clamp.find_input_pin('Min'), -12, 'left limit')
@@ -186,8 +204,11 @@ def add_presentation_graph(blueprint, idle, talk):
     connect(clamp.find_result_pin(), select.find_input_pin('A'), 'nearby turn')
     set_pin(select.find_input_pin('B'), 0, 'rest yaw')
     connect(near.find_result_pin(), select.find_input_pin('bPickA'), 'Player nearby')
+    absolute_yaw = add_function_call(graph, '/Script/Engine.KismetMathLibrary:Add_DoubleDouble', 0, 350, 'offset from rest direction')
+    connect(select.find_result_pin(), absolute_yaw.find_input_pin('A'), 'limited attention offset')
+    set_pin(absolute_yaw.find_input_pin('B'), rest_yaw, 'rest direction')
     rotation = add_function_call(graph, '/Script/Engine.KismetMathLibrary:MakeRotator', 100, 500, 'attention rotation')
-    connect(select.find_result_pin(), rotation.find_input_pin('Yaw'), 'limited yaw')
+    connect(absolute_yaw.find_result_pin(), rotation.find_input_pin('Yaw'), 'limited yaw around rest')
     current = add_function_call(graph, '/Script/Engine.Actor:K2_GetActorRotation', 100, 800, 'current attention')
     interp = add_function_call(graph, '/Script/Engine.KismetMathLibrary:RInterpTo', 350, 500, 'smooth acknowledgement')
     connect(current.find_result_pin(), interp.find_input_pin('Current'), 'current turn')
@@ -200,20 +221,17 @@ def add_presentation_graph(blueprint, idle, talk):
 
 
 def build():
-    mesh = import_fbx('SK_NPC_A')
+    mesh = import_fbx('SK_NPC_' + RESIDENT)
     nanite = mesh.get_editor_property('nanite_settings')
     nanite.set_editor_property('enabled', False)
     mesh.set_editor_property('nanite_settings', nanite)
     skeleton = mesh.get_editor_property('skeleton')
-    idle, talk = import_fbx('A_Idle', skeleton), import_fbx('A_Talk', skeleton)
+    idle, talk = import_fbx(RESIDENT + '_Idle', skeleton), import_fbx(RESIDENT + '_Talk', skeleton)
     materials = {
-        'Skin': character_material('Skin', 'middleage_lightskinned_male_diffuse.png', 0.65),
-        'ShirtDenim': character_material('ShirtDenim', 'male_casualsuit03_diffuse.png', 0.82, normal='male_casualsuit03_normal.png'),
-        'Shoes': character_material('Shoes', 'shoes01_diffuse.png', 0.6),
-        'Hair': character_material('Hair', 'short02_diffuse.png', 0.6, True),
-        'Eyes': character_material('Eyes', 'brown_eye.png', 0.18, True),
-        'Brows': character_material('Brows', 'eyebrow002.png', 0.85, True),
-        'Lashes': character_material('Lashes', 'eyelashes01.png', 0.85, True),
+        name: character_material(name, Path(diffuse).name, roughness,
+                                 name in ('Hair', 'Eyes', 'Brows', 'Lashes'),
+                                 Path(normal).name if normal else None)
+        for name, (diffuse, normal, roughness) in RECIPE['textures'].items()
     }
     slots = mesh.get_editor_property('materials')
     for index, slot in enumerate(slots):
@@ -226,7 +244,7 @@ def build():
     visual.set_skeletal_mesh_asset(mesh)
     visual.set_editor_property('relative_location', unreal.Vector(0, 0, -90))
     visual.set_editor_property('relative_rotation', unreal.Rotator(yaw=-90))
-    visual.set_editor_property('relative_scale3d', unreal.Vector(1.08, 1.08, 1.08))
+    visual.set_editor_property('relative_scale3d', unreal.Vector(*([RECIPE['scale']] * 3)))
     visual.set_collision_enabled(unreal.CollisionEnabled.NO_COLLISION)
     visual.set_editor_property('visibility_based_anim_tick_option', unreal.VisibilityBasedAnimTickOption.ALWAYS_TICK_POSE_AND_REFRESH_BONES)
     visual.set_animation_mode(unreal.AnimationMode.ANIMATION_SINGLE_NODE)
@@ -235,20 +253,20 @@ def build():
     data.saved_looping = True
     data.saved_playing = True
     visual.set_editor_property('animation_data', data)
-    add_presentation_graph(blueprint, idle, talk)
+    add_presentation_graph(blueprint, idle, talk, RECIPE['restYaw'])
     compile_and_save(blueprint)
     save_blueprint(blueprint)
     level = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
     require(level.load_level('/Game/Maps/L_Testbed'), 'testbed map')
     actors = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
-    previous = next(actor for actor in actors.get_all_level_actors() if actor.get_actor_label() == 'NPC_A')
-    npc = actors.spawn_actor_from_class(blueprint.generated_class(), previous.get_actor_location(), unreal.Rotator())
+    previous = next(actor for actor in actors.get_all_level_actors() if actor.get_actor_label() == 'NPC_' + RESIDENT)
+    npc = actors.spawn_actor_from_class(blueprint.generated_class(), previous.get_actor_location(), unreal.Rotator(yaw=RECIPE['restYaw']))
     npc.set_editor_property('DialogueLines', previous.get_editor_property('DialogueLines'))
     actors.destroy_actor(previous)
-    npc.set_actor_label('NPC_A')
+    npc.set_actor_label('NPC_' + RESIDENT)
     require(level.save_current_level(), 'save refined resident')
     unreal.EditorAssetLibrary.save_directory(DEST, only_if_is_dirty=False, recursive=True)
-    unreal.log('T06_NPC_A_GENERATION_PASSED')
+    unreal.log('NPC_' + RESIDENT + '_GENERATION_PASSED')
 
 
 if __name__ == '__main__':

@@ -35,7 +35,7 @@ Copy-Item -LiteralPath $projectPath -Destination $stageRoot
 Copy-Item -LiteralPath (Join-Path $repoRoot 'ASSETS.md') -Destination $stageRoot
 Copy-Item -LiteralPath (Join-Path $repoRoot 'Config') -Destination $stageRoot -Recurse
 Copy-Item -LiteralPath (Join-Path $repoRoot 'SourceArt') -Destination $stageRoot -Recurse
-foreach ($name in @('bootstrap_project.py', 'interaction_assets.py', 'dialogue_assets.py', 'room_a_assets.py', 'room_b_assets.py', 'npc_a_assets.py')) {
+foreach ($name in @('bootstrap_project.py', 'interaction_assets.py', 'dialogue_assets.py', 'room_a_assets.py', 'room_b_assets.py', 'npc_assets.py', 'character_recipes.py')) {
     Copy-Item -LiteralPath (Join-Path $PSScriptRoot $name) -Destination "$stageRoot\scripts"
 }
 Copy-Item -LiteralPath (Join-Path $repoRoot 'Content\Python\test_interaction.py') -Destination "$stageRoot\Content\Python"
@@ -49,14 +49,17 @@ Invoke-StagingCheck -Arguments (@($stageProject, "-ExecutePythonScript=$stageRoo
     -LogPath (Join-Path $transactionRoot 'room-a-generation.log') -SuccessMarker 'T04_ROOM_A_GENERATION_PASSED'
 Invoke-StagingCheck -Arguments (@($stageProject, "-ExecutePythonScript=$stageRoot\scripts\room_b_assets.py") + $common) `
     -LogPath (Join-Path $transactionRoot 'room-b-generation.log') -SuccessMarker 'T05_ROOM_B_GENERATION_PASSED'
-Invoke-StagingCheck -Arguments (@($stageProject, "-ExecutePythonScript=$stageRoot\scripts\npc_a_assets.py") + $common) `
-    -LogPath (Join-Path $transactionRoot 'npc-a-generation.log') -SuccessMarker 'T06_NPC_A_GENERATION_PASSED'
+Invoke-StagingCheck -Arguments (@($stageProject, "-ExecutePythonScript=$stageRoot\scripts\npc_assets.py") + $common) `
+    -LogPath (Join-Path $transactionRoot 'npc-a-generation.log') -SuccessMarker 'NPC_A_GENERATION_PASSED'
+Invoke-StagingCheck -Arguments (@($stageProject, "-ExecutePythonScript=$stageRoot\scripts\npc_assets.py", '-NPCB') + $common) `
+    -LogPath (Join-Path $transactionRoot 'npc-b-generation.log') -SuccessMarker 'NPC_B_GENERATION_PASSED'
 Invoke-StagingCheck -Arguments (@($stageProject, '-ExecCmds=Automation RunTests Editor.Python.FPSOne.test_interaction', '-TestExit=Automation Test Queue Empty', "-ReportExportPath=$transactionRoot\interaction-report") + $common) `
     -LogPath (Join-Path $transactionRoot 'interaction.log') -SuccessMarker 'T03_DIALOGUE_FUNCTIONAL_TEST_PASSED'
 
 $paths = @(
     'Content/Blueprints/BP_DialogueNPC.uasset',
     'Content/Blueprints/BP_NPC_A.uasset',
+    'Content/Blueprints/BP_NPC_B.uasset',
     'Content/Blueprints/BPC_DialogueInteractable.uasset',
     'Content/Blueprints/BPC_Interactable.uasset',
     'Content/Blueprints/BPC_DoorInteractable.uasset',

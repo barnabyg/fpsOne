@@ -6,7 +6,7 @@ The oak workstation, upholstered chair, linen guest daybed, bookcase, woven rug,
 
 ## Editable sources and generation
 
-T06 subsequently replaces NPC A using the [pinned character workflow](npc-a.md); NPC B remains a proxy until T07. The current verifier additionally requires NPC A's conversational-distance review.
+T06 and T07 replace both residents using the [pinned character workflow](npc-a.md) and [distinct NPC B recipe](npc-b.md). The current verifier requires separate conversational-distance reviews for both residents.
 
 The normal Git LFS clone contains the ready-to-open map and imported assets. No new external assets or texture downloads are required: T05 reuses the seven pinned Poly Haven CC0 sources documented in [ASSETS.md](../ASSETS.md). All texture maps remain 2K and the four new GLB furniture sources add less than 3 MiB. The per-file manifest covers the exported and imported assets.
 

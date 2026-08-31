@@ -17,4 +17,4 @@ change the CC0 license of the graphical assets or generated character output.
 Pinned archives: Build/character-toolchain.json.
 Retained texture source paths and before/after hashes: recipe.json.
 All retained file and Unreal import hashes: SourceArt/asset-manifest.json.
-Editable recipe and export: scripts/create_npc_a.py; docs/npc-a.md.
+Editable recipe and export: scripts/character_recipes.py; scripts/create_npc.py; docs/npc-a.md.

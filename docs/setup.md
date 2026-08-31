@@ -1,4 +1,4 @@
-# T05 setup, editor, validation, and packaging
+# Setup, editor, validation, and packaging
 
 ## Pinned environment
 
@@ -67,7 +67,7 @@ Human-local mode:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify.ps1
 ```
 
-The command validates per-file art provenance and hashes, repository tests, project files, Blueprint compilation, the player-facing Interaction scenario, Development Win64 packaging, a real packaged-window launch, project-originated diagnostics, and evidence freshness. T04 adds the furnished Room A spawn and circulation checks and its 2560 × 1440 capture. Agent mode stays red pending a current Room A visual review; see [the review and completion steps](room-a.md). T05 adds the furnished Room B, Door-transition and Room B captures, and individually linked agent reviews for all three environment views. See [Room B acceptance](room-b.md). The NPCs retain their earlier placeholders, so the four-view final-art benchmark still activates with T08. Dialogue, replay, collision, suspended controls, restored controls, and session reset remain required.
+The command validates per-file art provenance and hashes, repository tests, project files, Blueprint compilation, the player-facing Interaction scenario, Development Win64 packaging, a real packaged-window launch, project-originated diagnostics, and evidence freshness. T04 adds the furnished Room A spawn and circulation checks and its 2560 × 1440 capture. Agent mode stays red pending a current Room A visual review; see [the review and completion steps](room-a.md). T05 adds the furnished Room B, Door-transition and Room B captures, and individually linked agent reviews for all three environment views. See [Room B acceptance](room-b.md). T06 and T07 add distinct animated residents with their own conversational captures and current agent reviews. See [NPC A](npc-a.md) and [NPC B](npc-b.md). The complete four-view final-art benchmark still activates with T08. Dialogue, replay, collision, suspended controls, restored controls, and session reset remain required.
 
 Generated evidence is under `C:\docs\git\fpsOne\Saved\Verification`:
 
@@ -91,7 +91,7 @@ Prerequisite: a green canonical validation and `C:\fpsOne-output\Development\Win
 
 For T03 dialogue acceptance:
 
-1. In either Room, approach the cylinder-and-sphere proxy NPC and look at it from within 250 cm. Expect `E — Talk` in the same prompt presentation as the Door. Walk into the NPC; expect its capsule to block passage.
+1. In either Room, approach the resident and look at it from within 250 cm. Expect `E — Talk` in the same prompt presentation as the Door. Walk into the NPC; expect its capsule to block passage.
 2. Press E once. Expect a restrained charcoal panel near the bottom with a speaker-labelled line. The centre dot and Talk prompt disappear.
 3. Hold each movement key during dialogue; expect no walking. Move the mouse in both axes; expect limited look (35 degrees horizontally and 20 degrees vertically around the starting view).
 4. Press E separately for each line. Expect three lines, then dismissal on the next press. Expect the centre dot, contextual prompts, walking, and free look to return. Repeat with each NPC several times; each exchange starts from its own first line.
@@ -107,4 +107,4 @@ To capture the dialogue and restored HUD for visual inspection, run the function
 
 Captures are retained under `Saved\DialogueReview` at the PIE viewport's actual resolution (recorded by the pixel check; command-line window size does not force the embedded viewport size). The canonical verifier runs this rendered scenario after its headless scenario and checks the actual pixels for dot hiding/restoration and panel dismissal. Both captures and the pixel report appear on the dashboard. This deterministic T03 UI check is separate from the T08 final-art benchmark.
 
-The T05 package contains both furnished Rooms and retains proxy NPCs. Final character art/animation and the complete four-view benchmark remain assigned to T06–T08. Audio remains outside the prototype's scope.
+The current package contains both furnished Rooms and both refined animated residents. The complete four-view benchmark remains assigned to T08. Audio remains outside the prototype's scope.

@@ -1,4 +1,4 @@
-"""Editable NPC A recipe; original pose/animation contributions are CC0-1.0.
+"""Export an editable resident; original pose/animation contributions are CC0-1.0.
 
 Blender 4.5.3 + MPFB 2.0.8. Run with -- --tools C:/.../character-tools.
 Only selected MakeHuman core assets are used (see ASSETS.md). No mocap.
@@ -15,10 +15,16 @@ import bpy
 from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT = ROOT / 'SourceArt/Characters/NPC_A'
+sys.path.insert(0, str(ROOT / 'scripts'))
+from character_recipes import resident_recipe
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--tools', type=Path, required=True)
+parser.add_argument('--resident', choices=('A', 'B'), required=True)
 args = parser.parse_args(sys.argv[sys.argv.index('--') + 1:])
+resident = args.resident
+recipe = resident_recipe(resident)
+OUTPUT = ROOT / 'SourceArt/Characters' / ('NPC_' + resident)
 assert bpy.app.version[:3] == (4, 5, 3), 'Use the pinned Blender 4.5.3'
 tools = args.tools.resolve()
 OUTPUT.mkdir(parents=True, exist_ok=True)
@@ -33,14 +39,13 @@ assert VERSION == (2, 0, 8), 'Use pinned MPFB 2.0.8'
 bpy.ops.object.select_all(action='SELECT')
 bpy.ops.object.delete(use_global=False)
 macro = TargetService.get_default_macro_info_dict()
-macro.update(gender=1.0, age=0.42, muscle=0.43, weight=0.48, height=0.53, proportions=0.55)
-macro['race'] = dict(caucasian=0.85, asian=0.15, african=0.0)
+macro.update(recipe['macro'])
 body = HumanService.create_human(macro_detail_dict=macro)
-body.name = 'ResidentA'
+body.name = 'Resident' + resident
 rig = HumanService.add_builtin_rig(body, 'default')
 # Unreal's legacy FBX importer strips nodes literally named Armature. Retain
 # this explicit root so the metre-to-centimetre transform also survives in clips.
-rig.name = 'ResidentARig'
+rig.name = 'Resident' + resident + 'Rig'
 
 
 def load_part(folder, name, kind):
@@ -48,22 +53,8 @@ def load_part(folder, name, kind):
                                        body, asset_type=kind, subdiv_levels=0, material_type='NONE')
 
 
-parts = {'Skin': body,
-         'ShirtDenim': load_part('clothes', 'male_casualsuit03', 'Clothes'),
-         'Shoes': load_part('clothes', 'shoes01', 'Clothes'),
-         'Hair': load_part('hair', 'short02', 'Hair'),
-         'Eyes': load_part('eyes', 'high-poly', 'Eyes'),
-         'Brows': load_part('eyebrows', 'eyebrow002', 'Eyebrows'),
-         'Lashes': load_part('eyelashes', 'eyelashes01', 'Eyelashes')}
-textures = {
-    'Skin': ('skins/middleage_caucasian_male/middleage_lightskinned_male_diffuse.png', None, 0.65),
-    'ShirtDenim': ('clothes/male_casualsuit03/male_casualsuit03_diffuse.png', 'clothes/male_casualsuit03/male_casualsuit03_normal.png', 0.82),
-    'Shoes': ('clothes/shoes01/shoes01_diffuse.png', None, 0.6),
-    'Hair': ('hair/short02/short02_diffuse.png', None, 0.6),
-    'Eyes': ('eyes/materials/brown_eye.png', None, 0.18),
-    'Brows': ('eyebrows/eyebrow002/eyebrow002.png', None, 0.85),
-    'Lashes': ('eyelashes/eyelashes01/eyelashes01.png', None, 0.85),
-}
+parts = {'Skin': body, **{name: load_part(*part) for name, part in recipe['parts'].items()}}
+textures = recipe['textures']
 texture_sources = []
 
 
@@ -91,6 +82,17 @@ for name, obj in parts.items():
     tex = mat.node_tree.nodes.new('ShaderNodeTexImage')
     tex.image = texture(diffuse)
     mat.node_tree.links.new(tex.outputs['Color'], shader.inputs['Base Color'])
+    tint = recipe.get('materialTints', {}).get(name)
+    if tint:
+        # Retain authored folds/stripes while giving B a distinct sage palette.
+        luminance = mat.node_tree.nodes.new('ShaderNodeRGBToBW')
+        gain = mat.node_tree.nodes.new('ShaderNodeMixRGB')
+        gain.blend_type = 'MULTIPLY'
+        gain.inputs[0].default_value = 1
+        gain.inputs[2].default_value = (*tint, 1)
+        mat.node_tree.links.new(tex.outputs['Color'], luminance.inputs['Color'])
+        mat.node_tree.links.new(luminance.outputs['Val'], gain.inputs[1])
+        mat.node_tree.links.new(gain.outputs['Color'], shader.inputs['Base Color'])
     shader.inputs['Roughness'].default_value = roughness
     if name in ('Hair', 'Brows', 'Lashes', 'Eyes'):
         mat.node_tree.links.new(tex.outputs['Alpha'], shader.inputs['Alpha'])
@@ -170,13 +172,15 @@ def animate(name, talking=False):
         pose('neck01', (0.35 * breath + 1.2 * gesture, 0.5 * shift, 0))
         pose('head', (0.4 * breath + 1.5 * gesture, 0.7 * shift, 0))
         if talking:
-            upper = rig.pose.bones['upperarm01.R']
+            side = recipe['gestureSide']
+            sign = 1 if side == 'R' else -1
+            upper = rig.pose.bones['upperarm01.' + side]
             upper.rotation_euler.x += math.radians(-8 * gesture)
-            upper.rotation_euler.z += math.radians(8 * gesture)
-            pose('lowerarm01.R', (6 + 38 * gesture, -10 * gesture, 0))
-            pose('wrist.R', (0, 12 * gesture, 3 * gesture))
+            upper.rotation_euler.z += math.radians(sign * 8 * gesture)
+            pose('lowerarm01.' + side, (6 + 38 * gesture, -sign * 10 * gesture, 0))
+            pose('wrist.' + side, (0, sign * 12 * gesture, sign * 3 * gesture))
         # Two short eyelid closures per eight-second loop; no mouth animation.
-        blink = max(max(0, 1 - abs(t - centre) / 0.12) for centre in (2.1, 5.7))
+        blink = max(max(0, 1 - abs(t - centre) / 0.12) for centre in recipe['blinkTimes'])
         for side in ('L', 'R'):
             pose('orbicularis03.' + side, (-22 * blink, 0, 0))
             pose('orbicularis04.' + side, (8 * blink, 0, 0))
@@ -185,8 +189,8 @@ def animate(name, talking=False):
     return action
 
 
-idle = animate('A_Idle')
-talk = animate('A_Talk', True)
+idle = animate(resident + '_Idle')
+talk = animate(resident + '_Talk', True)
 rig.animation_data.action = idle
 scene.frame_set(1)
 rig['fpsOne_macro_recipe'] = json.dumps(macro, sort_keys=True)
@@ -195,7 +199,7 @@ bpy.context.preferences.filepaths.save_version = 0
 for image in bpy.data.images:
     if image.filepath:
         image.filepath = '//Textures/' + Path(image.filepath).name
-bpy.ops.wm.save_as_mainfile(filepath=str(OUTPUT / 'NPC_A.blend'))
+bpy.ops.wm.save_as_mainfile(filepath=str(OUTPUT / ('NPC_' + resident + '.blend')))
 bpy.ops.object.select_all(action='DESELECT')
 rig.select_set(True)
 for obj in parts.values():
@@ -205,7 +209,7 @@ export = dict(use_selection=True, object_types={'ARMATURE', 'MESH'}, add_leaf_bo
               axis_forward='-Y', axis_up='Z', mesh_smooth_type='FACE', use_mesh_modifiers=True,
               bake_anim_use_all_actions=False, bake_anim_use_nla_strips=False,
               bake_anim_simplify_factor=0.0, path_mode='STRIP')
-bpy.ops.export_scene.fbx(filepath=str(OUTPUT / 'SK_NPC_A.fbx'), bake_anim=False, **export)
+bpy.ops.export_scene.fbx(filepath=str(OUTPUT / ('SK_NPC_' + resident + '.fbx')), bake_anim=False, **export)
 for obj in parts.values():
     obj.select_set(False)
 for action in (idle, talk):
@@ -213,5 +217,6 @@ for action in (idle, talk):
     bpy.ops.export_scene.fbx(filepath=str(OUTPUT / (action.name + '.fbx')), bake_anim=True, **export)
 (OUTPUT / 'recipe.json').write_text(json.dumps(dict(macro=macro, textures=texture_sources,
     rig='MPFB default', parts={name: str(obj.name) for name, obj in parts.items()},
-    animations=['A_Idle', 'A_Talk'], author='fpsOne contributors', license='CC0-1.0'), indent=2) + '\n')
-print('T06_CHARACTER_EXPORT_PASSED')
+    materialTints=recipe.get('materialTints', {}),
+    animations=[idle.name, talk.name], author='fpsOne contributors', license='CC0-1.0'), indent=2) + '\n')
+print('CHARACTER_EXPORT_PASSED NPC_' + resident)

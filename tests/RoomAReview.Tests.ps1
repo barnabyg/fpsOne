@@ -39,6 +39,17 @@ Describe 'Room A visual evidence linkage' {
         $review | ConvertTo-Json -Depth 5 | Set-Content "$captureRoot\review.json"
         { Confirm-RoomReview $result $captureRoot 'revision' 'fingerprint' 'npcA' 'NPC A' } | Should Throw 'npcPresentation'
     }
+    It 'requires both character criteria before accepting NPC B evidence' {
+        $result | Add-Member -NotePropertyName npcB -NotePropertyValue $result.roomA
+        $review | ConvertTo-Json -Depth 5 | Set-Content "$captureRoot\review.json"
+        { Confirm-RoomReview $result $captureRoot 'revision' 'fingerprint' 'npcB' 'NPC B' } | Should Throw 'npcPresentation'
+        $review.criteria.npcPresentation = @{ status = 'passed'; evidence = 'Distinct face, ponytail, blouse and skirt are intact.' }
+        $review | ConvertTo-Json -Depth 5 | Set-Content "$captureRoot\review.json"
+        { Confirm-RoomReview $result $captureRoot 'revision' 'fingerprint' 'npcB' 'NPC B' } | Should Throw 'referenceBaseline'
+        $review.criteria.referenceBaseline = @{ status = 'passed'; evidence = 'Inspected at conversational distance against the stated benchmark.' }
+        $review | ConvertTo-Json -Depth 5 | Set-Content "$captureRoot\review.json"
+        (Confirm-RoomReview $result $captureRoot 'revision' 'fingerprint' 'npcB' 'NPC B').status | Should Be 'passed'
+    }
     It 'checks each T05 view independently, rejecting a substituted Door image' {
         $result | Add-Member -NotePropertyName roomB -NotePropertyValue $result.roomA
         Set-Content "$captureRoot\door.png" 'distinct Door capture'

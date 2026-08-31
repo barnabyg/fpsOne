@@ -70,14 +70,14 @@ def hold_input(world, controller, key, frames, value=1.0):
     yield
 
 
-def smooth_resident_motion(world, resident, steps):
+def smooth_resident_motion(world, resident, steps, wrist='wrist_R'):
     """Observe the visible wrist while E dismisses/replays a mid-arm gesture."""
-    require(resident.does_socket_exist('wrist_R'), 'Imported rig must retain its right wrist marker')
-    previous = resident.get_socket_location('wrist_R')
+    require(resident.does_socket_exist(wrist), 'Imported rig must retain its wrist marker')
+    previous = resident.get_socket_location(wrist)
     previous_time = unreal.GameplayStatics.get_time_seconds(world)
     for _ in steps:
         yield
-        current = resident.get_socket_location('wrist_R')
+        current = resident.get_socket_location(wrist)
         now = unreal.GameplayStatics.get_time_seconds(world)
         # Generous motion bound: a restrained hand must not jump tens of cm
         # in a frame. Time scaling keeps this meaningful in headless and RHI runs.
@@ -140,7 +140,7 @@ def capture_room(world, controller, name="room-a-overview", folder="RoomAReview"
                     engine=unreal.SystemLibrary.get_engine_version())
     with open(os.path.join(root, "capture.json"), "w", encoding="utf-8") as stream:
         json.dump(metadata, stream, indent=2)
-    marker = 'T06' if flag == '-T06Capture' else 'T05'
+    marker = {'-T06Capture': 'T06', '-T07Capture': 'T07'}.get(flag, 'T05')
     unreal.log("T04_ROOM_A_CAPTURE_PASSED" if flag == "-T04Capture" else f"{marker}_CAPTURE_PASSED {name}")
 
 
@@ -157,7 +157,7 @@ def add_test_fixtures(test_target_class):
     occluder.set_actor_hidden_in_game(True)
 
 
-def exercise_both_dialogues(world, player, controller, interactable_class, cycles=3):
+def exercise_both_dialogues(world, player, controller, interactable_class, interaction, cycles=3):
     npcs = sorted(unreal.GameplayStatics.get_all_actors_with_tag(world, unreal.Name("DialogueNPC")), key=lambda actor: actor.get_actor_location().x)
     expected_exchanges = (
         ("Resident A: The light is warm in here this afternoon.", "Player: It is a quiet place to take a break.", "Resident A: You are welcome to look around."),
@@ -167,6 +167,12 @@ def exercise_both_dialogues(world, player, controller, interactable_class, cycle
     require(len(npcs) == 2, "Both dialogue occupants must exist on launch")
     for index, npc in enumerate(npcs):
         require(npc.get_component_by_class(interactable_class) is not None, "NPC must supply the shared Interactable contract")
+        residents = [mesh for mesh in npc.get_components_by_class(unreal.SkeletalMeshComponent)
+                     if mesh.get_skeletal_mesh_asset() is not None and mesh.is_visible()]
+        require(len(residents) == 1, f'NPC {index + 1} must present one visible imported resident')
+        resident = residents[0]
+        require(135 < resident.get_socket_location('head').z - npc.get_actor_location().z + 90 < 190,
+                'Both residents must idle at adult standing height')
         direction = 1.0 if index == 0 else -1.0
         start = npc.get_actor_location() + unreal.Vector(direction * 150.0, 0.0, 0.0)
         player.set_actor_location(start, False, False)
@@ -177,15 +183,72 @@ def exercise_both_dialogues(world, player, controller, interactable_class, cycle
         player.set_actor_location(start, False, False)
         yield
         yield
-        for _ in range(cycles):
+        for cycle in range(cycles):
             require(str(property_value(presentation, "PromptText")) == "E — Talk", "Either NPC must present the shared Talk prompt")
             for expected in expected_exchanges[index]:
                 yield from press_e(world, controller)
                 require(bool(property_value(presentation, "DialogueVisible")), "The shared dialogue panel must be visible")
                 require(str(property_value(presentation, "DialogueText")) == expected, "Either NPC must replay its own speaker-labelled lines in order")
-            yield from press_e(world, controller)
+                require(135 < resident.get_socket_location('head').z - npc.get_actor_location().z + 90 < 190,
+                        'Both residents must keep adult standing height throughout dialogue')
+            if index == 1 and cycle == 0 and cycles > 1:
+                yield from exercise_npc_b_presentation(world, player, controller, npc, resident, interaction)
+            yield from smooth_resident_motion(world, resident, press_e(world, controller),
+                                              'wrist_R' if index == 0 else 'wrist_L')
             require(not bool(property_value(presentation, "DialogueVisible")), "Either exchange must dismiss after its last line")
             require(controller.get_hud() == presentation, "Both NPCs must reuse the same presentation")
+            require(str(property_value(presentation, 'PromptText')) == 'E — Talk',
+                    'Either exchange must immediately restore scanning and its Talk prompt')
+            if index == 1 and cycle == 0 and cycles > 1:
+                before = player.get_actor_location()
+                yield from hold_input(world, controller, 'S', 12)
+                require((player.get_actor_location() - before).length() > 5,
+                        'NPC B dismissal must restore walking')
+                yaw = controller.get_control_rotation().yaw
+                yield from hold_input(world, controller, 'MouseX', 20, 20)
+                require(abs((controller.get_control_rotation().yaw - yaw + 180) % 360 - 180) > 40,
+                        'NPC B dismissal must restore unrestricted look')
+                player.set_actor_location(start, False, False)
+                controller.set_control_rotation(unreal.Rotator())
+                yield
+                yield
+
+
+def exercise_npc_b_presentation(world, player, controller, npc, resident, interaction):
+    """Observe NPC B's presentation and suspended controls through a real exchange."""
+    yield from exercise_dialogue_controls(world, player, controller, interaction)
+    controller.set_control_rotation(unreal.Rotator())
+    yield from wait_for_resident_gesture(resident, 'wrist_L')
+    require(abs((npc.get_actor_rotation().yaw - 180 + 180) % 360 - 180) < 12.1,
+            'NPC B must acknowledge the Player around its Room B facing direction')
+
+
+def exercise_dialogue_controls(world, player, controller, interaction):
+    """The same Player input contract applies while either resident speaks."""
+    stationary = player.get_actor_location()
+    for key in ('W', 'S', 'A', 'D'):
+        yield from hold_input(world, controller, key, 12)
+        require((player.get_actor_location() - stationary).length() < 1,
+                f'Dialogue must suspend {key} walking')
+    for key, axis, limit in (('MouseX', 'yaw', 35.1), ('MouseY', 'pitch', 20.1)):
+        before = getattr(controller.get_control_rotation(), axis)
+        yield from hold_input(world, controller, key, 20, 20)
+        difference = (getattr(controller.get_control_rotation(), axis) - before + 180) % 360 - 180
+        require(2 < abs(difference) <= limit, f'Dialogue must retain bounded {axis}')
+    require(property_value(interaction, 'CurrentFocus') is None,
+            'Dialogue must keep Interaction scanning suspended')
+    return stationary
+
+
+def wait_for_resident_gesture(resident, wrist):
+    """Require visible wrist travel, then return at the gesture peak for E tests."""
+    yield from wait_for(lambda: 0.35 < resident.get_position() < 0.65,
+                        'The resident must reach its conversational rest pose', frames=2400)
+    resting_wrist = resident.get_socket_location(wrist)
+    yield from wait_for(lambda: 2.35 < resident.get_position() < 2.65,
+                        'The conversational gesture must advance', frames=2400)
+    require((resident.get_socket_location(wrist) - resting_wrist).length() > 5,
+            'The resident must make a visible conversational hand gesture')
 
 
 def exercise_door_motion(world, controller, leaf, closed_location, interaction, interactable, opening):
@@ -494,31 +557,14 @@ def interaction_scenario():
     require(str(property_value(presentation, "DialogueText")) == "Resident A: You are welcome to look around.", "The final line must remain visible until E")
     # Schedule E near the visible gesture's peak, then observe actual bone
     # motion across dismissal and immediate replay through the Player input.
-    yield from wait_for(lambda: 0.35 < resident.get_position() < 0.65,
-                        'The conversational cycle must reach its rest pose', frames=2400)
-    resting_wrist = resident.get_socket_location('wrist_R')
-    yield from wait_for(lambda: 2.35 < resident.get_position() < 2.65,
-                        'The conversational gesture must advance', frames=2400)
-    require((resident.get_socket_location('wrist_R') - resting_wrist).length() > 5,
-            'The resident must make a visible conversational hand gesture')
+    yield from wait_for_resident_gesture(resident, 'wrist_R')
     yield from smooth_resident_motion(world, resident, press_e(world, controller))
     require(not bool(property_value(presentation, "DialogueVisible")), "E after the final line must dismiss dialogue")
     yield from smooth_resident_motion(world, resident, press_e(world, controller))
     require(str(property_value(presentation, "DialogueText")) == "Resident A: The light is warm in here this afternoon.", "A replay must start from the first line")
     require(property_value(interaction, "CurrentFocus") is None, "Dialogue must suspend Interaction scanning")
     require(str(property_value(presentation, "PromptText")) == "", "Dialogue must hide the Interaction Prompt")
-    stationary = player.get_actor_location()
-    for key in ("W", "S", "A", "D"):
-        yield from hold_input(world, controller, key, 12)
-        require((player.get_actor_location() - stationary).length() < 1.0, f"{key} moved the Player during dialogue")
-    starting_view = controller.get_control_rotation()
-    yield from hold_input(world, controller, "MouseX", 20, 20.0)
-    yaw_change = (controller.get_control_rotation().yaw - starting_view.yaw + 180) % 360 - 180
-    require(2.0 < abs(yaw_change) <= 35.1, f"Dialogue mouse look must remain available but bounded: {yaw_change}")
-    yield from hold_input(world, controller, "MouseY", 20, 20.0)
-    pitch_change = (controller.get_control_rotation().pitch - starting_view.pitch + 180) % 360 - 180
-    require(2.0 < abs(pitch_change) <= 20.1, f"Dialogue pitch must remain available but bounded: {pitch_change}")
-    require(property_value(interaction, "CurrentFocus") is None, "Mouse look must not resume Interaction scanning")
+    stationary = yield from exercise_dialogue_controls(world, player, controller, interaction)
     for _ in range(3):
         yield from press_e(world, controller)
     require(not bool(property_value(presentation, "DialogueVisible")), "Dialogue completion must restore exploration presentation")
@@ -537,7 +583,7 @@ def interaction_scenario():
     yield from hold_input(world, controller, "MouseX", 20, 20.0)
     yaw_change = (controller.get_control_rotation().yaw - yaw_before + 180) % 360 - 180
     require(abs(yaw_change) > 40.0, "Dismissal must restore unrestricted yaw")
-    yield from exercise_both_dialogues(world, player, controller, interactable_class)
+    yield from exercise_both_dialogues(world, player, controller, interactable_class, interaction)
 
     # Leave both kinds of Interaction changed before starting a fresh session.
     player.set_actor_location(unreal.Vector(120.0, 0.0, 90.0), False, False)
@@ -552,6 +598,7 @@ def interaction_scenario():
     yield
     yield from press_e(world, controller)
     require(bool(property_value(presentation, "DialogueVisible")), "Reset test must leave an exchange active")
+    yield from capture_room(world, controller, 'npc-b-conversation', 'NPCBReview', '-T07Capture')
 
     unreal.log("T02_INTERACTION_FUNCTIONAL_TEST_PASSED")
     level_subsystem.editor_request_end_play()
@@ -571,7 +618,8 @@ def interaction_scenario():
     yield
     yield
     require(str(property_value(controller.get_hud(), "PromptText")) == "E — Open", "Launch must restore the closed Door")
-    yield from exercise_both_dialogues(world, player, controller, interactable_class, cycles=1)
+    interaction = player.get_component_by_class(interaction_class)
+    yield from exercise_both_dialogues(world, player, controller, interactable_class, interaction, cycles=1)
     unreal.log("T03_DIALOGUE_FUNCTIONAL_TEST_PASSED")
     level_subsystem.editor_request_end_play()
 

@@ -26,8 +26,9 @@ foreach ($asset in $manifest.assets) {
         }
     }
     $generated = @()
-    if ($asset.id -eq 'makehuman_npc_a') {
-        $characterFolder = Join-Path $Root 'Content\Characters\NPC_A'
+    if ($asset.id -in @('makehuman_npc_a', 'makehuman_npc_b')) {
+        $resident = if ($asset.id -eq 'makehuman_npc_a') { 'NPC_A' } else { 'NPC_B' }
+        $characterFolder = Join-Path $Root "Content\Characters\$resident"
         if (Test-Path -LiteralPath $characterFolder) {
             $generated += Get-ChildItem -LiteralPath $characterFolder -Recurse -File | ForEach-Object { New-FileEntry $_ }
         }

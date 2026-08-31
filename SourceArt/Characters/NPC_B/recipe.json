@@ -1,0 +1,90 @@
+{
+  "macro": {
+    "gender": 0.0,
+    "age": 0.5,
+    "muscle": 0.27,
+    "weight": 0.6,
+    "proportions": 0.46,
+    "height": 0.45,
+    "cupsize": 0.5,
+    "firmness": 0.5,
+    "race": {
+      "caucasian": 0.15,
+      "asian": 0.85,
+      "african": 0.0
+    }
+  },
+  "textures": [
+    {
+      "path": "Textures/middleage_lightskinned_female_diffuse2.png",
+      "archivePath": "skins/middleage_asian_female/middleage_lightskinned_female_diffuse2.png",
+      "upstreamSha256": "39c505ca224387bef0b20cd2bf513c3997c27c7e7434447228c9991b87cb8d01",
+      "sha256": "39c505ca224387bef0b20cd2bf513c3997c27c7e7434447228c9991b87cb8d01"
+    },
+    {
+      "path": "Textures/female_elegantsuit01_diffuse.png",
+      "archivePath": "clothes/female_elegantsuit01/female_elegantsuit01_diffuse.png",
+      "upstreamSha256": "ebe6f2afcbaadbe56d5cee6e00bab45e97ce482f0be0e34491d16ca5f98b38ac",
+      "sha256": "ebe6f2afcbaadbe56d5cee6e00bab45e97ce482f0be0e34491d16ca5f98b38ac"
+    },
+    {
+      "path": "Textures/female_elegantsuit01_normal.png",
+      "archivePath": "clothes/female_elegantsuit01/female_elegantsuit01_normal.png",
+      "upstreamSha256": "ae3650bce6678cd67d025ab70e68b22683176aeaabc06d8e5b2129af99c762e9",
+      "sha256": "ae3650bce6678cd67d025ab70e68b22683176aeaabc06d8e5b2129af99c762e9"
+    },
+    {
+      "path": "Textures/shoes03_diffuse.png",
+      "archivePath": "clothes/shoes03/shoes03_diffuse.png",
+      "upstreamSha256": "fe8216fbd0c34ecd3ac0e1a01970a4ccf844417be5fd1d72c527c9209256db93",
+      "sha256": "fe8216fbd0c34ecd3ac0e1a01970a4ccf844417be5fd1d72c527c9209256db93"
+    },
+    {
+      "path": "Textures/ponytail01_diffuse.png",
+      "archivePath": "hair/ponytail01/ponytail01_diffuse.png",
+      "upstreamSha256": "dcb364300cac06ce8bef91b2f7c0970baf310898bbdd06b0c6b884ee9306eb97",
+      "sha256": "dcb364300cac06ce8bef91b2f7c0970baf310898bbdd06b0c6b884ee9306eb97"
+    },
+    {
+      "path": "Textures/eyebrow001.png",
+      "archivePath": "eyebrows/eyebrow001/eyebrow001.png",
+      "upstreamSha256": "9940f7d0b1b223709a19b05156ba6f6e9e4dbdbced02d7574f4d51d72c58967b",
+      "sha256": "9940f7d0b1b223709a19b05156ba6f6e9e4dbdbced02d7574f4d51d72c58967b"
+    },
+    {
+      "path": "Textures/brown_eye.png",
+      "archivePath": "eyes/materials/brown_eye.png",
+      "upstreamSha256": "4659691c7295ad6206c78b003e5fd0e5f91dcd53032fa914a229bb48cabe424b",
+      "sha256": "4659691c7295ad6206c78b003e5fd0e5f91dcd53032fa914a229bb48cabe424b"
+    },
+    {
+      "path": "Textures/eyelashes01.png",
+      "archivePath": "eyelashes/eyelashes01/eyelashes01.png",
+      "upstreamSha256": "4b69c0fff2648874460e9caf80c31413c444218a5c50afebc425aeaa65484a35",
+      "sha256": "4b69c0fff2648874460e9caf80c31413c444218a5c50afebc425aeaa65484a35"
+    }
+  ],
+  "rig": "MPFB default",
+  "parts": {
+    "Skin": "ResidentB",
+    "BlouseSkirt": "ResidentB.female_elegantsuit01",
+    "Shoes": "ResidentB.shoes03",
+    "Hair": "ResidentB.ponytail01",
+    "Brows": "ResidentB.eyebrow001",
+    "Eyes": "ResidentB.high-poly",
+    "Lashes": "ResidentB.eyelashes01"
+  },
+  "materialTints": {
+    "BlouseSkirt": [
+      0.38,
+      0.8,
+      0.68
+    ]
+  },
+  "animations": [
+    "B_Idle",
+    "B_Talk"
+  ],
+  "author": "fpsOne contributors",
+  "license": "CC0-1.0"
+}

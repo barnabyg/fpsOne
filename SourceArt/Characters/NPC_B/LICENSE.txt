@@ -1,0 +1,20 @@
+NPC B graphical assets and animations: CC0-1.0
+https://creativecommons.org/publicdomain/zero/1.0/
+
+MakeHuman core geometry, rig weights, skin, clothes, hair, eyes, brows and lashes
+are CC0. Their upstream license statement is retained in upstream-license.md.
+Core-pack attribution: MakeHuman team; Data Collection AB; Joel Palmius;
+Jonas Hauquier. See the original header in core-material-notice.mhmat.
+
+The original NPC B proportions/pose recipe and idle/conversational animation
+curves authored by fpsOne contributors are also dedicated to CC0-1.0.
+No third-party motion-capture or restricted character content is used.
+
+Blender and MPFB executables/source code are separate tools, not part of these
+graphical assets. They are not redistributed here. Their GPL terms do not
+change the CC0 license of the graphical assets or generated character output.
+
+Pinned archives: Build/character-toolchain.json.
+Retained texture source paths and before/after hashes: recipe.json.
+All retained file and Unreal import hashes: SourceArt/asset-manifest.json.
+Editable recipe and export: scripts/character_recipes.py; scripts/create_npc.py; docs/npc-b.md.
