@@ -1,6 +1,6 @@
 # fpsOne
 
-fpsOne is a narrowly scoped first-person Unreal Engine 5.8 testbed with two furnished apartment Rooms, an animated Door, and repeatable dialogue. T06 replaces NPC A with a CC0 humanoid with idle motion, blinks, nearby acknowledgement, and a conversational gesture. NPC B remains a proxy until T07. All art is publicly redistributable.
+fpsOne is a narrowly scoped first-person Unreal Engine 5.8 testbed with two furnished apartment Rooms, an animated Door, and repeatable dialogue. T06 and T07 supply two distinct CC0 humanoid residents with idle motion, blinks, nearby acknowledgement, and conversational gestures. All art is publicly redistributable.
 
 ## Prerequisites
 
@@ -59,4 +59,4 @@ Evidence and the local dashboard are written to `Saved\Verification`; the Develo
 
 T04 adds a 2560 × 1440 Room A acceptance image and an agent review linked to its hash and the tested working tree. The initial agent run remains red until that review is completed with `verify.ps1 -RequireVisualReview -CompleteVisualReview`. See [Room A assets, visual review, and manual checks](docs/room-a.md). A normal clone needs Git LFS assets (`git lfs pull`); asset downloads and Blender are unnecessary to open or play it.
 
-The current verifier also requires Room B, open-Door, and conversational-distance NPC A captures and reviews. See [NPC A source, pinned authoring tools, and manual checks](docs/npc-a.md) and [Room B](docs/room-b.md). Blender 4.5.3, MPFB 2.0.8, and MakeHuman core assets are needed only to recreate or change character source; their SHA-256 pins and C:-only setup are included without tool binaries.
+The current verifier also requires Room B, open-Door, and conversational-distance captures and reviews for both NPCs. See [NPC A and pinned authoring tools](docs/npc-a.md), [NPC B source and manual checks](docs/npc-b.md), and [Room B](docs/room-b.md). Blender 4.5.3, MPFB 2.0.8, and MakeHuman core assets are needed only to recreate or change character source; their SHA-256 pins and C:-only setup are included without tool binaries.

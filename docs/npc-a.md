@@ -3,7 +3,8 @@
 T06 replaces Resident A with a CC0 adult humanoid: a textured striped shirt,
 denim, leather shoes, layered short hair, brown eyes, and a calibrated rough
 skin material. The approximately 180 cm resident retains the existing blocking
-capsule and NPC-owned dialogue. NPC B remains the T03 proxy until T07.
+capsule and NPC-owned dialogue. T07 adds [the distinct NPC B resident](npc-b.md)
+using the same source and presentation workflow.
 
 `BP_NPC_A` inherits `BP_DialogueNPC`; its construction script hides only the
 inherited proxy art. `CharacterVisual` uses the imported MPFB skeleton, without
@@ -36,7 +37,7 @@ From the repository root, with public download access:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\setup-character-tools.ps1
 $tools = "$PWD\.scratch\character-tools"
 $env:BLENDER_USER_RESOURCES = "$tools\blender-user"
-& "$tools\blender\blender-4.5.3-windows-x64\blender.exe" --background --factory-startup --python-exit-code 1 --python .\scripts\create_npc_a.py -- --tools $tools
+& "$tools\blender\blender-4.5.3-windows-x64\blender.exe" --background --factory-startup --python-exit-code 1 --python .\scripts\create_npc.py -- --tools $tools --resident A
 ```
 
 The setup script accepts `-ToolRoot` for another directory on C:, verifies each
@@ -49,7 +50,8 @@ Do not put the tool directory in a tracked content folder.
 `SourceArt/Characters/NPC_A/NPC_A.blend` retains the rig, weighted meshes,
 materials, and the `A_Idle` and `A_Talk` actions. Texture paths are relative to
 the blend file. The original macro prescription, selected parts, and animation
-curves are also editable in `scripts/create_npc_a.py`. `recipe.json` records
+curves are also editable in `scripts/character_recipes.py` and
+`scripts/create_npc.py`. `recipe.json` records
 the prescription and each retained texture's archive path, upstream hash,
 and final hash. The clothing normal map is reduced to 2K; smaller eye, shoe,
 and eyelash maps are retained at native size rather than upscaled.
@@ -68,8 +70,8 @@ To reproduce imported content from the retained sources, close Unreal editors:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\regenerate-assets.ps1
 ```
 
-The isolated generation project creates gameplay, both Rooms, then NPC A using
-`scripts/npc_a_assets.py`. It imports the mesh and clips with the pinned legacy
+The isolated generation project creates gameplay, both Rooms, then both residents using
+`scripts/npc_assets.py`. It imports the mesh and clips with the pinned legacy
 skeletal FBX importer, supplies the same skeleton to both clips, reconstructs
 materials, and preserves the NPC's dialogue lines and position. It then runs
 the Player Interaction scenario and publishes the assets and matching manifest
@@ -95,7 +97,7 @@ used. The blend and FBX files contain graphical output, not MPFB tool code.
 
 ## Current visual evidence
 
-Run the complete agent verifier, inspect all four current screenshots, write
+Run the complete agent verifier, inspect all five current screenshots, write
 their linked reviews, and complete that same run:
 
 ```powershell
@@ -112,7 +114,7 @@ requires a passed status and specific visible evidence. Examine face/eye/hair
 integrity, clothing, scale, silhouette, and plausible unmodded Skyrim Special
 Edition/Fallout 4 PC Ultra quality at this distance. Do not infer visual quality
 from compilation or a successful import. T08's final complete-prototype
-benchmark remains separate, with NPC B's final art still pending.
+benchmark remains separate; NPC B has its own current character review from T07.
 
 The deterministic Player scenario checks the imported resident's running head
 height in both idle and dialogue, in addition to collision, both exchanges,

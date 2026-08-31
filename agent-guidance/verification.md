@@ -33,6 +33,16 @@ From T06, the same run also requires a 2560 × 1440 NPC A capture during the rea
 
 ### Incremental ticket profiles
 
+From T07, also capture NPC B during its real Dialogue Interaction at 2560 x 1440
+and require a current review with the six environment criteria plus
+`npcPresentation` and `referenceBaseline`. All five slice reviews are required
+for agent completion. The Player scenario checks both imported residents' idle
+and dialogue scale, NPC B's visible gesture and facing direction, suspended and
+restored input, and independent replay. Every NPC B source and imported asset
+is covered by the same provenance, hash, redistribution, and 2K gates. See
+`docs/npc-b.md`. Human-local mode captures all views without agent judgement;
+T08's complete-prototype assessment remains separate.
+
 Before a ticket introduces the feature exercised by a later gate, the verifier may mark that gate not applicable only when the result names the missing slice and the ticket that activates it. Through T03, repository tests cover the configured input surface, the player-facing world Interaction scenario is required, and the Development package must pass a launch smoke test. T03 requires both NPC exchanges, replay, collision, suspended scanning and walking, bounded mouse look, restored controls, and fresh-session reset alongside the existing Door checks. The four-view final-art agent visual gate activates with T08. These staged exceptions expire when their activating slices land and do not weaken the complete-prototype profile.
 
 ## Warning exceptions
