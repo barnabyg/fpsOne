@@ -46,7 +46,8 @@ foreach ($directory in @('SourceArt\Authored', 'Content\Environment')) {
     foreach ($file in Get-ChildItem -LiteralPath (Join-Path $Root $directory) -File -Recurse) {
         $entry = New-FileEntry $file
         if (-not $covered.ContainsKey($entry.path)) {
-            if ($entry.path -notmatch '^SourceArt/Authored/SM_(LinenSofa|Sideboard|FloorLamp|Rug)\.glb$' -and
+            if ($entry.path -notmatch '^SourceArt/Authored/SM_(LinenSofa|Sideboard|FloorLamp|Rug|WritingDesk|DeskChair|GuestDaybed|Bookcase)\.glb$' -and
+                $entry.path -notmatch '^Content/Environment/RoomB/SM_(WritingDesk|DeskChair|GuestDaybed|Bookcase)/' -and
                 $entry.path -notmatch '^Content/Environment/RoomA/(SM_(LinenSofa|Sideboard|FloorLamp|Rug)/|Materials/M_(Piping|Bronze|Shade|Ceiling|Trim|SagePaint|Charcoal|Paper|Ochre|ArtPaper)\.uasset$)') {
                 throw "Unclassified generated art requires explicit provenance: $($entry.path)"
             }

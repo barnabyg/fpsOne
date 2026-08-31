@@ -1,4 +1,4 @@
-# T04 setup, editor, validation, and packaging
+# T05 setup, editor, validation, and packaging
 
 ## Pinned environment
 
@@ -67,7 +67,7 @@ Human-local mode:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify.ps1
 ```
 
-The command validates per-file art provenance and hashes, repository tests, project files, Blueprint compilation, the player-facing Interaction scenario, Development Win64 packaging, a real packaged-window launch, project-originated diagnostics, and evidence freshness. T04 adds the furnished Room A spawn and circulation checks and its 2560 × 1440 capture. Agent mode stays red pending a current Room A visual review; see [the review and completion steps](room-a.md). Room B and the NPCs retain their earlier placeholders, so the four-view final-art benchmark still activates with T08. Dialogue, replay, collision, suspended controls, restored controls, and session reset remain required.
+The command validates per-file art provenance and hashes, repository tests, project files, Blueprint compilation, the player-facing Interaction scenario, Development Win64 packaging, a real packaged-window launch, project-originated diagnostics, and evidence freshness. T04 adds the furnished Room A spawn and circulation checks and its 2560 × 1440 capture. Agent mode stays red pending a current Room A visual review; see [the review and completion steps](room-a.md). T05 adds the furnished Room B, Door-transition and Room B captures, and individually linked agent reviews for all three environment views. See [Room B acceptance](room-b.md). The NPCs retain their earlier placeholders, so the four-view final-art benchmark still activates with T08. Dialogue, replay, collision, suspended controls, restored controls, and session reset remain required.
 
 Generated evidence is under `C:\docs\git\fpsOne\Saved\Verification`:
 
@@ -107,4 +107,4 @@ To capture the dialogue and restored HUD for visual inspection, run the function
 
 Captures are retained under `Saved\DialogueReview` at the PIE viewport's actual resolution (recorded by the pixel check; command-line window size does not force the embedded viewport size). The canonical verifier runs this rendered scenario after its headless scenario and checks the actual pixels for dot hiding/restoration and panel dismissal. Both captures and the pixel report appear on the dashboard. This deterministic T03 UI check is separate from the T08 final-art benchmark.
 
-The T04 package retains proxy NPCs and a blockout Room B. Final character art/animation, Room B furnishings, and the complete four-view benchmark remain assigned to later tickets. Audio remains outside the prototype's scope.
+The T05 package contains both furnished Rooms and retains proxy NPCs. Final character art/animation and the complete four-view benchmark remain assigned to T06–T08. Audio remains outside the prototype's scope.

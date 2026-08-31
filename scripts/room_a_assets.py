@@ -36,10 +36,10 @@ def import_file(source, destination, name=None):
     return objects
 
 
-def model(identity, authored=False):
+def model(identity, authored=False, destination_root=ART):
     source = (ROOT / "SourceArt/Authored" / (identity + ".glb") if authored else
               ROOT / "SourceArt/PolyHaven" / identity / (identity + "_2k.gltf"))
-    destination = ART + "/" + identity
+    destination = destination_root + "/" + identity
     if not unreal.EditorAssetLibrary.does_directory_exist(destination):
         import_file(source, destination)
     meshes = [unreal.load_asset(path) for path in unreal.EditorAssetLibrary.list_assets(destination)]

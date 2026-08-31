@@ -34,4 +34,19 @@ Describe 'Room A visual evidence linkage' {
         $review | ConvertTo-Json -Depth 5 | Set-Content "$captureRoot\review.json"
         { Confirm-RoomAReview $result $captureRoot 'revision' 'fingerprint' } | Should Throw 'lighting'
     }
+    It 'checks each T05 view independently, rejecting a substituted Door image' {
+        $result | Add-Member -NotePropertyName roomB -NotePropertyValue $result.roomA
+        Set-Content "$captureRoot\door.png" 'distinct Door capture'
+        $doorHash = (Get-FileHash "$captureRoot\door.png" -Algorithm SHA256).Hash.ToLowerInvariant()
+        $result | Add-Member -NotePropertyName doorTransition -NotePropertyValue @{
+            screenshotPath = 'door.png'; sha256 = $doorHash; reviewPath = 'door-review.json'
+        }
+        $review | ConvertTo-Json -Depth 5 | Set-Content "$captureRoot\review.json"
+        $review | ConvertTo-Json -Depth 5 | Set-Content "$captureRoot\door-review.json"
+        (Confirm-RoomReview $result $captureRoot 'revision' 'fingerprint' 'roomB' 'Room B').status | Should Be 'passed'
+        { Confirm-RoomReview $result $captureRoot 'revision' 'fingerprint' 'doorTransition' 'Open Door' } | Should Throw 'screenshot'
+        $review.screenshotSha256 = $doorHash
+        $review | ConvertTo-Json -Depth 5 | Set-Content "$captureRoot\door-review.json"
+        (Confirm-RoomReview $result $captureRoot 'revision' 'fingerprint' 'doorTransition' 'Open Door').status | Should Be 'passed'
+    }
 }

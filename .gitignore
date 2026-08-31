@@ -13,6 +13,7 @@ Thumbs.db
 Desktop.ini
 
 # Editor temporary files
+__pycache__/
 *.swp
 *.swo
 *~
