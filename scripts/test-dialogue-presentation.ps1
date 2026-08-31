@@ -10,7 +10,8 @@ try {
         throw 'Dialogue and restored-view captures must have identical dimensions.'
     }
     # The scenario holds the camera and proxy still across these captures. The
-    # restrained dot darkens a few central pixels when exploration returns. Test
+    # restrained dot changes a few central pixels when exploration returns; it
+    # brightens shaded surfaces and darkens bright ones. Test
     # the rendered output: a dot on both branches, or on neither, must fail.
     $dotPixels = 0
     $backgroundDelta = 0
@@ -23,7 +24,7 @@ try {
             $after = $restored.GetPixel($x, $y)
             $delta = ([int]$before.R + [int]$before.G + [int]$before.B - [int]$after.R - [int]$after.G - [int]$after.B) / 3.0
             if ([Math]::Abs($x - $centreX) -le 4 -and [Math]::Abs($y - $centreY) -le 5) {
-                if ($delta -gt 10) { $dotPixels++ }
+                if ([Math]::Abs($delta) -gt 10) { $dotPixels++ }
             } else {
                 $backgroundDelta += [Math]::Abs($delta)
                 $backgroundSamples++
@@ -34,7 +35,7 @@ try {
         throw 'The centre background moved too much to compare the dot reliably.'
     }
     if ($dotPixels -lt 1 -or $dotPixels -gt 16) {
-        throw "Expected a small visible dot only after dismissal; found $dotPixels darkened central pixels."
+        throw "Expected a small visible dot only after dismissal; found $dotPixels contrasting central pixels."
     }
     # Sample inside the backing, away from its text and the restored Talk prompt.
     $panelX = [int]($dialogue.Width * 0.15)

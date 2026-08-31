@@ -60,4 +60,19 @@ Describe 'validated asset publishing' {
         { Publish-GeneratedAssetSet $source $destination $backup @('../outside.uasset') } | Should Throw
         (Get-Content "$destination\Content\A.uasset") | Should Be 'old A'
     }
+
+    It 'rolls back assets when their manifest cannot be replaced' {
+        New-Item -ItemType Directory -Path "$source\SourceArt", "$destination\SourceArt" -Force | Out-Null
+        Set-Content "$source\SourceArt\asset-manifest.json" 'new manifest'
+        Set-Content "$destination\SourceArt\asset-manifest.json" 'old manifest'
+        $paths += 'SourceArt/asset-manifest.json'
+        # Windows allows the backup read but denies replacing this open file.
+        $handle = [IO.File]::Open("$destination\SourceArt\asset-manifest.json", [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::Read)
+        try {
+            { Publish-GeneratedAssetSet $source $destination $backup $paths } | Should Throw
+        } finally { $handle.Dispose() }
+        (Get-Content "$destination\Content\A.uasset") | Should Be 'old A'
+        (Get-Content "$destination\Content\B.uasset") | Should Be 'old B'
+        (Get-Content "$destination\SourceArt\asset-manifest.json") | Should Be 'old manifest'
+    }
 }

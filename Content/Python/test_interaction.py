@@ -2,6 +2,9 @@
 
 import math
 import os
+import hashlib
+import json
+import struct
 import unreal
 
 
@@ -78,10 +81,54 @@ def capture_presentation(world, controller, name):
     filename = os.path.abspath(os.path.join(root, name + ".png"))
     if os.path.exists(filename):
         os.remove(filename)
-    for _ in range(30):
+    for _ in range(120):
         yield
+    pawn = unreal.GameplayStatics.get_player_pawn(world, 0)
+    unreal.log(f"T04_UI_CAMERA {name}: {controller.get_control_rotation()} / {pawn.get_actor_location()}")
     unreal.SystemLibrary.execute_console_command(world, f'Shot -nosuffix filename="{filename}"', controller)
     yield from wait_for(lambda: os.path.exists(filename), f"Presentation capture did not arrive: {filename}")
+
+
+def capture_room_a(world, controller):
+    if "-T04Capture" not in unreal.SystemLibrary.get_command_line():
+        return
+    root = os.path.abspath(os.path.join(unreal.Paths.project_saved_dir(), "RoomAReview"))
+    os.makedirs(root, exist_ok=True)
+    filename = os.path.join(root, "room-a-overview.png")
+    if os.path.exists(filename):
+        os.remove(filename)
+    for _ in range(120):
+        yield
+    unreal.log(f"T04_CAMERA: {controller.get_control_rotation()} / {unreal.GameplayStatics.get_player_pawn(world, 0).get_actor_location()}")
+    unreal.SystemLibrary.execute_console_command(world, "r.HighResScreenshotDelay 32", controller)
+    unreal.SystemLibrary.execute_console_command(world, f'HighResShot 2560x1440 filename="{filename}"', controller)
+    yield from wait_for(lambda: os.path.exists(filename), "Room A acceptance screenshot did not arrive")
+    for _ in range(5):
+        yield
+    with open(filename, "rb") as stream:
+        data = stream.read()
+    width, height = struct.unpack(">II", data[16:24])
+    require((width, height) == (2560, 1440), "Room A acceptance must capture at 2560 x 1440")
+    metadata = dict(screenshot="room-a-overview.png", sha256=hashlib.sha256(data).hexdigest(),
+                    width=width, height=height,
+                    frameSeconds=unreal.GameplayStatics.get_world_delta_seconds(world),
+                    engine=unreal.SystemLibrary.get_engine_version())
+    with open(os.path.join(root, "capture.json"), "w", encoding="utf-8") as stream:
+        json.dump(metadata, stream, indent=2)
+    unreal.log("T04_ROOM_A_CAPTURE_PASSED")
+
+
+def add_test_fixtures(test_target_class):
+    """Unsaved editor setup; test props never ship in the furnished apartment."""
+    subsystem = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
+    target = subsystem.spawn_actor_from_class(test_target_class, unreal.Vector(-40, -80, 105), unreal.Rotator(yaw=90))
+    target.set_actor_hidden_in_game(True)
+    occluder = subsystem.spawn_actor_from_class(unreal.StaticMeshActor, unreal.Vector(-100, 180, 140), unreal.Rotator())
+    occluder.static_mesh_component.set_static_mesh(unreal.load_asset("/Engine/BasicShapes/Cube"))
+    occluder.static_mesh_component.set_mobility(unreal.ComponentMobility.MOVABLE)
+    occluder.set_actor_scale3d(unreal.Vector(0.2, 0.8, 2.8))
+    occluder.set_editor_property("tags", [unreal.Name("InteractionTestOccluder")])
+    occluder.set_actor_hidden_in_game(True)
 
 
 def exercise_both_dialogues(world, player, controller, interactable_class, cycles=3):
@@ -186,6 +233,8 @@ def interaction_scenario():
     interaction_class = blueprint_class(INTERACTION_COMPONENT_ASSET)
     interactable_class = blueprint_class(INTERACTABLE_COMPONENT_ASSET)
 
+    add_test_fixtures(test_target_class)
+
     level_subsystem.editor_request_begin_play()
 
     worlds = []
@@ -222,6 +271,18 @@ def interaction_scenario():
     )
 
     controller = unreal.GameplayStatics.get_player_controller(world, 0)
+    yield
+    yield
+    require(str(property_value(controller.get_hud(), "PromptText")) == "",
+            "Room A spawn must not initially focus the Door or NPC A")
+    yield from capture_room_a(world, controller)
+    # Sweep the real Player capsule through the circulation aisle; furnishings
+    # must leave a usable approach to the shared Door from the accepted spawn.
+    for destination in (unreal.Vector(-550, -70, 90), unreal.Vector(-170, -70, 90), unreal.Vector(-170, 0, 90)):
+        player.set_actor_location(destination, True, False)
+        require((player.get_actor_location() - destination).length() < 5,
+                f"Room A furnishings obstruct the Player's route from spawn to the Door: wanted {destination}, got {player.get_actor_location()}")
+    test_targets[0].set_actor_hidden_in_game(False)
     player.set_actor_location(unreal.Vector(-200.0, 0.0, 90.0), False, False)
     controller.set_control_rotation(unreal.Rotator())
     yield
@@ -257,6 +318,7 @@ def interaction_scenario():
     )
     require(len(occluders) == 1, "The map must contain one Interaction occluder")
     occluder = occluders[0]
+    occluder.set_actor_hidden_in_game(False)
     player.set_actor_location(unreal.Vector(-200.0, 0.0, 90.0), False, False)
     occluder.set_actor_location(unreal.Vector(-100.0, 0.0, 140.0), False, False)
     yield
@@ -275,7 +337,7 @@ def interaction_scenario():
     )
 
     generic = test_targets[0].get_component_by_class(interactable_class)
-    player.set_actor_location(unreal.Vector(-200.0, 130.0, 90.0), False, False)
+    player.set_actor_location(unreal.Vector(-200.0, -80.0, 90.0), False, False)
     controller.set_control_rotation(unreal.Rotator(pitch=-17.0))
     yield
     yield
@@ -417,6 +479,11 @@ def interaction_scenario():
     yield
     yield
     require(not bool(property_value(controller.get_hud(), "DialogueVisible")), "Launch must start without a dialogue panel")
+    require(str(property_value(controller.get_hud(), "PromptText")) == "", "Fresh Room A spawn must start without Interaction Focus")
+    player.set_actor_location(unreal.Vector(-200, 0, 90), False, False)
+    controller.set_control_rotation(unreal.Rotator())
+    yield
+    yield
     require(str(property_value(controller.get_hud(), "PromptText")) == "E — Open", "Launch must restore the closed Door")
     yield from exercise_both_dialogues(world, player, controller, interactable_class, cycles=1)
     unreal.log("T03_DIALOGUE_FUNCTIONAL_TEST_PASSED")

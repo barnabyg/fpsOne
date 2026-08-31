@@ -21,7 +21,8 @@ function Publish-GeneratedAssetSet {
         [string] $SourceRoot,
         [string] $DestinationRoot,
         [string] $BackupRoot,
-        [string[]] $AssetPaths
+        [string[]] $AssetPaths,
+        [switch] $ValidateRoomA
     )
 
     $ErrorActionPreference = 'Stop'
@@ -33,9 +34,19 @@ function Publish-GeneratedAssetSet {
         throw 'Asset transaction and destination must share a volume.'
     }
 
+    if ($ValidateRoomA) {
+        # Reject changed sources before touching published content. Hash and
+        # validate staged outputs, then install their manifest in the same
+        # rollback boundary as the assets it describes.
+        & (Join-Path $PSScriptRoot 'test-asset-manifest.ps1') -Root $DestinationRoot -SourcesOnly
+        & (Join-Path $PSScriptRoot 'update-asset-manifest.ps1') -Root $SourceRoot
+        $AssetPaths += 'SourceArt/asset-manifest.json'
+    }
+
     # Validate the entire set before writing any destination asset.
     $entries = foreach ($relativePath in $AssetPaths) {
-        if ($relativePath -notmatch '^Content[/\\][A-Za-z0-9_/\\-]+\.(uasset|umap)$' -or $relativePath.Contains('..')) {
+        if (($relativePath -notmatch '^Content[/\\][A-Za-z0-9_/\\-]+\.(uasset|umap)$' -and
+                $relativePath -ne 'SourceArt/asset-manifest.json') -or $relativePath.Contains('..')) {
             throw "Invalid generated asset path: $relativePath"
         }
         $source = Join-Path $SourceRoot $relativePath

@@ -1,0 +1,6 @@
+Content/Environment/**/*.uasset filter=lfs diff=lfs merge=lfs -text
+Content/Maps/L_Testbed.umap filter=lfs diff=lfs merge=lfs -text
+SourceArt/**/*.jpg filter=lfs diff=lfs merge=lfs -text
+SourceArt/**/*.bin filter=lfs diff=lfs merge=lfs -text
+SourceArt/**/*.glb filter=lfs diff=lfs merge=lfs -text
+SourceArt/**/*.gltf -text

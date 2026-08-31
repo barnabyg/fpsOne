@@ -1,0 +1,610 @@
+﻿{
+    "schemaVersion":  1,
+    "assets":  [
+                   {
+                       "id":  "modern_arm_chair_01",
+                       "source":  "https://polyhaven.com/a/modern_arm_chair_01",
+                       "author":  "Vibrant Nordic",
+                       "version":  "6893f36e58dddba95bd0ae1f1ef38537c1852a0b",
+                       "license":  "CC0-1.0",
+                       "licenseEvidence":  "https://polyhaven.com/license",
+                       "attribution":  "Courtesy of Poly Haven and Vibrant Nordic",
+                       "resolution":  2048,
+                       "publicRedistribution":  true,
+                       "files":  [
+                                     {
+                                         "path":  "SourceArt/PolyHaven/modern_arm_chair_01/modern_arm_chair_01_2k.gltf",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Models/gltf/2k/modern_arm_chair_01/modern_arm_chair_01_2k.gltf",
+                                         "upstreamMd5":  "1fec9694d156cbed5dc8757576cd16a5",
+                                         "sha256":  "eb971ed98af1ce3d4cc93a058ceee5c31dbd185f99aa3d86938d366820943414"
+                                     },
+                                     {
+                                         "path":  "SourceArt/PolyHaven/modern_arm_chair_01/textures/modern_arm_chair_01_pillow_diff_2k.jpg",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/modern_arm_chair_01/modern_arm_chair_01_pillow_diff_2k.jpg",
+                                         "upstreamMd5":  "c3def4cb2bcef8ee07c90c55c20a637e",
+                                         "sha256":  "20a8b41bd14552643c1355587ec1198cb8c5f1f7dea50dc71dbb0f6a826adfc1"
+                                     },
+                                     {
+                                         "path":  "SourceArt/PolyHaven/modern_arm_chair_01/textures/modern_arm_chair_01_pillow_nor_gl_2k.jpg",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/modern_arm_chair_01/modern_arm_chair_01_pillow_nor_gl_2k.jpg",
+                                         "upstreamMd5":  "2549b1d93eb4ec13e8ad9edd1327d2f0",
+                                         "sha256":  "dfd11d444ba0a6c1a16304f91c10ef2a2a525180f6a46ca57c2d55c196ff39de"
+                                     },
+                                     {
+                                         "path":  "SourceArt/PolyHaven/modern_arm_chair_01/modern_arm_chair_01.bin",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/modern_arm_chair_01/modern_arm_chair_01.bin",
+                                         "upstreamMd5":  "5a8f2ea1c79ea484140e484b2a621670",
+                                         "sha256":  "8755f2f498c0bb165660379d1b045465751c16bbeaf553c8dd76bb14c16d1ff6"
+                                     },
+                                     {
+                                         "path":  "SourceArt/PolyHaven/modern_arm_chair_01/textures/modern_arm_chair_01_legs_diff_2k.jpg",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/modern_arm_chair_01/modern_arm_chair_01_legs_diff_2k.jpg",
+                                         "upstreamMd5":  "cfed247a17cafd9f59a7f01ed01fdbf4",
+                                         "sha256":  "a3a289f3265d77e120e81aebdd9107b612609b077190e842389b5cd32bbf9a3d"
+                                     },
+                                     {
+                                         "path":  "SourceArt/PolyHaven/modern_arm_chair_01/textures/modern_arm_chair_01_legs_arm_2k.jpg",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/modern_arm_chair_01/modern_arm_chair_01_legs_arm_2k.jpg",
+                                         "upstreamMd5":  "a62c231c4f42be2f85f6b42a7cc1fc8e",
+                                         "sha256":  "38a2b11cdfb18aeed9804fee38de93d8fd856f53ad9448ee877833ba25643f15"
+                                     },
+                                     {
+                                         "path":  "SourceArt/PolyHaven/modern_arm_chair_01/textures/modern_arm_chair_01_legs_nor_gl_2k.jpg",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/modern_arm_chair_01/modern_arm_chair_01_legs_nor_gl_2k.jpg",
+                                         "upstreamMd5":  "52c08726e839e2c1c87863e6f5a87411",
+                                         "sha256":  "5a57c6b8de10b79d7d2b5540bcb864f4c3c0b4f81c6ef2c5f61470e88620c4a7"
+                                     },
+                                     {
+                                         "path":  "SourceArt/PolyHaven/modern_arm_chair_01/textures/modern_arm_chair_01_pillow_arm_2k.jpg",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/modern_arm_chair_01/modern_arm_chair_01_pillow_arm_2k.jpg",
+                                         "upstreamMd5":  "1984906adcaef79cefe2d20cb5be4c7e",
+                                         "sha256":  "3c98a68f8d4d9045082d1af97994ff564dc4f8378814bea717d9862edf5dae22"
+                                     }
+                                 ],
+                       "generatedFiles":  [
+                                              {
+                                                  "path":  "Content/Environment/RoomA/modern_arm_chair_01/modern_arm_chair_01_2k/Materials/modern_arm_chair_01_legs.uasset",
+                                                  "sha256":  "65d8483c9f72ac2f59a33a680ccd360c409ba1b7fb5d72774d5c5d3095361f15"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/modern_arm_chair_01/modern_arm_chair_01_2k/Materials/modern_arm_chair_01_pillow.uasset",
+                                                  "sha256":  "a3ac79cabdebba9eab6aa3908307e76c6d7ff77e9f9af456b5e7560e23338de6"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/modern_arm_chair_01/modern_arm_chair_01_2k/StaticMeshes/modern_arm_chair_01_2k.uasset",
+                                                  "sha256":  "8945504e76cfb8843bb21e5e08725dd380db71d2608d4d84652d187217b76b8a"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/modern_arm_chair_01/modern_arm_chair_01_2k/Textures/modern_arm_chair_01_legs_diff.uasset",
+                                                  "sha256":  "dd95bc637dc576e5ac20bb5a6f72a4af654bbd60c42f035e720db6a12ee83b1e"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/modern_arm_chair_01/modern_arm_chair_01_2k/Textures/modern_arm_chair_01_legs_metal-modern_arm_chair_01_legs_rough.uasset",
+                                                  "sha256":  "1965e2dbda90b6a517bdb49760fa4ada7403c82662516967763ed15a49cc0ffe"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/modern_arm_chair_01/modern_arm_chair_01_2k/Textures/modern_arm_chair_01_legs_nor_gl.uasset",
+                                                  "sha256":  "10e143e5381d1c75dd8a222c250586ff8c4d3c5d287a645438ca613297a5e830"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/modern_arm_chair_01/modern_arm_chair_01_2k/Textures/modern_arm_chair_01_pillow_diff.uasset",
+                                                  "sha256":  "50d8245fded536ea7c7008b6195496e7ec12e893988c15e760ce38e5a8b14d8d"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/modern_arm_chair_01/modern_arm_chair_01_2k/Textures/modern_arm_chair_01_pillow_metal-modern_arm_chair_01_pillow_rough.uasset",
+                                                  "sha256":  "eee9e37792b686fa5e3a5bc089842cddb686f0da3de178359295ee776ef35ebc"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/modern_arm_chair_01/modern_arm_chair_01_2k/Textures/modern_arm_chair_01_pillow_nor_gl.uasset",
+                                                  "sha256":  "5a3d8f3d62dae49d826aae9e475db4c8a6c30dd725b0219d1e5a3b051f610e9f"
+                                              }
+                                          ]
+                   },
+                   {
+                       "id":  "modern_coffee_table_01",
+                       "source":  "https://polyhaven.com/a/modern_coffee_table_01",
+                       "author":  "Amin",
+                       "version":  "31772c0aab6f930a18de82606146c0a97f08b7d0",
+                       "license":  "CC0-1.0",
+                       "licenseEvidence":  "https://polyhaven.com/license",
+                       "attribution":  "Courtesy of Poly Haven and Amin",
+                       "resolution":  2048,
+                       "publicRedistribution":  true,
+                       "files":  [
+                                     {
+                                         "path":  "SourceArt/PolyHaven/modern_coffee_table_01/modern_coffee_table_01_2k.gltf",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Models/gltf/2k/modern_coffee_table_01/modern_coffee_table_01_2k.gltf",
+                                         "upstreamMd5":  "5e8490b726b706acffbed17d6174471b",
+                                         "sha256":  "0934d355e65fc5d1b2056fa913813384246572839af464d741f443462cc8e955"
+                                     },
+                                     {
+                                         "path":  "SourceArt/PolyHaven/modern_coffee_table_01/textures/modern_coffee_table_01_rough_2k.jpg",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/modern_coffee_table_01/modern_coffee_table_01_rough_2k.jpg",
+                                         "upstreamMd5":  "48093edf08c1f4ddd85f995bcddc90f7",
+                                         "sha256":  "48575f42cab1b40558a4f5957ccaf304651460d6caad2de23d86aec3a6bcd6ff"
+                                     },
+                                     {
+                                         "path":  "SourceArt/PolyHaven/modern_coffee_table_01/modern_coffee_table_01.bin",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/modern_coffee_table_01/modern_coffee_table_01.bin",
+                                         "upstreamMd5":  "6e8f65bff935af308eab9eff062f6daa",
+                                         "sha256":  "b8fe0d49041b879a5d5962685a39e3daf009679f7b6a88ced1347e6dc6c0851e"
+                                     },
+                                     {
+                                         "path":  "SourceArt/PolyHaven/modern_coffee_table_01/textures/modern_coffee_table_01_diff_2k.jpg",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/modern_coffee_table_01/modern_coffee_table_01_diff_2k.jpg",
+                                         "upstreamMd5":  "0e4e0c7fa75c2ba6e3f244fafd12190c",
+                                         "sha256":  "527c9cbe6162b5ba84c5427407148d45a051f38c8475b32b5cd3fc02534a7090"
+                                     },
+                                     {
+                                         "path":  "SourceArt/PolyHaven/modern_coffee_table_01/textures/modern_coffee_table_01_nor_gl_2k.jpg",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/modern_coffee_table_01/modern_coffee_table_01_nor_gl_2k.jpg",
+                                         "upstreamMd5":  "475d7a37185a8f32318896a08188430e",
+                                         "sha256":  "ce0fbc0e6e900480edafbeaab4e4593882c8f3f46dea43b897ccef07093b8caa"
+                                     }
+                                 ],
+                       "generatedFiles":  [
+                                              {
+                                                  "path":  "Content/Environment/RoomA/modern_coffee_table_01/modern_coffee_table_01_2k/Materials/modern_coffee_table_01.uasset",
+                                                  "sha256":  "2e678abb848bf868e8f8a9d6b21c70929be5399a8d18176fae987d7cff58816c"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/modern_coffee_table_01/modern_coffee_table_01_2k/StaticMeshes/modern_coffee_table_01_2k.uasset",
+                                                  "sha256":  "b3f1b4c8ee2e5636e0d9630bedc944fca3947991fc8ff1ec1668309df332feae"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/modern_coffee_table_01/modern_coffee_table_01_2k/Textures/modern_coffee_table_01_diff.uasset",
+                                                  "sha256":  "75c3323095c079cab70c12e569e215c6453a11f46d8611de8814a0803da29cc9"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/modern_coffee_table_01/modern_coffee_table_01_2k/Textures/modern_coffee_table_01_nor_gl.uasset",
+                                                  "sha256":  "e712a44e8475d056931b57caa0cd4b3923011a215a6117b4973309777c8e174c"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/modern_coffee_table_01/modern_coffee_table_01_2k/Textures/modern_coffee_table_01_rough.uasset",
+                                                  "sha256":  "7c2c847982c05858c92fb0d11879918406aa5e4679eebc179ade8e06bf6dfa71"
+                                              }
+                                          ]
+                   },
+                   {
+                       "id":  "potted_plant_02",
+                       "source":  "https://polyhaven.com/a/potted_plant_02",
+                       "author":  "Rico Cilliers",
+                       "version":  "155661c96a28b9eb143e866daeb41f5a076d6677",
+                       "license":  "CC0-1.0",
+                       "licenseEvidence":  "https://polyhaven.com/license",
+                       "attribution":  "Courtesy of Poly Haven and Rico Cilliers",
+                       "resolution":  2048,
+                       "publicRedistribution":  true,
+                       "files":  [
+                                     {
+                                         "path":  "SourceArt/PolyHaven/potted_plant_02/potted_plant_02_2k.gltf",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Models/gltf/2k/potted_plant_02/potted_plant_02_2k.gltf",
+                                         "upstreamMd5":  "9161f84da94065f5b3888347c0f275ce",
+                                         "sha256":  "80ab49cb61737244f50b805ddde3dd64e461b2a244817f8882e95a97c916d158"
+                                     },
+                                     {
+                                         "path":  "SourceArt/PolyHaven/potted_plant_02/textures/potted_plant_02_leaves_diff_2k.jpg",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/potted_plant_02/potted_plant_02_leaves_diff_2k.jpg",
+                                         "upstreamMd5":  "96aa3bba976e762eedced66d9832c2a5",
+                                         "sha256":  "f70de9a4b735b740e79d4e7720a47eae5e2bb4a289880cdae5905d156223bd7d"
+                                     },
+                                     {
+                                         "path":  "SourceArt/PolyHaven/potted_plant_02/textures/potted_plant_02_leaves_nor_gl_2k.jpg",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/potted_plant_02/potted_plant_02_leaves_nor_gl_2k.jpg",
+                                         "upstreamMd5":  "c187345d2875a28be93e61db4dd61558",
+                                         "sha256":  "2ae648b12ea457fb720f9adc6f8dc9feb8d5409e43f3b9f2ce7f089b3eef12f6"
+                                     },
+                                     {
+                                         "path":  "SourceArt/PolyHaven/potted_plant_02/textures/potted_plant_02_pot_diff_2k.jpg",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/potted_plant_02/potted_plant_02_pot_diff_2k.jpg",
+                                         "upstreamMd5":  "d7c6055680866af21f73e14a57bbd7d3",
+                                         "sha256":  "21672040b5de49e7dae07452431b4fe5cf401494f5ab5157b5f54a146cc68383"
+                                     },
+                                     {
+                                         "path":  "SourceArt/PolyHaven/potted_plant_02/potted_plant_02.bin",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/potted_plant_02/potted_plant_02.bin",
+                                         "upstreamMd5":  "cdbd4619b2596c9c469ad34676085fa8",
+                                         "sha256":  "9c9812482c78a59789ed32fa842b4cbd9365e09c900c31ebb998e5efe627fe97"
+                                     },
+                                     {
+                                         "path":  "SourceArt/PolyHaven/potted_plant_02/textures/potted_plant_02_leaves_rough_2k.jpg",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/potted_plant_02/potted_plant_02_leaves_rough_2k.jpg",
+                                         "upstreamMd5":  "0b1e1d0c38da3a5d73dc1274fc739fa0",
+                                         "sha256":  "399e61a82069b3e344cece76c128f84a664dd44719331450877b671906e01e27"
+                                     },
+                                     {
+                                         "path":  "SourceArt/PolyHaven/potted_plant_02/textures/potted_plant_02_pot_nor_gl_2k.jpg",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/potted_plant_02/potted_plant_02_pot_nor_gl_2k.jpg",
+                                         "upstreamMd5":  "0b333cfc921defac311dc9232f2f01b9",
+                                         "sha256":  "8e8c2e96de90e793712a9db8a6cea7a38f7fd5ec489b8134b586a42ebbbfcb11"
+                                     },
+                                     {
+                                         "path":  "SourceArt/PolyHaven/potted_plant_02/textures/potted_plant_02_pot_rough_2k.jpg",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/potted_plant_02/potted_plant_02_pot_rough_2k.jpg",
+                                         "upstreamMd5":  "08a89ef59d4fd0b19a925cc4d2c512af",
+                                         "sha256":  "c1f341bfa5e610dab2fd31aad4068fa20cf957b098912da5949bca996d7649bf"
+                                     }
+                                 ],
+                       "generatedFiles":  [
+                                              {
+                                                  "path":  "Content/Environment/RoomA/potted_plant_02/potted_plant_02_2k/Materials/potted_plant_02_leaves.uasset",
+                                                  "sha256":  "f4ec32bcdf06f8f1a78972eaa0a1ea8176f16f4f362e2285d0462c063515b1c8"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/potted_plant_02/potted_plant_02_2k/Materials/potted_plant_02_pot.uasset",
+                                                  "sha256":  "f9581e4d0b1355ed00986a1edd793a1b09ddde878231524c9fec1cec846cbf8d"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/potted_plant_02/potted_plant_02_2k/StaticMeshes/potted_plant_02_dirt.uasset",
+                                                  "sha256":  "efba935de5417c70a826edddb955981ecc27f1f58e280550703130109ce7e24e"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/potted_plant_02/potted_plant_02_2k/StaticMeshes/potted_plant_02_leaves.uasset",
+                                                  "sha256":  "43f805535810286c11cc60634e2b6baf21f055fff6bb6c1f4e143e8ff9df77dc"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/potted_plant_02/potted_plant_02_2k/StaticMeshes/potted_plant_02_pot.uasset",
+                                                  "sha256":  "eb10cc3a2f285e05eb61aeabd6013d2903b283758b1c28675436c538f0ee7715"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/potted_plant_02/potted_plant_02_2k/Textures/potted_plant_02_leaves_diff.uasset",
+                                                  "sha256":  "157d6890d6bb162aa138dc4ff00608a1d3ed7f939c9dad35cd6275a1526163be"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/potted_plant_02/potted_plant_02_2k/Textures/potted_plant_02_leaves_nor_gl.uasset",
+                                                  "sha256":  "017b23cc5ef4f317460e87e097a6ada761092fde1a12acab5cd467687ec90a1d"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/potted_plant_02/potted_plant_02_2k/Textures/potted_plant_02_leaves_rough.uasset",
+                                                  "sha256":  "3713675a6bd33d0337c60b33dd97189c76863b0e68689d5c29f1258433528f8c"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/potted_plant_02/potted_plant_02_2k/Textures/potted_plant_02_pot_diff.uasset",
+                                                  "sha256":  "fa8b6522d1a943f71de25e699ce5873bac7b21b08fc32d3e694c3d9d058fa65e"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/potted_plant_02/potted_plant_02_2k/Textures/potted_plant_02_pot_nor_gl.uasset",
+                                                  "sha256":  "d361085aa8e24f29ab0bb3a2b0017d05250268c2853b70920236c20cd22e7c0a"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/potted_plant_02/potted_plant_02_2k/Textures/potted_plant_02_pot_rough.uasset",
+                                                  "sha256":  "bd3ed320f40ba3c4cac957f111e698ed64c77b1e7a32fffc16284193c9b9bffa"
+                                              }
+                                          ]
+                   },
+                   {
+                       "id":  "ceramic_vase_03",
+                       "source":  "https://polyhaven.com/a/ceramic_vase_03",
+                       "author":  "James Ray Cock",
+                       "version":  "df64b230fb44e0aceff07e3dc0aa97b7ebcb1143",
+                       "license":  "CC0-1.0",
+                       "licenseEvidence":  "https://polyhaven.com/license",
+                       "attribution":  "Courtesy of Poly Haven and James Ray Cock",
+                       "resolution":  2048,
+                       "publicRedistribution":  true,
+                       "files":  [
+                                     {
+                                         "path":  "SourceArt/PolyHaven/ceramic_vase_03/ceramic_vase_03_2k.gltf",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Models/gltf/2k/ceramic_vase_03/ceramic_vase_03_2k.gltf",
+                                         "upstreamMd5":  "85805aea31d8b6bea5f21cd20ee737ef",
+                                         "sha256":  "f01b35d72b3edf565961dcd1b2d81da90e8c6b51ccddbc62d7c54d9b8ca988b9"
+                                     },
+                                     {
+                                         "path":  "SourceArt/PolyHaven/ceramic_vase_03/textures/ceramic_vase_03_diff_2k.jpg",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/ceramic_vase_03/ceramic_vase_03_diff_2k.jpg",
+                                         "upstreamMd5":  "c32fd23ffb9c493a99a543365ce4420b",
+                                         "sha256":  "3e9a7a350540769a4b78dafb975ce732c19dfdb011e9987141a8c00ba57ec3b2"
+                                     },
+                                     {
+                                         "path":  "SourceArt/PolyHaven/ceramic_vase_03/textures/ceramic_vase_03_nor_gl_2k.jpg",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/ceramic_vase_03/ceramic_vase_03_nor_gl_2k.jpg",
+                                         "upstreamMd5":  "2e5cdcf970f9d7137f2dedfd9cc93564",
+                                         "sha256":  "20defcdd0b4c3cc9d30f31b8a17af88b2b307afc725126154cb3da3c1e4970ee"
+                                     },
+                                     {
+                                         "path":  "SourceArt/PolyHaven/ceramic_vase_03/textures/ceramic_vase_03_rough_2k.jpg",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/ceramic_vase_03/ceramic_vase_03_rough_2k.jpg",
+                                         "upstreamMd5":  "b907ebfb83c544e16704dd8525028a9e",
+                                         "sha256":  "6066733d04bb9d38cfb7286cfb8644e8993311c232c7713f4fe25be03eeed835"
+                                     },
+                                     {
+                                         "path":  "SourceArt/PolyHaven/ceramic_vase_03/ceramic_vase_03.bin",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/ceramic_vase_03/ceramic_vase_03.bin",
+                                         "upstreamMd5":  "4ad56bfebd58d98eb20f13a5e4fb6476",
+                                         "sha256":  "19ced3c9a4231e0e0f0d2693661e40db15590ad99b3c84feecaa19067311fa6b"
+                                     }
+                                 ],
+                       "generatedFiles":  [
+                                              {
+                                                  "path":  "Content/Environment/RoomA/ceramic_vase_03/ceramic_vase_03_2k/Materials/ceramic_vase_03.uasset",
+                                                  "sha256":  "e523a9d017584fb0196da8b90179677c849697b021e515fc372cafcb80337ccb"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/ceramic_vase_03/ceramic_vase_03_2k/StaticMeshes/ceramic_vase_03_2k.uasset",
+                                                  "sha256":  "838e11eca70af6750e86245b8af0c58e108172d63ce797cc0de55b847e126aaf"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/ceramic_vase_03/ceramic_vase_03_2k/Textures/ceramic_vase_03_diff.uasset",
+                                                  "sha256":  "33165596c55e7a99d963e414f3ccd1fea7594a02cfc304b89f84630d1754cb7e"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/ceramic_vase_03/ceramic_vase_03_2k/Textures/ceramic_vase_03_nor_gl.uasset",
+                                                  "sha256":  "a6326e56b565322d974410e3462927771667dcdebec237c2b3bd4a4de6e4aee5"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/ceramic_vase_03/ceramic_vase_03_2k/Textures/ceramic_vase_03_rough.uasset",
+                                                  "sha256":  "a8e1dd7ff72d4a62b90961d0eceedf982076e58917abb14203f15973373c8dd6"
+                                              }
+                                          ]
+                   },
+                   {
+                       "id":  "wood_floor",
+                       "source":  "https://polyhaven.com/a/wood_floor",
+                       "author":  "Dimitrios Savva",
+                       "version":  "a44e6375a09ab98780b876e709f2629e7ed30409",
+                       "license":  "CC0-1.0",
+                       "licenseEvidence":  "https://polyhaven.com/license",
+                       "attribution":  "Courtesy of Poly Haven and Dimitrios Savva",
+                       "resolution":  2048,
+                       "publicRedistribution":  true,
+                       "files":  [
+                                     {
+                                         "path":  "SourceArt/PolyHaven/wood_floor/wood_floor_diff_2k.jpg",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/wood_floor/wood_floor_diff_2k.jpg",
+                                         "upstreamMd5":  "d209b7416b022ed06093aef068c7fe23",
+                                         "sha256":  "7c3ff1164c8dd0758ef2c048e9a266d28174120de01052ec40e6ca486177345c"
+                                     },
+                                     {
+                                         "path":  "SourceArt/PolyHaven/wood_floor/wood_floor_nor_dx_2k.jpg",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/wood_floor/wood_floor_nor_dx_2k.jpg",
+                                         "upstreamMd5":  "12a8a26270df55c5ae2af5abd36da6da",
+                                         "sha256":  "3ea99b7585eff741be247f225ac64ccc898010297f769c5c3d57f7e38e0d9dc2"
+                                     },
+                                     {
+                                         "path":  "SourceArt/PolyHaven/wood_floor/wood_floor_rough_2k.jpg",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/wood_floor/wood_floor_rough_2k.jpg",
+                                         "upstreamMd5":  "325868b3352d71059753498b1c94385b",
+                                         "sha256":  "297eda0d75f2020cc541dbf242e1f5fd058053249567f49a4506fc2c5b1a172b"
+                                     }
+                                 ],
+                       "generatedFiles":  [
+                                              {
+                                                  "path":  "Content/Environment/RoomA/Materials/M_Floor.uasset",
+                                                  "sha256":  "b78bfd39a6ffc35219b2af45dc7c5e9143babfb7ecef1a8e4add7a2906faee9b"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/Materials/M_Oak.uasset",
+                                                  "sha256":  "bbfb76c180703df73ddc9f1b671b0c8458189c7c4a8d44abbb2bf629b82c6824"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/Textures/wood_floor_diff_2k.uasset",
+                                                  "sha256":  "e3ba820e4ea839ac73664d5249137300a86f5ace9d01e6b8109a2c8648201560"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/Textures/wood_floor_nor_dx_2k.uasset",
+                                                  "sha256":  "f07fda1b6752b587b7cb854590e4fa1916f25ef17d4edb799786cae5d4e90365"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/Textures/wood_floor_rough_2k.uasset",
+                                                  "sha256":  "ae760d8f9593f38041df082d15c96195e00fdb132fb8e297cb0e66acd8cbb4bf"
+                                              }
+                                          ]
+                   },
+                   {
+                       "id":  "fabric_pattern_07",
+                       "source":  "https://polyhaven.com/a/fabric_pattern_07",
+                       "author":  "Rob Tuytel",
+                       "version":  "af042f95980f6ccc87285c3bc23e11671a5fecde",
+                       "license":  "CC0-1.0",
+                       "licenseEvidence":  "https://polyhaven.com/license",
+                       "attribution":  "Courtesy of Poly Haven and Rob Tuytel",
+                       "resolution":  2048,
+                       "publicRedistribution":  true,
+                       "files":  [
+                                     {
+                                         "path":  "SourceArt/PolyHaven/fabric_pattern_07/fabric_pattern_07_col_1_2k.jpg",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/fabric_pattern_07/fabric_pattern_07_col_1_2k.jpg",
+                                         "upstreamMd5":  "ad5b3f69e889a6890d6413ea1568ff25",
+                                         "sha256":  "1f4941638b890d4535b1078067be8a831ca302d1e696ed959b4e4512de893cba"
+                                     },
+                                     {
+                                         "path":  "SourceArt/PolyHaven/fabric_pattern_07/fabric_pattern_07_nor_dx_2k.jpg",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/fabric_pattern_07/fabric_pattern_07_nor_dx_2k.jpg",
+                                         "upstreamMd5":  "2248835f417d222b87d21aa8ee052355",
+                                         "sha256":  "f98a78526bfe7ead762b45fc04bb463cabbe588183ee81ac97d1964882bd4db5"
+                                     },
+                                     {
+                                         "path":  "SourceArt/PolyHaven/fabric_pattern_07/fabric_pattern_07_rough_2k.jpg",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/fabric_pattern_07/fabric_pattern_07_rough_2k.jpg",
+                                         "upstreamMd5":  "96906a97616405b0e664b9d18638d4f9",
+                                         "sha256":  "be3e311614ee6f31d4cb4a774ed678b7a64189d3e1a55ad71033142185da270a"
+                                     }
+                                 ],
+                       "generatedFiles":  [
+                                              {
+                                                  "path":  "Content/Environment/RoomA/Materials/M_Linen.uasset",
+                                                  "sha256":  "550a505e16cf1f7cd3ee2191ec0e7f84da29b314ec85c368f54c03c58ed1beea"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/Materials/M_Rug.uasset",
+                                                  "sha256":  "90da0e5fc2066cbe81312363539da0c5ad435257199a64eae91258a46f5dc4de"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/Textures/fabric_pattern_07_col_1_2k.uasset",
+                                                  "sha256":  "affc74d6b5a7fe36f96454e126ede31fd1e200f1439e5fbbe2166c5ebb27fc43"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/Textures/fabric_pattern_07_nor_dx_2k.uasset",
+                                                  "sha256":  "e5a13f913b6434b2365d34c4169b7cdea22dce20a28b9ae0d22fbf771557dcf2"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/Textures/fabric_pattern_07_rough_2k.uasset",
+                                                  "sha256":  "4284f9e43950ea91b040c73d72fa0e6eec331ef38aec5ed643843fb7b904a7fa"
+                                              }
+                                          ]
+                   },
+                   {
+                       "id":  "white_plaster_02",
+                       "source":  "https://polyhaven.com/a/white_plaster_02",
+                       "author":  "Rob Tuytel",
+                       "version":  "508068441dd24eb06ef6d269a43f6ea7c8bade6b",
+                       "license":  "CC0-1.0",
+                       "licenseEvidence":  "https://polyhaven.com/license",
+                       "attribution":  "Courtesy of Poly Haven and Rob Tuytel",
+                       "resolution":  2048,
+                       "publicRedistribution":  true,
+                       "files":  [
+                                     {
+                                         "path":  "SourceArt/PolyHaven/white_plaster_02/white_plaster_02_diff_2k.jpg",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/white_plaster_02/white_plaster_02_diff_2k.jpg",
+                                         "upstreamMd5":  "35f9c96c16aa0d934da7884b232f6d07",
+                                         "sha256":  "0ca5245ba70777d3e41ff4566c9f8d363855461891802c55cb7dc0f6f85f084e"
+                                     },
+                                     {
+                                         "path":  "SourceArt/PolyHaven/white_plaster_02/white_plaster_02_nor_dx_2k.jpg",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/white_plaster_02/white_plaster_02_nor_dx_2k.jpg",
+                                         "upstreamMd5":  "6178690fae17d3728de2f69b48295217",
+                                         "sha256":  "9395eda83bd3e9697cf56c5782d100832b1a8403b346684eda5f8d1062173b60"
+                                     },
+                                     {
+                                         "path":  "SourceArt/PolyHaven/white_plaster_02/white_plaster_02_rough_2k.jpg",
+                                         "url":  "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/white_plaster_02/white_plaster_02_rough_2k.jpg",
+                                         "upstreamMd5":  "47f989e9fd3e69e667244ff4b9f406f8",
+                                         "sha256":  "a3dc1911f6e25d88fdb0031fe0cfb602eec5496084c508774c60691bed087417"
+                                     }
+                                 ],
+                       "generatedFiles":  [
+                                              {
+                                                  "path":  "Content/Environment/RoomA/Materials/M_WarmPlaster.uasset",
+                                                  "sha256":  "75c4463d2c9ee1d45ccf8749fc3802f2ca66266e4d1c9cea4213bf0090046cc8"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/Textures/white_plaster_02_diff_2k.uasset",
+                                                  "sha256":  "85b8491a4c3a6a366051c8db6b4464f932dd9d4217bddcb243d2fce709a6e6ca"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/Textures/white_plaster_02_nor_dx_2k.uasset",
+                                                  "sha256":  "256e7c1158fed0a599b094d960c00c0dd0a9a69f90d88d418282f08dda4fd0bc"
+                                              },
+                                              {
+                                                  "path":  "Content/Environment/RoomA/Textures/white_plaster_02_rough_2k.uasset",
+                                                  "sha256":  "dbd7c53fce5b375ffed4a64bfc9389f3fa33d3937b88969f2ade5a87316c85b7"
+                                              }
+                                          ]
+                   }
+               ],
+    "projectAuthoredFiles":  [
+                                 {
+                                     "path":  "Content/Environment/RoomA/Materials/M_ArtPaper.uasset",
+                                     "sha256":  "54573c49c2d2312ecff5c20c4cee68d75db5268a02e6107e16ccfebc72f3d64b"
+                                 },
+                                 {
+                                     "path":  "Content/Environment/RoomA/Materials/M_Bronze.uasset",
+                                     "sha256":  "300c74e3c743ea231b2cea9ecbdc1bd5e327b2fca7ba2985d2eccef34c7b3d77"
+                                 },
+                                 {
+                                     "path":  "Content/Environment/RoomA/Materials/M_Ceiling.uasset",
+                                     "sha256":  "539e597d7c93819293e4133e06919049f686b8b5f411962418804f2252c1998a"
+                                 },
+                                 {
+                                     "path":  "Content/Environment/RoomA/Materials/M_Charcoal.uasset",
+                                     "sha256":  "2aad6e281dc1415d95372278d1b21ef6a12d90905dffa9fad5010ae78e8a9723"
+                                 },
+                                 {
+                                     "path":  "Content/Environment/RoomA/Materials/M_Ochre.uasset",
+                                     "sha256":  "3616a89f17b837d44526bf659ffdc0aa4c3829b82371039c6ea9389ea605dcb0"
+                                 },
+                                 {
+                                     "path":  "Content/Environment/RoomA/Materials/M_Paper.uasset",
+                                     "sha256":  "a59351ef7e2d34c054f0ce429bc75ad1a9f8c65861efc214bb5c12b815f2fcbf"
+                                 },
+                                 {
+                                     "path":  "Content/Environment/RoomA/Materials/M_Piping.uasset",
+                                     "sha256":  "cb409bdd9b599038c5e598fef4a3808bd21b3e4f4476ab0d50952a8c83029d95"
+                                 },
+                                 {
+                                     "path":  "Content/Environment/RoomA/Materials/M_SagePaint.uasset",
+                                     "sha256":  "b375c93758fd00f0d520c1c2ed2bae4437641354eee9d014a41cf98889d467a7"
+                                 },
+                                 {
+                                     "path":  "Content/Environment/RoomA/Materials/M_Shade.uasset",
+                                     "sha256":  "6859072f525eadb84e2593379574788e74407c1a210f5033f9250ce05e02248e"
+                                 },
+                                 {
+                                     "path":  "Content/Environment/RoomA/Materials/M_Trim.uasset",
+                                     "sha256":  "8bf53387095774fa7b3465182d710880f96461c208de9da30a8f20aefae59ab5"
+                                 },
+                                 {
+                                     "path":  "Content/Environment/RoomA/SM_FloorLamp/SM_FloorLamp/Materials/Bronze.uasset",
+                                     "sha256":  "108611c775c3a6e7483fecb872fb424607ba04d859c8a3e44269bcc3f8099e9e"
+                                 },
+                                 {
+                                     "path":  "Content/Environment/RoomA/SM_FloorLamp/SM_FloorLamp/Materials/Shade.uasset",
+                                     "sha256":  "c8137833263e40cfa5ec1054814c1460261565d781479b0478d66e6e57eb3b41"
+                                 },
+                                 {
+                                     "path":  "Content/Environment/RoomA/SM_FloorLamp/SM_FloorLamp/StaticMeshes/SM_FloorLamp.uasset",
+                                     "sha256":  "115dedf44a8054b4eba78c63ad57be8669ec1b8984e529421e3562b6e10a5508"
+                                 },
+                                 {
+                                     "path":  "Content/Environment/RoomA/SM_LinenSofa/SM_LinenSofa/Materials/Bronze.uasset",
+                                     "sha256":  "c66ef6c7ac7c3e219746394d826ed2cd83d632eec6d9fe5b72525d353ffff727"
+                                 },
+                                 {
+                                     "path":  "Content/Environment/RoomA/SM_LinenSofa/SM_LinenSofa/Materials/Linen.uasset",
+                                     "sha256":  "b46a4fba51daa1e0f68f3fe9685cf24f78bd7c544c089a937c43d1871c40b257"
+                                 },
+                                 {
+                                     "path":  "Content/Environment/RoomA/SM_LinenSofa/SM_LinenSofa/Materials/Piping.uasset",
+                                     "sha256":  "afda2f15d0098df77641c48511fb61d96cf55852d67ed8ab13dfcfab3e35380f"
+                                 },
+                                 {
+                                     "path":  "Content/Environment/RoomA/SM_LinenSofa/SM_LinenSofa/Materials/Rug.uasset",
+                                     "sha256":  "23738bd14f22dfaaa4b11e471c8e769f0823b40f021de283f93fd4f1b2660262"
+                                 },
+                                 {
+                                     "path":  "Content/Environment/RoomA/SM_LinenSofa/SM_LinenSofa/StaticMeshes/SM_LinenSofa.uasset",
+                                     "sha256":  "f816b38ff5ea69c06bde267fe1619718d562c89608d969156d42ee9927c3a9e4"
+                                 },
+                                 {
+                                     "path":  "Content/Environment/RoomA/SM_Rug/SM_Rug/Materials/Piping.uasset",
+                                     "sha256":  "b1c940d850510b12bbd8a720a5084e6bf39d8605e82c079aa2e9bf45c8db336a"
+                                 },
+                                 {
+                                     "path":  "Content/Environment/RoomA/SM_Rug/SM_Rug/Materials/Rug.uasset",
+                                     "sha256":  "224b9aa79fa8d24890287ea68e67f0b05e9dcb563c5cdbb7750563bac1b6a07b"
+                                 },
+                                 {
+                                     "path":  "Content/Environment/RoomA/SM_Rug/SM_Rug/StaticMeshes/SM_Rug.uasset",
+                                     "sha256":  "e4b65256ac6b58f91459905a540a55afb84043a447e7dcacb3293c25a51cd993"
+                                 },
+                                 {
+                                     "path":  "Content/Environment/RoomA/SM_Sideboard/SM_Sideboard/Materials/Bronze.uasset",
+                                     "sha256":  "466d66fb716d1fff9e9b859c5b828d9d673a2107a318a956c72abbaeb79f2908"
+                                 },
+                                 {
+                                     "path":  "Content/Environment/RoomA/SM_Sideboard/SM_Sideboard/Materials/Oak.uasset",
+                                     "sha256":  "25890b9da555ee8e8be87279caa715db4c0fecf87e351a0f5bd7fe68bada9862"
+                                 },
+                                 {
+                                     "path":  "Content/Environment/RoomA/SM_Sideboard/SM_Sideboard/StaticMeshes/SM_Sideboard.uasset",
+                                     "sha256":  "d5335868b22933bf4b9262053d454022c082e4b4ac1cd4adad8a5921fd9ccffc"
+                                 },
+                                 {
+                                     "path":  "SourceArt/Authored/SM_FloorLamp.glb",
+                                     "sha256":  "d785a42cca1c9b824d51f58ad447ec2205fd4221d0e103569527de2a5a2285b8"
+                                 },
+                                 {
+                                     "path":  "SourceArt/Authored/SM_LinenSofa.glb",
+                                     "sha256":  "7714e2dc30a2ca06fd650fee8498f70938cdb12696df7b05eb432458d95fe416"
+                                 },
+                                 {
+                                     "path":  "SourceArt/Authored/SM_Rug.glb",
+                                     "sha256":  "d033d27f0065749e1c4bee820855967cfc8a09f01435916a15d487bbce1af9dc"
+                                 },
+                                 {
+                                     "path":  "SourceArt/Authored/SM_Sideboard.glb",
+                                     "sha256":  "55b88dc12cc8a06bbe79352c26f91cc7aba4aef326b6d26cafaee45914c4ff3d"
+                                 }
+                             ]
+}
