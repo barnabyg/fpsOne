@@ -24,12 +24,13 @@ function Test-ManifestFile {
     }
     $covered[$relative] = $true
     $script:totalBytes += (Get-Item -LiteralPath $path).Length
-    if ($relative -match '\.jpg$') {
+    if ($relative -match '\.(jpg|png)$') {
         Add-Type -AssemblyName System.Drawing
         $image = [Drawing.Image]::FromFile($path)
         try {
-            if ([Math]::Max($image.Width, $image.Height) -ne 2048) {
-                throw "T04 textures must use the selected 2K profile: $relative"
+            if ([Math]::Max($image.Width, $image.Height) -gt 2048 -or
+                ($relative -match '\.jpg$' -and [Math]::Max($image.Width, $image.Height) -ne 2048)) {
+                throw "Textures must use the selected maximum 2K profile: $relative"
             }
         } finally { $image.Dispose() }
     }
@@ -39,9 +40,12 @@ foreach ($asset in $manifest.assets) {
     foreach ($field in @('id', 'source', 'author', 'version', 'license', 'licenseEvidence', 'attribution')) {
         if ([string]::IsNullOrWhiteSpace([string] $asset.$field)) { throw "Asset lacks $field provenance." }
     }
+    $polyHaven = $asset.source -match '^https://polyhaven.com/a/[A-Za-z0-9_]+$' -and
+        $asset.licenseEvidence -eq 'https://polyhaven.com/license'
+    $makeHuman = $asset.source -eq 'https://static.makehumancommunity.org/assets/assetpacks/makehuman_system_assets.html' -and
+        $asset.licenseEvidence -eq 'https://static.makehumancommunity.org/about/license.html'
     if ($asset.license -ne 'CC0-1.0' -or $asset.publicRedistribution -ne $true -or
-        $asset.source -notmatch '^https://polyhaven.com/a/[A-Za-z0-9_]+$' -or
-        $asset.licenseEvidence -ne 'https://polyhaven.com/license') {
+        -not ($polyHaven -or $makeHuman)) {
         throw "Unapproved public-redistribution license or evidence: $($asset.id)"
     }
     foreach ($entry in @($asset.files)) { Test-ManifestFile $entry }
@@ -54,7 +58,7 @@ if ($SourcesOnly) {
     return
 }
 foreach ($entry in @($manifest.projectAuthoredFiles)) { Test-ManifestFile $entry }
-foreach ($directory in @('SourceArt', 'Content\Environment')) {
+foreach ($directory in @('SourceArt', 'Content\Environment', 'Content\Characters')) {
     $path = Join-Path $Root $directory
     if (Test-Path -LiteralPath $path) {
         foreach ($file in Get-ChildItem -LiteralPath $path -File -Recurse) {

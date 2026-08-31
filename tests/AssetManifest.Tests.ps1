@@ -22,6 +22,12 @@ Describe 'public asset provenance validation' {
         $manifest | ConvertTo-Json -Depth 8 | Set-Content "$caseRoot\SourceArt\asset-manifest.json"
         (& "$repoRoot\scripts\test-asset-manifest.ps1" -Root $caseRoot) | Should Match 'ASSET_MANIFEST_PASSED'
     }
+    It 'accepts pinned MakeHuman core character art with explicit CC0 evidence' {
+        $manifest.assets[0].source = 'https://static.makehumancommunity.org/assets/assetpacks/makehuman_system_assets.html'
+        $manifest.assets[0].licenseEvidence = 'https://static.makehumancommunity.org/about/license.html'
+        $manifest | ConvertTo-Json -Depth 8 | Set-Content "$caseRoot\SourceArt\asset-manifest.json"
+        (& "$repoRoot\scripts\test-asset-manifest.ps1" -Root $caseRoot) | Should Match 'ASSET_MANIFEST_PASSED'
+    }
     It 'rejects a source whose bytes no longer match its recorded hash' {
         $manifest.assets[0].files[0].sha256 = '0' * 64
         $manifest | ConvertTo-Json -Depth 8 | Set-Content "$caseRoot\SourceArt\asset-manifest.json"

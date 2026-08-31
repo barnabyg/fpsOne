@@ -9,3 +9,4 @@
 /Game/Blueprints/BP_InteractionTestTarget.BP_InteractionTestTarget
 /Game/Blueprints/BP_DialogueNPC.BP_DialogueNPC
 /Game/Blueprints/BPC_DialogueInteractable.BPC_DialogueInteractable
+/Game/Blueprints/BP_NPC_A.BP_NPC_A

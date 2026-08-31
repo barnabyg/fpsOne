@@ -9,7 +9,7 @@ try {
     if ($dialogue.Width -ne $restored.Width -or $dialogue.Height -ne $restored.Height) {
         throw 'Dialogue and restored-view captures must have identical dimensions.'
     }
-    # The scenario holds the camera and proxy still across these captures. The
+    # The scenario holds the camera on a static floor patch beside NPC A. The
     # restrained dot changes a few central pixels when exploration returns; it
     # brightens shaded surfaces and darkens bright ones. Test
     # the rendered output: a dot on both branches, or on neither, must fail.

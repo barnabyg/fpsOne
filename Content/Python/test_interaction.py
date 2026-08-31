@@ -70,10 +70,30 @@ def hold_input(world, controller, key, frames, value=1.0):
     yield
 
 
+def smooth_resident_motion(world, resident, steps):
+    """Observe the visible wrist while E dismisses/replays a mid-arm gesture."""
+    require(resident.does_socket_exist('wrist_R'), 'Imported rig must retain its right wrist marker')
+    previous = resident.get_socket_location('wrist_R')
+    previous_time = unreal.GameplayStatics.get_time_seconds(world)
+    for _ in steps:
+        yield
+        current = resident.get_socket_location('wrist_R')
+        now = unreal.GameplayStatics.get_time_seconds(world)
+        # Generous motion bound: a restrained hand must not jump tens of cm
+        # in a frame. Time scaling keeps this meaningful in headless and RHI runs.
+        require((current - previous).length() < 250 * (now - previous_time) + 1,
+                'Dismissal/replay must not snap the resident arm to another pose')
+        previous, previous_time = current, now
+
+
 def capture_presentation(world, controller, name):
     """Optional rendered evidence; the normal functional run remains headless."""
     if "-T03Capture" not in unreal.SystemLibrary.get_command_line():
         return
+    # Keep the UI pixel comparison against the static floor beside the animated
+    # resident. The separate T06 capture shows the actual conversational view.
+    original_view = controller.get_control_rotation()
+    controller.set_control_rotation(unreal.Rotator(pitch=-20, yaw=150))
     require(unreal.SystemLibrary.get_console_variable_int_value("r.MotionVectorSimulation") == 0,
             "The TSR warning exception requires disabled, unchanged motion-vector simulation")
     root = os.path.join(unreal.Paths.project_saved_dir(), "DialogueReview")
@@ -87,6 +107,7 @@ def capture_presentation(world, controller, name):
     unreal.log(f"T04_UI_CAMERA {name}: {controller.get_control_rotation()} / {pawn.get_actor_location()}")
     unreal.SystemLibrary.execute_console_command(world, f'Shot -nosuffix filename="{filename}"', controller)
     yield from wait_for(lambda: os.path.exists(filename), f"Presentation capture did not arrive: {filename}")
+    controller.set_control_rotation(original_view)
 
 
 def capture_room(world, controller, name="room-a-overview", folder="RoomAReview", flag="-T04Capture"):
@@ -119,7 +140,8 @@ def capture_room(world, controller, name="room-a-overview", folder="RoomAReview"
                     engine=unreal.SystemLibrary.get_engine_version())
     with open(os.path.join(root, "capture.json"), "w", encoding="utf-8") as stream:
         json.dump(metadata, stream, indent=2)
-    unreal.log("T04_ROOM_A_CAPTURE_PASSED" if flag == "-T04Capture" else f"T05_CAPTURE_PASSED {name}")
+    marker = 'T06' if flag == '-T06Capture' else 'T05'
+    unreal.log("T04_ROOM_A_CAPTURE_PASSED" if flag == "-T04Capture" else f"{marker}_CAPTURE_PASSED {name}")
 
 
 def add_test_fixtures(test_target_class):
@@ -438,12 +460,21 @@ def interaction_scenario():
     require(player.get_actor_location().x > 0.0, "Closed Door did not restore its passage obstruction")
 
     npcs = unreal.GameplayStatics.get_all_actors_with_tag(world, unreal.Name("DialogueNPC"))
-    require(len(npcs) == 2, "Each Room must contain one proxy Dialogue NPC")
+    require(len(npcs) == 2, "Each Room must contain one Dialogue NPC")
     require(
         sum(npc.get_actor_location().x < 0.0 for npc in npcs) == 1,
-        "Proxy NPCs must occupy different Rooms",
+        "NPCs must occupy different Rooms",
     )
     npc = min(npcs, key=lambda actor: actor.get_actor_location().x)
+    # Observe the imported rig in the running world, including animation scale.
+    # The editable MPFB source publishes its anatomical head marker. A valid
+    # bind mesh alone cannot catch FBX clips collapsing to metre-sized bones.
+    residents = [mesh for mesh in npc.get_components_by_class(unreal.SkeletalMeshComponent)
+                 if mesh.get_skeletal_mesh_asset() is not None and mesh.is_visible()]
+    require(len(residents) == 1, 'NPC A must present one visible imported resident')
+    resident = residents[0]
+    require(135 < resident.get_socket_location('head').z - npc.get_actor_location().z + 90 < 190,
+            'NPC A animated head must remain at adult standing height')
     player.set_actor_location(npc.get_actor_location() + unreal.Vector(150.0, 0.0, 0.0), False, False)
     controller.set_control_rotation(unreal.Rotator(yaw=180.0))
     yield
@@ -452,15 +483,27 @@ def interaction_scenario():
     yield from press_e(world, controller)
     presentation = controller.get_hud()
     require(bool(property_value(presentation, "DialogueVisible")), "E must open the dialogue panel")
+    require(135 < resident.get_socket_location('head').z - npc.get_actor_location().z + 90 < 190,
+            'Conversational animation must preserve adult standing height')
     require(str(property_value(presentation, "DialogueText")) == "Resident A: The light is warm in here this afternoon.", f"E must present NPC A's initial speaker-labelled line; got {property_value(presentation, 'DialogueText')}")
+    yield from capture_room(world, controller, 'npc-a-conversation', 'NPCAReview', '-T06Capture')
     yield from capture_presentation(world, controller, "npc-a-dialogue")
     yield from press_e(world, controller)
     require(str(property_value(presentation, "DialogueText")) == "Player: It is a quiet place to take a break.", "E must advance exactly one dialogue line")
     yield from press_e(world, controller)
     require(str(property_value(presentation, "DialogueText")) == "Resident A: You are welcome to look around.", "The final line must remain visible until E")
-    yield from press_e(world, controller)
+    # Schedule E near the visible gesture's peak, then observe actual bone
+    # motion across dismissal and immediate replay through the Player input.
+    yield from wait_for(lambda: 0.35 < resident.get_position() < 0.65,
+                        'The conversational cycle must reach its rest pose', frames=2400)
+    resting_wrist = resident.get_socket_location('wrist_R')
+    yield from wait_for(lambda: 2.35 < resident.get_position() < 2.65,
+                        'The conversational gesture must advance', frames=2400)
+    require((resident.get_socket_location('wrist_R') - resting_wrist).length() > 5,
+            'The resident must make a visible conversational hand gesture')
+    yield from smooth_resident_motion(world, resident, press_e(world, controller))
     require(not bool(property_value(presentation, "DialogueVisible")), "E after the final line must dismiss dialogue")
-    yield from press_e(world, controller)
+    yield from smooth_resident_motion(world, resident, press_e(world, controller))
     require(str(property_value(presentation, "DialogueText")) == "Resident A: The light is warm in here this afternoon.", "A replay must start from the first line")
     require(property_value(interaction, "CurrentFocus") is None, "Dialogue must suspend Interaction scanning")
     require(str(property_value(presentation, "PromptText")) == "", "Dialogue must hide the Interaction Prompt")
@@ -479,6 +522,10 @@ def interaction_scenario():
     for _ in range(3):
         yield from press_e(world, controller)
     require(not bool(property_value(presentation, "DialogueVisible")), "Dialogue completion must restore exploration presentation")
+    return_deadline = unreal.GameplayStatics.get_time_seconds(world) + 4.1
+    yield from smooth_resident_motion(world, resident, wait_for(
+        lambda: unreal.GameplayStatics.get_time_seconds(world) >= return_deadline,
+        'The resident must finish returning to rest', frames=2400))
     controller.set_control_rotation(unreal.Rotator(yaw=180.0))
     yield
     yield

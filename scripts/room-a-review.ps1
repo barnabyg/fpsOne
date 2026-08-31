@@ -20,7 +20,9 @@ function Confirm-RoomReview {
     if ($review.status -ne 'passed' -or [string]::IsNullOrWhiteSpace($review.reviewer)) {
         throw "$Name needs an evidenced passing agent visual review."
     }
-    foreach ($criterion in @('composition', 'lighting', 'materials', 'density', 'renderingDefects', 'uiObstruction')) {
+    $criteria = @('composition', 'lighting', 'materials', 'density', 'renderingDefects', 'uiObstruction')
+    if ($View -eq 'npcA') { $criteria += @('npcPresentation', 'referenceBaseline') }
+    foreach ($criterion in $criteria) {
         $finding = $review.criteria.$criterion
         if ($finding.status -ne 'passed' -or [string]::IsNullOrWhiteSpace($finding.evidence)) {
             throw "$Name visual criterion lacks passing evidence: $criterion"

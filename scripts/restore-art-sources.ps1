@@ -1,11 +1,13 @@
 [CmdletBinding()]
 param([string] $Root = (Split-Path -Parent $PSScriptRoot))
 
-# Optional recovery of the exact CC0 source files. A normal Git LFS clone does
+# Optional recovery of the exact Poly Haven source files. Character sources
+# are retained in Git LFS and reproduced by the pinned Blender recipe.
+# A normal Git LFS clone does
 # not need network asset downloads. Never overwrite an existing changed file.
 $ErrorActionPreference = 'Stop'
 $manifest = Get-Content -LiteralPath (Join-Path $Root 'SourceArt\asset-manifest.json') -Raw | ConvertFrom-Json
-foreach ($asset in $manifest.assets) {
+foreach ($asset in @($manifest.assets | Where-Object source -Match '^https://polyhaven.com/a/')) {
     foreach ($file in $asset.files) {
         if ($file.path -notmatch '^SourceArt/PolyHaven/[A-Za-z0-9_./-]+$' -or $file.path.Contains('..') -or
             $file.url -notmatch '^https://dl.polyhaven.org/file/ph-assets/') { throw 'Unapproved source path or URL.' }

@@ -130,7 +130,8 @@ $initialFingerprint = Get-WorkingTreeFingerprint
 $acceptanceViews = @(
     @{ key = 'roomA'; name = 'Room A'; folder = 'RoomAReview'; image = 'room-a-overview'; marker = 'T04_ROOM_A_CAPTURE_PASSED' },
     @{ key = 'roomB'; name = 'Room B'; folder = 'RoomBReview'; image = 'room-b-overview'; marker = 'T05_CAPTURE_PASSED room-b-overview' },
-    @{ key = 'doorTransition'; name = 'Open Door'; folder = 'DoorReview'; image = 'open-door-transition'; marker = 'T05_CAPTURE_PASSED open-door-transition' }
+    @{ key = 'doorTransition'; name = 'Open Door'; folder = 'DoorReview'; image = 'open-door-transition'; marker = 'T05_CAPTURE_PASSED open-door-transition' },
+    @{ key = 'npcA'; name = 'NPC A'; folder = 'NPCAReview'; image = 'npc-a-conversation'; marker = 'T06_CAPTURE_PASSED npc-a-conversation' }
 )
 
 # The first agent run captures current evidence and remains red pending visual
@@ -150,16 +151,16 @@ if ($CompleteVisualReview) {
         $reviewGate = @($result.gates | Where-Object name -eq "$($view.name) visual review")
         if ($reviewGate.Count -ne 1) { throw "The $($view.name) visual review gate is missing or duplicated." }
         $reviewGate[0].status = 'passed'
-        $reviewGate[0].details = 'Current agent review passed composition, lighting, materials, density, rendering defects, and UI obstruction. Final NPC art and the four-view benchmark remain T06-T08.'
+        $reviewGate[0].details = 'Current agent review passed all required criteria. NPC A additionally requires character presentation and reference-game evidence. NPC B and the complete final-art benchmark remain T07-T08.'
         $capture = $result.($view.key)
         $reviewGate[0].reportPaths = @($capture.screenshotPath, $capture.reviewPath)
     }
-    $result.visualReview = [pscustomobject]@{ status = 'passed'; details = 'Room A, Room B, and the open-Door transition passed current, individually hash-linked agent reviews.' }
+    $result.visualReview = [pscustomobject]@{ status = 'passed'; details = 'Room A, Room B, the open-Door transition, and NPC A passed current, individually hash-linked agent reviews.' }
     $result.generatedAtUtc = [DateTime]::UtcNow.ToString('o')
     $result | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $resultPath -Encoding UTF8
     & (Join-Path $PSScriptRoot 'render-dashboard.ps1') -ResultPath $resultPath -OutputPath (Join-Path $EvidenceRoot 'index.html')
     if (-not $NoOpenDashboard) { Start-Process -FilePath (Join-Path $EvidenceRoot 'index.html') }
-    Write-Output 'T04_ROOM_A_VISUAL_REVIEW_PASSED; T05_ROOM_B_AND_DOOR_VISUAL_REVIEW_PASSED'
+    Write-Output 'T04_ROOM_A_VISUAL_REVIEW_PASSED; T05_ROOM_B_AND_DOOR_VISUAL_REVIEW_PASSED; T06_NPC_A_VISUAL_REVIEW_PASSED'
     exit 0
 }
 $gates = [System.Collections.Generic.List[object]]::new()
@@ -223,6 +224,7 @@ $requiredProjectFiles = @(
     (Join-Path $repoRoot 'Content\Blueprints\BPC_DoorInteractable.uasset'),
     (Join-Path $repoRoot 'Content\Blueprints\BPC_DialogueInteractable.uasset'),
     (Join-Path $repoRoot 'Content\Blueprints\BP_DialogueNPC.uasset'),
+    (Join-Path $repoRoot 'Content\Blueprints\BP_NPC_A.uasset'),
     (Join-Path $repoRoot 'Content\Blueprints\BPC_Interaction.uasset'),
     (Join-Path $repoRoot 'Content\Blueprints\BP_Door.uasset'),
     (Join-Path $repoRoot 'Content\Blueprints\BP_InteractionHUD.uasset'),
@@ -355,7 +357,7 @@ if ($interactionStatus -ne 'passed') {
         '-ExecCmds=Automation RunTests Editor.Python.FPSOne.test_interaction',
         '-TestExit=Automation Test Queue Empty',
         "-ReportExportPath=$presentationReport",
-        '-T03Capture', '-T04Capture', '-T05Capture', '-unattended', '-nop4', '-nosplash', '-stdout', '-FullStdOutLogOutput'
+        '-T03Capture', '-T04Capture', '-T05Capture', '-T06Capture', '-unattended', '-nop4', '-nosplash', '-stdout', '-FullStdOutLogOutput'
     )
     $presentationExitCode = Invoke-LoggedCommand -Executable $editorPath -Arguments $presentationArguments -LogPath $presentationLog
     $presentationSummary = Select-String -LiteralPath $presentationLog -Pattern 'T03_DIALOGUE_FUNCTIONAL_TEST_PASSED' -Quiet
@@ -516,10 +518,10 @@ $diagnosticTimer.Stop()
 $gates.Add((New-Gate 'Diagnostics' $diagnosticStatus $diagnosticTimer.ElapsedMilliseconds $diagnosticDetails (Get-RelativeEvidencePath $diagnosticLog)))
 
 if ($RequireVisualReview) {
-    $gates.Add((New-Gate 'Visual acceptance' 'not_applicable' 0 'The complete four-view environment/NPC benchmark gate activates with T08. T04/T05 environment views have their own current reviews below.'))
+    $gates.Add((New-Gate 'Visual acceptance' 'not_applicable' 0 'The complete four-view environment/NPC benchmark gate activates with T08. T04-T06 environment and NPC A views have their own current reviews below.'))
     $visualReview = [pscustomobject]@{
         status = 'pending'
-        details = 'Inspect each Room A, Room B, and open-Door screenshot, write each evidence-linked review.json, then run verify.ps1 -RequireVisualReview -CompleteVisualReview.'
+        details = 'Inspect Room A, Room B, open Door, and NPC A; write each evidence-linked review.json, then run verify.ps1 -RequireVisualReview -CompleteVisualReview.'
     }
 } else {
     $gates.Add((New-Gate 'Visual acceptance' 'not_applicable' 0 'Human-local validation does not use an AI visual gate.'))
@@ -580,6 +582,7 @@ $result = [pscustomobject][ordered]@{
         powershell = $PSVersionTable.PSVersion.ToString()
         git = ((& git --version) -replace '^git version ', '')
         unreal = if (Test-Path -LiteralPath $editorPath) { [Diagnostics.FileVersionInfo]::GetVersionInfo($editorPath).ProductVersion } else { 'not found' }
+        characterAuthoring = 'Blender 4.5.3 / MPFB 2.0.8 / MakeHuman core SHA-256 pins in Build/character-toolchain.json; not needed to play'
     }
     gates = @($gates)
     packagePath = [string] $packageExecutable
@@ -588,6 +591,7 @@ $result = [pscustomobject][ordered]@{
     roomA = $roomCaptures.roomA
     roomB = $roomCaptures.roomB
     doorTransition = $roomCaptures.doorTransition
+    npcA = $roomCaptures.npcA
     warningExceptions = $warningExceptions
 }
 
