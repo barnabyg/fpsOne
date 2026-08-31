@@ -1,8 +1,8 @@
-# T02 setup, editor, validation, and packaging
+# T03 setup, editor, validation, and packaging
 
 ## Pinned environment
 
-The T02 implementation targets:
+The T03 implementation targets:
 
 | Tool | Version | Required C:-drive location |
 | --- | --- | --- |
@@ -13,7 +13,7 @@ The T02 implementation targets:
 | Git LFS | 3.7.1 | Host installation on C: |
 | Windows PowerShell | 5.1.26100.9168 | `C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe` |
 
-The validator records the detected tool versions with every result. Assets committed through T02 were generated and verified with the build above.
+The validator records the detected tool versions with every result. Assets committed through T03 were generated and verified with the build above.
 
 ## Epic Games Launcher handoff
 
@@ -67,7 +67,7 @@ Human-local mode:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify.ps1
 ```
 
-The command validates the asset manifest, repository tests, project files, Blueprint compilation, the player-facing T02 Interaction scenario, Development Win64 packaging, a real packaged-window launch, project-originated diagnostics, and evidence freshness. T02 has no final Room, Door, or NPC acceptance views, so its four-view visual gate is explicitly not applicable until T08.
+The command validates the asset manifest, repository tests, project files, Blueprint compilation, the player-facing T03 Interaction scenario, Development Win64 packaging, a real packaged-window launch, project-originated diagnostics, and evidence freshness. T03 uses proxy NPCs and blockout Rooms; the four-view final-art visual gate remains explicitly not applicable until T08. Dialogue, replay, collision, suspended controls, restored controls, and session reset are required functional checks.
 
 Generated evidence is under `C:\docs\git\fpsOne\Saved\Verification`:
 
@@ -89,4 +89,22 @@ Prerequisite: a green canonical validation and `C:\fpsOne-output\Development\Win
 6. Press E; expect the Door to ease 90° inward into Room B over about 0.75 seconds and permit passage. From Room B, refocus it, expect `E — Close`, press E, and expect the Door to reverse and block passage again once closed.
 7. Press Escape; expect the application to exit immediately without opening a menu.
 
-The T02 package has no NPC, dialogue, audio, furnishing, or final visual-quality acceptance content; those remain assigned to later tickets.
+For T03 dialogue acceptance:
+
+1. In either Room, approach the cylinder-and-sphere proxy NPC and look at it from within 250 cm. Expect `E — Talk` in the same prompt presentation as the Door. Walk into the NPC; expect its capsule to block passage.
+2. Press E once. Expect a restrained charcoal panel near the bottom with a speaker-labelled line. The centre dot and Talk prompt disappear.
+3. Hold each movement key during dialogue; expect no walking. Move the mouse in both axes; expect limited look (35 degrees horizontally and 20 degrees vertically around the starting view).
+4. Press E separately for each line. Expect three lines, then dismissal on the next press. Expect the centre dot, contextual prompts, walking, and free look to return. Repeat with each NPC several times; each exchange starts from its own first line.
+5. Exit during an exchange with the Door open, then relaunch. Expect a closed Door, no dialogue panel, normal controls, and both exchanges available from the beginning.
+
+The NPC's instance-editable `DialogueLines` array contains speaker-labelled text entries (for example, `Resident A: ...` and `Player: ...`). Each NPC owns its own copy; the shared Interaction component handles the active exchange. Empty arrays do not start an exchange. No dialogue state is persisted.
+
+To capture the dialogue and restored HUD for visual inspection, run the functional scenario with rendering enabled:
+
+```powershell
+& 'C:\Program Files\Epic Games\UE_5.8\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' "$PWD\FPSOne.uproject" '-ExecCmds=Automation RunTests Editor.Python.FPSOne.test_interaction' '-TestExit=Automation Test Queue Empty' -T03Capture -ResX=2560 -ResY=1440 -unattended -nop4 -nosplash
+```
+
+Captures are retained under `Saved\DialogueReview` at the PIE viewport's actual resolution (recorded by the pixel check; command-line window size does not force the embedded viewport size). The canonical verifier runs this rendered scenario after its headless scenario and checks the actual pixels for dot hiding/restoration and panel dismissal. Both captures and the pixel report appear on the dashboard. This deterministic T03 UI check is separate from the T08 final-art benchmark.
+
+The T03 package uses proxy NPCs and blockout Rooms. Final character art, animation, audio, furnishings, and visual-quality acceptance remain assigned to later tickets.

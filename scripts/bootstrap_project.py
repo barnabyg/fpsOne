@@ -12,6 +12,7 @@ from interaction_assets import (
     create_interaction_assets,
     require_asset_absent,
 )
+from dialogue_assets import DIALOGUE_ASSET_PATHS, create_npc_assets
 
 
 PLAYER_ASSET = "/Game/Blueprints/BP_Player"
@@ -237,6 +238,7 @@ def create_testbed_map(
     game_mode_blueprint: unreal.Blueprint,
     door_blueprint: unreal.Blueprint,
     interaction_test_target_blueprint: unreal.Blueprint,
+    npc_blueprint: unreal.Blueprint,
 ) -> None:
     level_subsystem = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
     actor_subsystem = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
@@ -310,6 +312,24 @@ def create_testbed_map(
     require(primary_door is not None, "Could not spawn the Door")
     primary_door.set_actor_label("Door")
 
+    for label, location, lines in (
+        ("NPC_A", unreal.Vector(-350.0, -130.0, 90.0), [
+            "Resident A: The light is warm in here this afternoon.",
+            "Player: It is a quiet place to take a break.",
+            "Resident A: You are welcome to look around.",
+        ]),
+        ("NPC_B", unreal.Vector(250.0, 100.0, 90.0), [
+            "Resident B: I have just finished tidying the desk.",
+            "Player: The room looks ready for the evening.",
+            "Resident B: Yes, there is nothing else to do for now.",
+        ]),
+    ):
+        npc = actor_subsystem.spawn_actor_from_class(npc_blueprint.generated_class(), location, unreal.Rotator())
+        require(npc is not None, f"Could not spawn {label}")
+        npc.set_actor_label(label)
+        npc.set_editor_property("tags", [unreal.Name("DialogueNPC")])
+        npc.set_editor_property("DialogueLines", [unreal.Text(line) for line in lines])
+
     distractor = actor_subsystem.spawn_actor_from_class(
         interaction_test_target_blueprint.generated_class(),
         unreal.Vector(-40.0, 130.0, 105.0),
@@ -376,23 +396,24 @@ def create_testbed_map(
 
 
 def main() -> None:
-    for asset_path in (*INTERACTION_ASSET_PATHS, PLAYER_ASSET, PLAYER_CONTROLLER_ASSET, GAME_MODE_ASSET, MAP_ASSET):
+    for asset_path in (*INTERACTION_ASSET_PATHS, *DIALOGUE_ASSET_PATHS, PLAYER_ASSET, PLAYER_CONTROLLER_ASSET, GAME_MODE_ASSET, MAP_ASSET):
         require_asset_absent(asset_path)
     unreal.log(f"Generating T02 assets with {unreal.SystemLibrary.get_engine_version()}")
     (
-        _,
+        interactable_blueprint,
         interaction_blueprint,
         door_blueprint,
         hud_blueprint,
         interaction_test_target_blueprint,
     ) = create_interaction_assets()
+    npc_blueprint = create_npc_assets(interactable_blueprint, interaction_blueprint)
     player_blueprint = create_player_blueprint(interaction_blueprint)
     player_controller_blueprint = create_player_controller_blueprint()
     game_mode_blueprint = create_game_mode_blueprint(
         player_blueprint, player_controller_blueprint, hud_blueprint
     )
     create_testbed_map(
-        game_mode_blueprint, door_blueprint, interaction_test_target_blueprint
+        game_mode_blueprint, door_blueprint, interaction_test_target_blueprint, npc_blueprint
     )
     unreal.log("T02 Blueprint generation completed without script errors")
 

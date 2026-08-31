@@ -1,6 +1,6 @@
 $repoRoot = Split-Path -Parent $PSScriptRoot
 
-Describe 'T02 interaction automation' {
+Describe 'T03 interaction automation' {
     It 'enables the editor-only Unreal Python Automation harness' {
         $project = Get-Content -LiteralPath (Join-Path $repoRoot 'FPSOne.uproject') -Raw | ConvertFrom-Json
         $plugin = @($project.Plugins | Where-Object Name -eq 'PythonAutomationTest')
@@ -19,6 +19,7 @@ Describe 'T02 interaction automation' {
 
         $verifier | Should Match 'Automation RunTests Editor\.Python\.FPSOne\.test_interaction'
         $verifier | Should Match 'T02_INTERACTION_FUNCTIONAL_TEST_PASSED'
+        $verifier | Should Match 'T03_DIALOGUE_FUNCTIONAL_TEST_PASSED'
         $verifier | Should Not Match "Interaction functional tests' 'not_applicable'"
     }
 }

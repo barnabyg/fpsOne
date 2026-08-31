@@ -32,7 +32,7 @@ $stageRoot = Join-Path $transactionRoot 'project'
 New-Item -ItemType Directory -Path "$stageRoot\scripts", "$stageRoot\Content\Python" -Force | Out-Null
 Copy-Item -LiteralPath $projectPath -Destination $stageRoot
 Copy-Item -LiteralPath (Join-Path $repoRoot 'Config') -Destination $stageRoot -Recurse
-foreach ($name in @('bootstrap_project.py', 'interaction_assets.py')) {
+foreach ($name in @('bootstrap_project.py', 'interaction_assets.py', 'dialogue_assets.py')) {
     Copy-Item -LiteralPath (Join-Path $PSScriptRoot $name) -Destination "$stageRoot\scripts"
 }
 Copy-Item -LiteralPath (Join-Path $repoRoot 'Content\Python\test_interaction.py') -Destination "$stageRoot\Content\Python"
@@ -41,9 +41,11 @@ $common = @('-unattended', '-nop4', '-nosplash', '-NullRHI', '-stdout', '-FullSt
 Invoke-StagingCheck -Arguments (@($stageProject, "-ExecutePythonScript=$stageRoot\scripts\bootstrap_project.py") + $common) `
     -LogPath (Join-Path $transactionRoot 'generation.log') -SuccessMarker 'T02 Blueprint generation completed without script errors'
 Invoke-StagingCheck -Arguments (@($stageProject, '-ExecCmds=Automation RunTests Editor.Python.FPSOne.test_interaction', '-TestExit=Automation Test Queue Empty', "-ReportExportPath=$transactionRoot\interaction-report") + $common) `
-    -LogPath (Join-Path $transactionRoot 'interaction.log') -SuccessMarker 'T02_INTERACTION_FUNCTIONAL_TEST_PASSED'
+    -LogPath (Join-Path $transactionRoot 'interaction.log') -SuccessMarker 'T03_DIALOGUE_FUNCTIONAL_TEST_PASSED'
 
 $paths = @(
+    'Content/Blueprints/BP_DialogueNPC.uasset',
+    'Content/Blueprints/BPC_DialogueInteractable.uasset',
     'Content/Blueprints/BPC_Interactable.uasset',
     'Content/Blueprints/BPC_DoorInteractable.uasset',
     'Content/Blueprints/BPC_Interaction.uasset',
