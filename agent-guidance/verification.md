@@ -17,7 +17,7 @@ The verifier is green only when every required gate passes for the current worki
 1. Validate every external asset against `ASSETS.md`, including source, license, local file coverage, and public-redistribution permission.
 2. Validate the Unreal project, configured game map, and referenced content.
 3. Compile every project Blueprint with zero errors and zero warnings.
-4. Run the headless interaction functional tests and export their report.
+4. Run the headless interaction functional tests and export their report. From T03, also run the rendered Dialogue presentation scenario and pixel checks for the hidden/restored centre dot and appearing/dismissing panel; retain both UI screenshots on the dashboard. This deterministic UI regression gate is separate from T08's final-art multimodal acceptance.
 5. Cook and package the Win64 build successfully.
 6. Scan project, test, cook, and package logs with zero project-originated errors or warnings.
 7. In agent mode, capture the four acceptance views and complete the multimodal visual gate below. In human-local mode, report this gate as not applicable.
@@ -27,7 +27,7 @@ Run focused gates while iterating, then run the complete command after all chang
 
 ### Incremental ticket profiles
 
-Before a ticket introduces the feature exercised by a later gate, the verifier may mark that gate not applicable only when the result names the missing slice and the ticket that activates it. Through T02, repository tests cover the configured input surface, the player-facing world Interaction scenario is required, and the Development package must pass a launch smoke test. The four-view agent visual gate activates with T08. These staged exceptions expire when their activating slices land and do not weaken the complete-prototype profile.
+Before a ticket introduces the feature exercised by a later gate, the verifier may mark that gate not applicable only when the result names the missing slice and the ticket that activates it. Through T03, repository tests cover the configured input surface, the player-facing world Interaction scenario is required, and the Development package must pass a launch smoke test. T03 requires both NPC exchanges, replay, collision, suspended scanning and walking, bounded mouse look, restored controls, and fresh-session reset alongside the existing Door checks. The four-view final-art agent visual gate activates with T08. These staged exceptions expire when their activating slices land and do not weaken the complete-prototype profile.
 
 ## Warning exceptions
 

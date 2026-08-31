@@ -1,6 +1,7 @@
 """Player-facing PIE automation for the reusable T02 Interaction seam."""
 
 import math
+import os
 import unreal
 
 
@@ -45,6 +46,73 @@ def wait_for(predicate, message, frames=240):
             return
         yield
     raise AssertionError(message)
+
+
+def press_e(world, controller):
+    unreal.SystemLibrary.execute_console_command(world, "Input.+key E", controller)
+    yield
+    unreal.SystemLibrary.execute_console_command(world, "Input.-key E", controller)
+    yield
+    yield
+
+
+def hold_input(world, controller, key, frames, value=1.0):
+    unreal.SystemLibrary.execute_console_command(world, f"Input.+key {key} {value}", controller)
+    try:
+        for _ in range(frames):
+            yield
+    finally:
+        unreal.SystemLibrary.execute_console_command(world, f"Input.-key {key}", controller)
+    yield
+    yield
+
+
+def capture_presentation(world, controller, name):
+    """Optional rendered evidence; the normal functional run remains headless."""
+    if "-T03Capture" not in unreal.SystemLibrary.get_command_line():
+        return
+    require(unreal.SystemLibrary.get_console_variable_int_value("r.MotionVectorSimulation") == 0,
+            "The TSR warning exception requires disabled, unchanged motion-vector simulation")
+    root = os.path.join(unreal.Paths.project_saved_dir(), "DialogueReview")
+    os.makedirs(root, exist_ok=True)
+    filename = os.path.abspath(os.path.join(root, name + ".png"))
+    if os.path.exists(filename):
+        os.remove(filename)
+    for _ in range(30):
+        yield
+    unreal.SystemLibrary.execute_console_command(world, f'Shot -nosuffix filename="{filename}"', controller)
+    yield from wait_for(lambda: os.path.exists(filename), f"Presentation capture did not arrive: {filename}")
+
+
+def exercise_both_dialogues(world, player, controller, interactable_class, cycles=3):
+    npcs = sorted(unreal.GameplayStatics.get_all_actors_with_tag(world, unreal.Name("DialogueNPC")), key=lambda actor: actor.get_actor_location().x)
+    expected_exchanges = (
+        ("Resident A: The light is warm in here this afternoon.", "Player: It is a quiet place to take a break.", "Resident A: You are welcome to look around."),
+        ("Resident B: I have just finished tidying the desk.", "Player: The room looks ready for the evening.", "Resident B: Yes, there is nothing else to do for now."),
+    )
+    presentation = controller.get_hud()
+    require(len(npcs) == 2, "Both dialogue occupants must exist on launch")
+    for index, npc in enumerate(npcs):
+        require(npc.get_component_by_class(interactable_class) is not None, "NPC must supply the shared Interactable contract")
+        direction = 1.0 if index == 0 else -1.0
+        start = npc.get_actor_location() + unreal.Vector(direction * 150.0, 0.0, 0.0)
+        player.set_actor_location(start, False, False)
+        controller.set_control_rotation(unreal.Rotator(yaw=180.0 if index == 0 else 0.0))
+        yield
+        player.set_actor_location(npc.get_actor_location() - unreal.Vector(direction * 100.0, 0.0, 0.0), True, False)
+        require((player.get_actor_location().x - npc.get_actor_location().x) * direction > 50.0, "The NPC capsule must block the Player")
+        player.set_actor_location(start, False, False)
+        yield
+        yield
+        for _ in range(cycles):
+            require(str(property_value(presentation, "PromptText")) == "E — Talk", "Either NPC must present the shared Talk prompt")
+            for expected in expected_exchanges[index]:
+                yield from press_e(world, controller)
+                require(bool(property_value(presentation, "DialogueVisible")), "The shared dialogue panel must be visible")
+                require(str(property_value(presentation, "DialogueText")) == expected, "Either NPC must replay its own speaker-labelled lines in order")
+            yield from press_e(world, controller)
+            require(not bool(property_value(presentation, "DialogueVisible")), "Either exchange must dismiss after its last line")
+            require(controller.get_hud() == presentation, "Both NPCs must reuse the same presentation")
 
 
 def exercise_door_motion(world, controller, leaf, closed_location, interaction, interactable, opening):
@@ -268,7 +336,90 @@ def interaction_scenario():
     player.set_actor_location(unreal.Vector(-200.0, 0.0, 90.0), True, False)
     require(player.get_actor_location().x > 0.0, "Closed Door did not restore its passage obstruction")
 
+    npcs = unreal.GameplayStatics.get_all_actors_with_tag(world, unreal.Name("DialogueNPC"))
+    require(len(npcs) == 2, "Each Room must contain one proxy Dialogue NPC")
+    require(
+        sum(npc.get_actor_location().x < 0.0 for npc in npcs) == 1,
+        "Proxy NPCs must occupy different Rooms",
+    )
+    npc = min(npcs, key=lambda actor: actor.get_actor_location().x)
+    player.set_actor_location(npc.get_actor_location() + unreal.Vector(150.0, 0.0, 0.0), False, False)
+    controller.set_control_rotation(unreal.Rotator(yaw=180.0))
+    yield
+    yield
+    require(str(property_value(interaction, "CurrentPrompt")) == "E — Talk", "Focused NPC must offer E — Talk")
+    yield from press_e(world, controller)
+    presentation = controller.get_hud()
+    require(bool(property_value(presentation, "DialogueVisible")), "E must open the dialogue panel")
+    require(str(property_value(presentation, "DialogueText")) == "Resident A: The light is warm in here this afternoon.", f"E must present NPC A's initial speaker-labelled line; got {property_value(presentation, 'DialogueText')}")
+    yield from capture_presentation(world, controller, "npc-a-dialogue")
+    yield from press_e(world, controller)
+    require(str(property_value(presentation, "DialogueText")) == "Player: It is a quiet place to take a break.", "E must advance exactly one dialogue line")
+    yield from press_e(world, controller)
+    require(str(property_value(presentation, "DialogueText")) == "Resident A: You are welcome to look around.", "The final line must remain visible until E")
+    yield from press_e(world, controller)
+    require(not bool(property_value(presentation, "DialogueVisible")), "E after the final line must dismiss dialogue")
+    yield from press_e(world, controller)
+    require(str(property_value(presentation, "DialogueText")) == "Resident A: The light is warm in here this afternoon.", "A replay must start from the first line")
+    require(property_value(interaction, "CurrentFocus") is None, "Dialogue must suspend Interaction scanning")
+    require(str(property_value(presentation, "PromptText")) == "", "Dialogue must hide the Interaction Prompt")
+    stationary = player.get_actor_location()
+    for key in ("W", "S", "A", "D"):
+        yield from hold_input(world, controller, key, 12)
+        require((player.get_actor_location() - stationary).length() < 1.0, f"{key} moved the Player during dialogue")
+    starting_view = controller.get_control_rotation()
+    yield from hold_input(world, controller, "MouseX", 20, 20.0)
+    yaw_change = (controller.get_control_rotation().yaw - starting_view.yaw + 180) % 360 - 180
+    require(2.0 < abs(yaw_change) <= 35.1, f"Dialogue mouse look must remain available but bounded: {yaw_change}")
+    yield from hold_input(world, controller, "MouseY", 20, 20.0)
+    pitch_change = (controller.get_control_rotation().pitch - starting_view.pitch + 180) % 360 - 180
+    require(2.0 < abs(pitch_change) <= 20.1, f"Dialogue pitch must remain available but bounded: {pitch_change}")
+    require(property_value(interaction, "CurrentFocus") is None, "Mouse look must not resume Interaction scanning")
+    for _ in range(3):
+        yield from press_e(world, controller)
+    require(not bool(property_value(presentation, "DialogueVisible")), "Dialogue completion must restore exploration presentation")
+    controller.set_control_rotation(unreal.Rotator(yaw=180.0))
+    yield
+    yield
+    require(str(property_value(presentation, "PromptText")) == "E — Talk", "Dismissal must restore scanning and the Talk prompt")
+    yield from capture_presentation(world, controller, "npc-a-restored")
+    yield from hold_input(world, controller, "S", 12)
+    require((player.get_actor_location() - stationary).length() > 5.0, "Dismissal must restore walking input")
+    yaw_before = controller.get_control_rotation().yaw
+    yield from hold_input(world, controller, "MouseX", 20, 20.0)
+    yaw_change = (controller.get_control_rotation().yaw - yaw_before + 180) % 360 - 180
+    require(abs(yaw_change) > 40.0, "Dismissal must restore unrestricted yaw")
+    yield from exercise_both_dialogues(world, player, controller, interactable_class)
+
+    # Leave both kinds of Interaction changed before starting a fresh session.
+    player.set_actor_location(unreal.Vector(120.0, 0.0, 90.0), False, False)
+    controller.set_control_rotation(unreal.Rotator(yaw=180.0))
+    yield
+    yield
+    yield from exercise_door_motion(world, controller, leaf, closed_leaf_location, interaction, interactable, opening=True)
+    npc_b = max(npcs, key=lambda actor: actor.get_actor_location().x)
+    player.set_actor_location(npc_b.get_actor_location() - unreal.Vector(150.0, 0.0, 0.0), False, False)
+    controller.set_control_rotation(unreal.Rotator())
+    yield
+    yield
+    yield from press_e(world, controller)
+    require(bool(property_value(presentation, "DialogueVisible")), "Reset test must leave an exchange active")
+
     unreal.log("T02_INTERACTION_FUNCTIONAL_TEST_PASSED")
+    level_subsystem.editor_request_end_play()
+    yield from wait_for(lambda: not unreal.EditorLevelLibrary.get_pie_worlds(False), "The first play session did not end")
+    level_subsystem.editor_request_begin_play()
+    yield from wait_for(lambda: bool(unreal.EditorLevelLibrary.get_pie_worlds(False)), "A fresh play session did not start")
+    world = unreal.EditorLevelLibrary.get_pie_worlds(False)[0]
+    yield from wait_for(lambda: len(unreal.GameplayStatics.get_all_actors_of_class(world, player_class)) == 1, "Fresh Player did not spawn")
+    player = unreal.GameplayStatics.get_player_pawn(world, 0)
+    controller = unreal.GameplayStatics.get_player_controller(world, 0)
+    yield
+    yield
+    require(not bool(property_value(controller.get_hud(), "DialogueVisible")), "Launch must start without a dialogue panel")
+    require(str(property_value(controller.get_hud(), "PromptText")) == "E — Open", "Launch must restore the closed Door")
+    yield from exercise_both_dialogues(world, player, controller, interactable_class, cycles=1)
+    unreal.log("T03_DIALOGUE_FUNCTIONAL_TEST_PASSED")
     level_subsystem.editor_request_end_play()
 
 

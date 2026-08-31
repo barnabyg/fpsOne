@@ -99,7 +99,9 @@ function New-Gate {
 function Get-RelativeEvidencePath {
     param([string] $Path)
 
-    return $Path.Substring($EvidenceRoot.TrimEnd('\').Length).TrimStart('\')
+    $rootUri = [Uri]([IO.Path]::GetFullPath($EvidenceRoot).TrimEnd('\') + '\')
+    $targetUri = [Uri]([IO.Path]::GetFullPath($Path))
+    return [Uri]::UnescapeDataString($rootUri.MakeRelativeUri($targetUri).ToString()).Replace('/', '\')
 }
 
 function Invoke-LoggedCommand {
@@ -132,7 +134,7 @@ $uatPath = Join-Path $EngineRoot 'Engine\Build\BatchFiles\RunUAT.bat'
 $assetTimer = [System.Diagnostics.Stopwatch]::StartNew()
 $assetManifestPath = Join-Path $repoRoot 'ASSETS.md'
 if (Test-Path -LiteralPath $assetManifestPath) {
-    $assetDetails = 'ASSETS.md is present; the current T02 slice contains no third-party assets.'
+    $assetDetails = 'ASSETS.md is present; the current T03 slice contains no third-party assets.'
     $assetStatus = 'passed'
 } else {
     $assetDetails = 'ASSETS.md is missing.'
@@ -181,6 +183,8 @@ $requiredProjectFiles = @(
     (Join-Path $repoRoot 'Content\Blueprints\BP_Player.uasset'),
     (Join-Path $repoRoot 'Content\Blueprints\BPC_Interactable.uasset'),
     (Join-Path $repoRoot 'Content\Blueprints\BPC_DoorInteractable.uasset'),
+    (Join-Path $repoRoot 'Content\Blueprints\BPC_DialogueInteractable.uasset'),
+    (Join-Path $repoRoot 'Content\Blueprints\BP_DialogueNPC.uasset'),
     (Join-Path $repoRoot 'Content\Blueprints\BPC_Interaction.uasset'),
     (Join-Path $repoRoot 'Content\Blueprints\BP_Door.uasset'),
     (Join-Path $repoRoot 'Content\Blueprints\BP_InteractionHUD.uasset'),
@@ -278,6 +282,7 @@ if ($projectStatus -ne 'passed' -or $playerStatus -ne 'passed') {
     )
     $interactionExitCode = Invoke-LoggedCommand -Executable $editorPath -Arguments $interactionArguments -LogPath $interactionLog
     $interactionSummary = Select-String -LiteralPath $interactionLog -Pattern 'T02_INTERACTION_FUNCTIONAL_TEST_PASSED' -Quiet
+    $dialogueSummary = Select-String -LiteralPath $interactionLog -Pattern 'T03_DIALOGUE_FUNCTIONAL_TEST_PASSED' -Quiet
     $interactionErrors = Select-String -LiteralPath $interactionLog -Pattern 'LogPython: Error' -Quiet
     foreach ($name in @('index.html', 'index.json')) {
         $reportPath = Join-Path $interactionReport $name
@@ -285,9 +290,9 @@ if ($projectStatus -ne 'passed' -or $playerStatus -ne 'passed') {
             $interactionReports += Get-RelativeEvidencePath $reportPath
         }
     }
-    if ($interactionExitCode -eq 0 -and $interactionSummary -and -not $interactionErrors -and $interactionReports.Count -eq 2) {
+    if ($interactionExitCode -eq 0 -and $interactionSummary -and $dialogueSummary -and -not $interactionErrors -and $interactionReports.Count -eq 2) {
         $interactionStatus = 'passed'
-        $interactionDetails = 'The player-facing PIE scenario passed focus, prompt, Door transition, collision, and passage checks.'
+        $interactionDetails = 'The player-facing PIE scenario passed focus, prompts, Door motion/collision/passage, both NPC exchanges, replay, movement suspension, bounded look, restored controls, and fresh-session reset checks.'
     } else {
         $interactionStatus = 'failed'
         $interactionDetails = "Interaction functional tests failed or did not emit their success marker and reports (exit code $interactionExitCode)."
@@ -296,11 +301,58 @@ if ($projectStatus -ne 'passed' -or $playerStatus -ne 'passed') {
 $interactionTimer.Stop()
 $gates.Add((New-Gate 'Interaction functional tests' $interactionStatus $interactionTimer.ElapsedMilliseconds $interactionDetails (Get-RelativeEvidencePath $interactionLog) $interactionReports))
 
+$presentationTimer = [System.Diagnostics.Stopwatch]::StartNew()
+$presentationLog = Join-Path $logsRoot 'dialogue-presentation.log'
+$presentationPixelLog = Join-Path $logsRoot 'dialogue-pixels.log'
+$presentationReports = @()
+$presentationScreenshots = @()
+if ($interactionStatus -ne 'passed') {
+    $presentationStatus = 'skipped'
+    $presentationDetails = 'Rendered Dialogue presentation requires passing headless Interaction tests.'
+    Set-Content -LiteralPath $presentationLog -Value $presentationDetails -Encoding UTF8
+} else {
+    $presentationReport = Join-Path $logsRoot ('dialogue-presentation-report-' + [guid]::NewGuid().ToString('N'))
+    $presentationArguments = @(
+        $projectPath,
+        '-ExecCmds=Automation RunTests Editor.Python.FPSOne.test_interaction',
+        '-TestExit=Automation Test Queue Empty',
+        "-ReportExportPath=$presentationReport",
+        '-T03Capture', '-unattended', '-nop4', '-nosplash', '-stdout', '-FullStdOutLogOutput'
+    )
+    $presentationExitCode = Invoke-LoggedCommand -Executable $editorPath -Arguments $presentationArguments -LogPath $presentationLog
+    $presentationSummary = Select-String -LiteralPath $presentationLog -Pattern 'T03_DIALOGUE_FUNCTIONAL_TEST_PASSED' -Quiet
+    $pixelExitCode = Invoke-LoggedCommand -Executable 'powershell.exe' -Arguments @(
+        '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File',
+        (Join-Path $PSScriptRoot 'test-dialogue-presentation.ps1'),
+        '-CaptureRoot', (Join-Path $repoRoot 'Saved\DialogueReview')
+    ) -LogPath $presentationPixelLog
+    $presentationReports = @(
+        (Get-RelativeEvidencePath (Join-Path $presentationReport 'index.html')),
+        (Get-RelativeEvidencePath (Join-Path $presentationReport 'index.json')),
+        (Get-RelativeEvidencePath $presentationPixelLog),
+        (Get-RelativeEvidencePath (Join-Path $repoRoot 'Saved\DialogueReview\npc-a-dialogue.png')),
+        (Get-RelativeEvidencePath (Join-Path $repoRoot 'Saved\DialogueReview\npc-a-restored.png'))
+    )
+    $presentationScreenshots = @(
+        [pscustomobject]@{ name = 'T03 dialogue UI'; path = (Get-RelativeEvidencePath (Join-Path $repoRoot 'Saved\DialogueReview\npc-a-dialogue.png')) },
+        [pscustomobject]@{ name = 'T03 restored dot and prompt'; path = (Get-RelativeEvidencePath (Join-Path $repoRoot 'Saved\DialogueReview\npc-a-restored.png')) }
+    )
+    if ($presentationExitCode -eq 0 -and $presentationSummary -and $pixelExitCode -eq 0) {
+        $presentationStatus = 'passed'
+        $presentationDetails = 'Rendered pixel checks confirm the centre dot hides/restores and the charcoal dialogue panel appears/dismisses; the rendered Interaction scenario also passed.'
+    } else {
+        $presentationStatus = 'failed'
+        $presentationDetails = "Rendered Dialogue presentation failed (scenario exit $presentationExitCode; pixels exit $pixelExitCode)."
+    }
+}
+$presentationTimer.Stop()
+$gates.Add((New-Gate 'Dialogue presentation' $presentationStatus $presentationTimer.ElapsedMilliseconds $presentationDetails (Get-RelativeEvidencePath $presentationLog) $presentationReports))
+
 $packageTimer = [System.Diagnostics.Stopwatch]::StartNew()
 $packageLog = Join-Path $logsRoot 'development-package.log'
-if ($projectStatus -ne 'passed' -or $playerStatus -ne 'passed' -or $interactionStatus -ne 'passed') {
+if ($projectStatus -ne 'passed' -or $playerStatus -ne 'passed' -or $interactionStatus -ne 'passed' -or $presentationStatus -ne 'passed') {
     $packageStatus = 'skipped'
-    $packageDetails = 'Packaging requires passing project-health, player-locomotion, and Interaction gates.'
+    $packageDetails = 'Packaging requires passing project-health, player-locomotion, Interaction, and Dialogue presentation gates.'
     Set-Content -LiteralPath $packageLog -Value $packageDetails -Encoding UTF8
 } else {
     New-Item -ItemType Directory -Path $PackageRoot -Force | Out-Null
@@ -361,13 +413,13 @@ $gates.Add((New-Gate 'Packaged launch' $launchStatus $launchTimer.ElapsedMillise
 
 $diagnosticTimer = [System.Diagnostics.Stopwatch]::StartNew()
 $diagnosticLog = Join-Path $logsRoot 'diagnostics.log'
-if ($testStatus -ne 'passed' -or $projectStatus -ne 'passed' -or $playerStatus -ne 'passed' -or $interactionStatus -ne 'passed' -or $packageStatus -ne 'passed' -or $launchStatus -ne 'passed') {
+if ($testStatus -ne 'passed' -or $projectStatus -ne 'passed' -or $playerStatus -ne 'passed' -or $interactionStatus -ne 'passed' -or $presentationStatus -ne 'passed' -or $packageStatus -ne 'passed' -or $launchStatus -ne 'passed') {
     $diagnosticStatus = 'skipped'
     $diagnosticDetails = 'Diagnostics require successful test, project, player, Interaction, package, and packaged-launch logs.'
     Set-Content -LiteralPath $diagnosticLog -Value $diagnosticDetails -Encoding UTF8
 } else {
     $diagnosticCandidates = @(
-        Select-String -Path @($testLog, $projectLog, $playerLog, $interactionLog, $packageLog, $launchLog) -Pattern '(?i)\b(Warning|Error)\b' -ErrorAction SilentlyContinue |
+        Select-String -Path @($testLog, $projectLog, $playerLog, $interactionLog, $presentationLog, $presentationPixelLog, $packageLog, $launchLog) -Pattern '(?i)\b(Warning|Error)\b' -ErrorAction SilentlyContinue |
             Where-Object {
                 $_.Line -notmatch '(?i)(Success|Completed)\s.*0 error(?:\(s\)|s).*0 warning(?:\(s\)|s)' -and
                 $_.Line -notmatch '(?i)Map check complete:\s*0 Error\(s\), 0 Warning\(s\)'
@@ -388,6 +440,11 @@ if ($testStatus -ne 'passed' -or $projectStatus -ne 'passed' -or $playerStatus -
             pattern = '^Failed reading oplog from Zen at \[::1\]:8558 \(attempt 1/3\): .* Re-checking ZenServer readiness and retrying\.$'
             origin = 'RunUAT briefly lost its localhost Zen storage connection and invoked its built-in readiness retry.'
             consequence = 'The retry recovered; cooking reported zero errors and warnings, packaging completed, and the packaged launch passed.'
+        },
+        [pscustomobject]@{
+            pattern = "(?:LogConsoleManager: Warning: |LogAutomationController: Warning: LogConsoleManager: )Console variable 'r\.MotionVectorSimulation' used in the render thread\. Rendering artifacts could happen\. Use ECVF_RenderThreadSafe or don't use in render thread\.(?: \[log\] ?)?$"
+            origin = 'Pinned UE 5.8.2: Renderer/Private/PostProcess/TemporalSuperResolution.cpp reads the engine-owned variable on the render thread; Engine/Private/Rendering/MotionVectorSimulation.cpp registers it without ECVF_RenderThreadSafe.'
+            consequence = 'The rendered scenario asserts this unused simulation setting remains zero. This project never changes it, so there is no concurrent write; the required TSR renderer, functional scenario, pixel checks, and inspected captures pass. Fixing the registration requires changing the pinned engine binary.'
         }
     )
     $projectDiagnostics = [Collections.Generic.List[object]]::new()
@@ -421,10 +478,10 @@ $diagnosticTimer.Stop()
 $gates.Add((New-Gate 'Diagnostics' $diagnosticStatus $diagnosticTimer.ElapsedMilliseconds $diagnosticDetails (Get-RelativeEvidencePath $diagnosticLog)))
 
 if ($RequireVisualReview) {
-    $gates.Add((New-Gate 'Visual acceptance' 'not_applicable' 0 'T02 has no final Room, Door, or NPC acceptance views; the four-view agent gate activates with T08.'))
+    $gates.Add((New-Gate 'Visual acceptance' 'not_applicable' 0 'T03 uses blockout Rooms and proxy NPCs; the four-view final-art agent gate activates with T08.'))
     $visualReview = [pscustomobject]@{
         status = 'not_applicable'
-        details = 'No final visual-acceptance views apply to the T02 Interaction profile.'
+        details = 'No final-art visual-acceptance views apply to the T03 Dialogue Interaction profile; activation remains T08.'
     }
 } else {
     $gates.Add((New-Gate 'Visual acceptance' 'not_applicable' 0 'Human-local validation does not use an AI visual gate.'))
@@ -452,7 +509,7 @@ $result = [pscustomobject][ordered]@{
     }
     gates = @($gates)
     packagePath = [string] $packageExecutable
-    screenshots = @()
+    screenshots = $presentationScreenshots
     visualReview = $visualReview
     warningExceptions = $warningExceptions
 }

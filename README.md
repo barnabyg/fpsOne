@@ -1,6 +1,6 @@
 # fpsOne
 
-fpsOne is a narrowly scoped first-person Unreal Engine 5.8 testbed. The current T02 slice provides two directly connected blockout Rooms, conventional keyboard-and-mouse movement, and a reusable player-owned Interaction system driving one animated Door.
+fpsOne is a narrowly scoped first-person Unreal Engine 5.8 testbed. The current T03 slice provides two directly connected blockout Rooms, conventional keyboard-and-mouse movement, and a reusable player-owned Interaction system driving one animated Door and repeatable dialogue with two proxy NPCs.
 
 ## Prerequisites
 
@@ -24,10 +24,12 @@ The wizard stores only the non-secret Unreal installation path in the ignored `.
 | W / S | Move forward / backward |
 | A / D | Move left / right |
 | Mouse | Point the view |
-| E | Use the focused Interactable |
+| E | Use the focused Interactable; advance or dismiss dialogue |
 | Escape | Exit immediately |
 
 Sprinting, jumping, crouching, controller input, weapons, and menu behavior are intentionally absent.
+
+Look at either proxy NPC within 250 cm for `E — Talk`. E opens a shared speaker-labelled bottom panel, advances its three lines, then dismisses it. During dialogue, walking and Interaction scanning pause, the dot and prompt hide, and mouse look is limited around the starting view. Controls return on dismissal; either exchange can be replayed.
 
 ## Open the editable project
 

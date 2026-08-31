@@ -300,6 +300,9 @@ def configure_player_interaction(player_blueprint, interaction_blueprint):
     scan = add_function_call(graph, f"{interaction_path}:ScanForInteractionFocus", -120, 900, "Interaction scan")
     connect(tick.find_then_pin(), scan.find_execute_pin(), "Player Tick to Interaction scan")
     connect(get_interaction.find_result_pin(), scan.find_self_pin(), "Player-owned Interaction scanner")
+    refresh = add_function_call(graph, f"{interaction_path}:RefreshPresentation", 200, 900, "Interaction presentation")
+    connect(scan.find_then_pin(), refresh.find_execute_pin(), "refresh Interaction presentation")
+    connect(get_interaction.find_result_pin(), refresh.find_self_pin(), "Player-owned presentation")
 
     input_node = graph.create_node_from_name(
         "Input|ActionEvents|Interact", unreal.Vector2D(-700.0, 1200.0), []
@@ -551,58 +554,6 @@ def create_door(interactable_blueprint, door_interactable_blueprint):
     return blueprint
 
 
-def create_interaction_hud(interaction_blueprint):
-    require_asset_absent(HUD_ASSET)
-    blueprint = unreal.BlueprintEditorLibrary.create_blueprint_asset_with_parent(HUD_ASSET, unreal.HUD)
-    require(blueprint is not None, "Could not create BP_InteractionHUD")
-    graph = unreal.BlueprintGraphEditor.get_graph_editor_by_name(blueprint, "EventGraph")
-    draw = unreal.BlueprintEditorLibrary.add_event_override(
-        blueprint, "ReceiveDrawHUD", unreal.IntPoint(-900, 0)
-    )
-    require(draw is not None, "Could not add HUD draw event")
-
-    dot = add_function_call(graph, "/Script/Engine.HUD:DrawText", -560, 0, "centre dot")
-    set_pin(dot.find_input_pin("Text"), "·", "centre dot text")
-    set_pin(dot.find_input_pin("TextColor"), "(R=0.65,G=0.65,B=0.65,A=0.55)", "centre dot colour")
-    set_pin(dot.find_input_pin("ScreenX"), "1278.0", "centre dot X")
-    set_pin(dot.find_input_pin("ScreenY"), "710.0", "centre dot Y")
-    set_pin(dot.find_input_pin("Scale"), "1.25", "centre dot scale")
-    connect(draw.find_then_pin(), dot.find_execute_pin(), "HUD centre dot")
-
-    pawn = add_function_call(graph, "/Script/Engine.GameplayStatics:GetPlayerPawn", -620, -400, "HUD Player")
-    set_pin(pawn.find_input_pin("PlayerIndex"), "0", "HUD player index")
-    component = add_function_call(graph, "/Script/Engine.Actor:GetComponentByClass", -320, -400, "HUD Interaction component")
-    set_pin(component.find_input_pin("ComponentClass"), class_path(interaction_blueprint.generated_class()), "HUD Interaction class")
-    connect(pawn.find_result_pin(), component.find_self_pin(), "HUD Player component lookup")
-    focus = add_get(graph, "CurrentFocus", 0, -400, class_path(interaction_blueprint.generated_class()))
-    prompt = add_get(graph, "CurrentPrompt", 0, -260, class_path(interaction_blueprint.generated_class()))
-    connect(component.find_result_pin(), focus.find_self_pin(), "HUD focus source")
-    connect(component.find_result_pin(), prompt.find_self_pin(), "HUD prompt source")
-    valid = add_function_call(graph, "/Script/Engine.KismetSystemLibrary:IsValid", 260, -320, "HUD focus validity")
-    connect(focus.find_result_pin(), valid.find_input_pin("Object"), "HUD current focus")
-    branch = graph.add_branch_node()
-    branch.set_node_pos(unreal.IntPoint(500, 0))
-    connect(dot.find_then_pin(), branch.find_execute_pin(), "prompt decision")
-    connect(valid.find_result_pin(), branch.find_condition_pin(), "visible prompt focus")
-
-    backing = add_function_call(graph, "/Script/Engine.HUD:DrawRect", 780, 0, "Interaction Prompt backing")
-    set_pin(backing.find_input_pin("RectColor"), "(R=0.03,G=0.03,B=0.03,A=0.72)", "prompt backing colour")
-    set_pin(backing.find_input_pin("ScreenX"), "1040.0", "prompt backing X")
-    set_pin(backing.find_input_pin("ScreenY"), "1240.0", "prompt backing Y")
-    set_pin(backing.find_input_pin("ScreenW"), "480.0", "prompt backing width")
-    set_pin(backing.find_input_pin("ScreenH"), "64.0", "prompt backing height")
-    prompt_text = add_function_call(graph, "/Script/Engine.HUD:DrawText", 1060, 0, "Interaction Prompt text")
-    connect(prompt.find_result_pin(), prompt_text.find_input_pin("Text"), "contextual Interaction Prompt")
-    set_pin(prompt_text.find_input_pin("TextColor"), "(R=0.92,G=0.92,B=0.92,A=1.0)", "prompt text colour")
-    set_pin(prompt_text.find_input_pin("ScreenX"), "1160.0", "prompt text X")
-    set_pin(prompt_text.find_input_pin("ScreenY"), "1256.0", "prompt text Y")
-    connect(branch.find_then_pin(), backing.find_execute_pin(), "draw prompt backing")
-    connect(backing.find_then_pin(), prompt_text.find_execute_pin(), "draw prompt text")
-
-    compile_and_save(blueprint)
-    return blueprint
-
-
 def create_interaction_test_target(interactable_blueprint):
     require_asset_absent(TEST_INTERACTABLE_ASSET)
     blueprint = unreal.BlueprintEditorLibrary.create_blueprint_asset_with_parent(
@@ -624,6 +575,7 @@ def create_interaction_test_target(interactable_blueprint):
 
 
 def create_interaction_assets():
+    from dialogue_assets import create_presentation, configure_dialogue
     for asset_path in INTERACTION_ASSET_PATHS:
         require_asset_absent(asset_path)
     interactable = create_interactable_component()
@@ -631,10 +583,12 @@ def create_interaction_assets():
     door_interactable = create_door_interactable_component(interactable)
     save_blueprint(door_interactable)
     interaction = create_interaction_component(interactable)
+    panel = create_presentation()
+    configure_dialogue(interaction, panel)
     save_blueprint(interaction)
     door = create_door(interactable, door_interactable)
     save_blueprint(door)
-    hud = create_interaction_hud(interaction)
+    hud = panel
     save_blueprint(hud)
     test_target = create_interaction_test_target(interactable)
     save_blueprint(test_target)
