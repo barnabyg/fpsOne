@@ -18,10 +18,12 @@ The verifier is green only when every required gate passes for the current worki
 2. Validate the Unreal project, configured game map, and referenced content.
 3. Compile every project Blueprint with zero errors and zero warnings.
 4. Run the headless interaction functional tests and export their report. From T03, also run the rendered Dialogue presentation scenario and pixel checks for the hidden/restored centre dot and appearing/dismissing panel; retain both UI screenshots on the dashboard. This deterministic UI regression gate is separate from T08's final-art multimodal acceptance.
-5. Cook and package the Win64 build successfully.
-6. Scan project, test, cook, and package logs with zero project-originated errors or warnings.
-7. In agent mode, capture the four acceptance views and complete the multimodal visual gate below. In human-local mode, report this gate as not applicable.
-8. Generate the local verification dashboard described by `verification-dashboard.md`.
+5. Prove a separate clone of the canonical public remote can materialize all current Git LFS content and validate every editable source and license record.
+6. Cook and package Development and Shipping Win64 builds into fresh run-specific archives, resolve their exact expected executables, and launch-smoke the Development build.
+7. Scan project, test, cook, and package logs with zero project-originated errors or warnings.
+8. In agent mode, capture the four acceptance views and complete the multimodal visual gate below. In human-local mode, report this gate as not applicable.
+9. Manually walk the exact Shipping executable through both Rooms, both Dialogue Interactions, the complete Door cycle, restored input, and Escape exit at 2560 × 1440.
+10. Create the versioned Shipping ZIP outside Git, record its SHA-256, and generate the local verification dashboard described by `verification-dashboard.md`.
 
 Run focused gates while iterating, then run the complete command after all changes. A failed or skipped gate required by the active mode keeps verification red. A visual gate marked not applicable in human-local mode does not prevent the deterministic suite from passing.
 
@@ -50,6 +52,18 @@ for every view plus cross-view coherence evidence. Each image is linked to the
 tested revision, complete working-tree fingerprint, and SHA-256. Any reported
 defect keeps the gate red. See `docs/visual-acceptance.md`.
 
+From T09, canonical validation is a deliberately linked two-phase workflow. The
+first run validates a separate clean checkout, produces both Win64 package
+configurations, and records the exact Shipping executable. Run
+`scripts/record-shipping-acceptance.ps1` to perform and record the complete
+manual journey against that executable. Agents then use
+`verify.ps1 -RequireVisualReview -CompleteVisualReview`; the visual completion
+also completes delivery. Humans use `verify.ps1 -CompleteDelivery`. Completion
+rejects a changed revision/fingerprint, changed executable hash, incomplete
+manual checklist, any change to the complete accepted Shipping package, or a
+deterministic failure, then creates the versioned ZIP and hash under
+`C:\fpsOne-output\Delivery`.
+
 Before a ticket introduces the feature exercised by a later gate, the verifier may mark that gate not applicable only when the result names the missing slice and the ticket that activates it. Through T03, repository tests cover the configured input surface, the player-facing world Interaction scenario is required, and the Development package must pass a launch smoke test. T03 requires both NPC exchanges, replay, collision, suspended scanning and walking, bounded mouse look, restored controls, and fresh-session reset alongside the existing Door checks. The four-view final-art agent visual gate activates with T08. These staged exceptions expire when their activating slices land and do not weaken the complete-prototype profile.
 
 ## Warning exceptions
@@ -68,4 +82,4 @@ Record resolution and readily available frame timing with the acceptance capture
 
 ## Completion evidence
 
-Report the canonical command, its exit status, the dashboard path, the packaged-build path, the inspected screenshot, the multimodal review result, and every exception. State any untested behaviour explicitly.
+Report both canonical commands and exit statuses, the dashboard path, both packaged-build paths, the Shipping acceptance record, the delivery ZIP and SHA-256, the inspected screenshots, the multimodal review result, and every exception. State any untested behaviour explicitly.

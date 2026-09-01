@@ -4,11 +4,19 @@ param(
 
     [switch] $CompleteVisualReview,
 
+    [switch] $CompleteDelivery,
+
     [string] $EngineRoot,
 
     [string] $EvidenceRoot,
 
     [string] $PackageRoot,
+
+    [string] $ShippingPackageRoot,
+
+    [string] $DeliveryRoot,
+
+    [string] $CleanCloneRoot,
 
     [switch] $NoOpenDashboard
 )
@@ -23,6 +31,15 @@ if (-not $EvidenceRoot) {
 }
 if (-not $PackageRoot) {
     $PackageRoot = 'C:\fpsOne-output\Development'
+}
+if (-not $ShippingPackageRoot) {
+    $ShippingPackageRoot = 'C:\fpsOne-output\Shipping'
+}
+if (-not $DeliveryRoot) {
+    $DeliveryRoot = 'C:\fpsOne-output\Delivery'
+}
+if (-not $CleanCloneRoot) {
+    $CleanCloneRoot = 'C:\fpsOne-output\CleanClone'
 }
 if (-not $EngineRoot) {
     $environmentPath = Join-Path $repoRoot '.env'
@@ -125,6 +142,59 @@ function Invoke-LoggedCommand {
     return [int] $exitCode
 }
 
+function Invoke-Win64PackageGate {
+    param(
+        [string] $Name,
+        [ValidateSet('Development', 'Shipping')]
+        [string] $Configuration,
+        [string] $ArchiveRoot,
+        [string] $LogPath,
+        [bool] $PrerequisitesPassed
+    )
+
+    $timer = [System.Diagnostics.Stopwatch]::StartNew()
+    $executable = ''
+    if (-not $PrerequisitesPassed) {
+        $status = 'skipped'
+        $details = "$Configuration packaging requires passing project-health, player-locomotion, Interaction, and Dialogue presentation gates."
+        Set-Content -LiteralPath $LogPath -Value $details -Encoding UTF8
+    } else {
+        $runArchiveRoot = Join-Path $ArchiveRoot ("$($revision.Substring(0, 12))-$([guid]::NewGuid().ToString('N'))")
+        New-Item -ItemType Directory -Path $runArchiveRoot -Force | Out-Null
+        $arguments = @(
+            'BuildCookRun',
+            "-project=$projectPath",
+            '-nop4',
+            '-utf8output',
+            '-cook',
+            '-stage',
+            '-pak',
+            '-archive',
+            "-archivedirectory=$runArchiveRoot",
+            '-platform=Win64',
+            "-clientconfig=$Configuration",
+            '-unattended'
+        )
+        $exitCode = Invoke-LoggedCommand -Executable $uatPath -Arguments $arguments -LogPath $LogPath
+        $expectedExecutable = Join-Path $runArchiveRoot 'Windows\FPSOne.exe'
+        if ($exitCode -eq 0 -and (Test-Path -LiteralPath $expectedExecutable -PathType Leaf)) {
+            $executable = $expectedExecutable
+            $status = 'passed'
+            $details = "$Configuration Win64 package completed in a fresh archive and the exact Windows\FPSOne.exe is present."
+        } else {
+            $status = 'failed'
+            $details = "$Configuration packaging failed or did not produce the exact Windows\FPSOne.exe (exit code $exitCode)."
+        }
+    }
+    $timer.Stop()
+    $gates.Add((New-Gate $Name $status $timer.ElapsedMilliseconds $details (Get-RelativeEvidencePath $LogPath)))
+    return [pscustomobject]@{
+        status = $status
+        details = $details
+        executable = [string] $executable
+    }
+}
+
 $mode = if ($RequireVisualReview) { 'agent' } else { 'human-local' }
 $revision = ([string](Get-GitOutput rev-parse HEAD)).Trim()
 $initialFingerprint = Get-WorkingTreeFingerprint
@@ -136,43 +206,83 @@ $acceptanceViews = @(
     @{ key = 'npcB'; name = 'NPC B'; folder = 'NPCBReview'; image = 'npc-b-conversation'; marker = 'T07_CAPTURE_PASSED npc-b-conversation' }
 )
 
-# The first agent run captures current evidence and remains red pending visual
-# judgement. This completion mode verifies that exact evidence without taking a
-# different screenshot or rerunning already recorded deterministic gates.
-if ($CompleteVisualReview) {
-    if (-not $RequireVisualReview) { throw '-CompleteVisualReview requires -RequireVisualReview.' }
+# The first run captures current deterministic and package evidence. Completion
+# verifies the exact Shipping executable and (in agent mode) the exact images
+# without rebuilding or recapturing different evidence.
+if ($CompleteVisualReview -or $CompleteDelivery) {
+    if ($CompleteVisualReview -and -not $RequireVisualReview) { throw '-CompleteVisualReview requires -RequireVisualReview.' }
+    if ($CompleteVisualReview) { $CompleteDelivery = $true }
     $resultPath = Join-Path $EvidenceRoot 'verification-result.json'
+    if (-not (Test-Path -LiteralPath $resultPath -PathType Leaf)) { throw 'Run the canonical verifier before completing delivery.' }
     $result = Get-Content -LiteralPath $resultPath -Raw | ConvertFrom-Json
-    if ($result.mode -ne 'agent') { throw 'Only an agent verification run can accept a visual review.' }
-    $reviewNames = @($acceptanceViews | ForEach-Object { "$($_.name) visual review" }) + @('Visual acceptance')
-    $otherFailures = @($result.gates | Where-Object { $_.name -notin $reviewNames -and $_.status -notin @('passed', 'not_applicable') })
-    if ($otherFailures.Count) { throw 'Deterministic verification gates must all pass before completing the visual review.' }
-    foreach ($view in $acceptanceViews) {
-        $review = Confirm-RoomReview $result $EvidenceRoot $revision $initialFingerprint $view.key $view.name
-        $reviewGate = @($result.gates | Where-Object name -eq "$($view.name) visual review")
-        if ($reviewGate.Count -ne 1) { throw "The $($view.name) visual review gate is missing or duplicated." }
-        $reviewGate[0].status = 'passed'
-        $reviewGate[0].details = 'Current agent review passed all required criteria. Both NPC views additionally require character presentation and reference-game evidence. The complete final-art benchmark remains T08.'
-        $capture = $result.($view.key)
-        $reviewGate[0].reportPaths = @($capture.screenshotPath, $capture.reviewPath)
+    if ($result.revision -ne $revision -or $result.fingerprint -ne $initialFingerprint -or $result.stale) {
+        throw 'The verification result is stale; rerun the canonical verifier before completion.'
     }
-    $finalReview = Confirm-FinalVisualReview $result $EvidenceRoot $revision $initialFingerprint
-    $finalGate = @($result.gates | Where-Object name -eq 'Visual acceptance')
-    if ($finalGate.Count -ne 1) { throw 'The final Visual acceptance gate is missing or duplicated.' }
-    $finalGate[0].status = 'passed'
-    $finalGate[0].details = 'The T08 four-view multimodal review passed every criterion and found the complete apartment coherent at the reference benchmark.'
-    $finalGate[0].reportPaths = @($result.finalVisualAcceptance.reviewPath)
-    $result.visualReview = [pscustomobject]@{ status = 'passed'; details = 'T08 passed one current, revision- and hash-linked multimodal review across the four accepted gameplay views.' }
+    if ($CompleteVisualReview -and $result.mode -ne 'agent') { throw 'Only an agent verification run can accept a visual review.' }
+    $completionNames = @('Shipping manual acceptance', 'Versioned Shipping ZIP')
+    if ($CompleteVisualReview) {
+        $completionNames += @($acceptanceViews | ForEach-Object { "$($_.name) visual review" }) + @('Visual acceptance')
+    }
+    $otherFailures = @($result.gates | Where-Object { $_.name -notin $completionNames -and $_.status -notin @('passed', 'not_applicable') })
+    if ($otherFailures.Count) { throw 'Deterministic verification gates must all pass before completing delivery.' }
+
+    if ($CompleteVisualReview) {
+        foreach ($view in $acceptanceViews) {
+            $review = Confirm-RoomReview $result $EvidenceRoot $revision $initialFingerprint $view.key $view.name
+            $reviewGate = @($result.gates | Where-Object name -eq "$($view.name) visual review")
+            if ($reviewGate.Count -ne 1) { throw "The $($view.name) visual review gate is missing or duplicated." }
+            $reviewGate[0].status = 'passed'
+            $reviewGate[0].details = 'Current agent review passed all required criteria. Both NPC views additionally require character presentation and reference-game evidence.'
+            $capture = $result.($view.key)
+            $reviewGate[0].reportPaths = @($capture.screenshotPath, $capture.reviewPath)
+        }
+        $finalReview = Confirm-FinalVisualReview $result $EvidenceRoot $revision $initialFingerprint
+        $finalGate = @($result.gates | Where-Object name -eq 'Visual acceptance')
+        if ($finalGate.Count -ne 1) { throw 'The final Visual acceptance gate is missing or duplicated.' }
+        $finalGate[0].status = 'passed'
+        $finalGate[0].details = 'The T08 four-view multimodal review passed every criterion and found the complete apartment coherent at the reference benchmark.'
+        $finalGate[0].reportPaths = @($result.finalVisualAcceptance.reviewPath)
+        $result.visualReview = [pscustomobject]@{ status = 'passed'; details = 'T08 passed one current, revision- and hash-linked multimodal review across the four accepted gameplay views.' }
+    }
+
+    $deliveryResultPath = Join-Path $logsRoot 'delivery-result.json'
+    $acceptancePath = Join-Path $EvidenceRoot 'shipping-manual-acceptance.json'
+    & (Join-Path $PSScriptRoot 'complete-delivery.ps1') `
+        -PackageExecutable $result.packages.shipping `
+        -AcceptancePath $acceptancePath `
+        -DeliveryRoot $DeliveryRoot `
+        -Revision $revision `
+        -Fingerprint $initialFingerprint `
+        -ResultPath $deliveryResultPath `
+        -RepositoryRoot $repoRoot | Out-Null
+    $deliveryResult = Get-Content -LiteralPath $deliveryResultPath -Raw | ConvertFrom-Json
+    $acceptanceGate = @($result.gates | Where-Object name -eq 'Shipping manual acceptance')
+    $zipGate = @($result.gates | Where-Object name -eq 'Versioned Shipping ZIP')
+    if ($acceptanceGate.Count -ne 1 -or $zipGate.Count -ne 1) { throw 'T09 delivery gates are missing or duplicated.' }
+    $acceptanceGate[0].status = 'passed'
+    $acceptanceGate[0].details = 'The exact Shipping executable passed the complete guided 2560 x 1440 manual journey.'
+    $acceptanceGate[0].reportPaths = @((Get-RelativeEvidencePath $acceptancePath))
+    $zipGate[0].status = 'passed'
+    $zipGate[0].details = "Versioned Shipping ZIP created outside Git with SHA-256 $($deliveryResult.zipSha256)."
+    $zipGate[0].reportPaths = @((Get-RelativeEvidencePath $deliveryResultPath))
+    $result.delivery = [pscustomobject][ordered]@{
+        zipPath = [string] $deliveryResult.zipPath
+        zipSha256 = [string] $deliveryResult.zipSha256
+        acceptancePath = Get-RelativeEvidencePath $acceptancePath
+    }
     $result.generatedAtUtc = [DateTime]::UtcNow.ToString('o')
     $result | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $resultPath -Encoding UTF8
     & (Join-Path $PSScriptRoot 'render-dashboard.ps1') -ResultPath $resultPath -OutputPath (Join-Path $EvidenceRoot 'index.html')
     if (-not $NoOpenDashboard) { Start-Process -FilePath (Join-Path $EvidenceRoot 'index.html') }
-    Write-Output 'T04_ROOM_A_VISUAL_REVIEW_PASSED; T05_ROOM_B_AND_DOOR_VISUAL_REVIEW_PASSED; T06_NPC_A_VISUAL_REVIEW_PASSED; T07_NPC_B_VISUAL_REVIEW_PASSED; T08_FINAL_VISUAL_ACCEPTANCE_PASSED'
+    $remainingFailures = @($result.gates | Where-Object status -in @('failed', 'missing', 'skipped'))
+    if ($remainingFailures.Count -ne 0) { exit 1 }
+    Write-Output 'T09_DELIVERY_COMPLETION_PASSED'
     exit 0
 }
 $gates = [System.Collections.Generic.List[object]]::new()
 $warningExceptions = @()
 $packageExecutable = ''
+$shippingPackageExecutable = ''
 $editorPath = Join-Path $EngineRoot 'Engine\Binaries\Win64\UnrealEditor-Cmd.exe'
 $uatPath = Join-Path $EngineRoot 'Engine\Build\BatchFiles\RunUAT.bat'
 
@@ -215,6 +325,32 @@ if (Test-Path -LiteralPath $testReport -PathType Leaf) {
     $repositoryReports += Get-RelativeEvidencePath $testReport
 }
 $gates.Add((New-Gate 'Repository tests' $testStatus $testTimer.ElapsedMilliseconds $testDetails (Get-RelativeEvidencePath $testLog) $repositoryReports))
+
+$cleanCloneTimer = [System.Diagnostics.Stopwatch]::StartNew()
+$cleanCloneLog = Join-Path $logsRoot 'clean-clone.log'
+if ($assetStatus -ne 'passed' -or $testStatus -ne 'passed') {
+    $cleanCloneStatus = 'skipped'
+    $cleanCloneDetails = 'Clean-clone verification requires passing asset-manifest and repository-test gates.'
+    Set-Content -LiteralPath $cleanCloneLog -Value $cleanCloneDetails -Encoding UTF8
+} else {
+    $cleanCloneExitCode = Invoke-LoggedCommand -Executable 'powershell.exe' -Arguments @(
+        '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File',
+        (Join-Path $PSScriptRoot 'test-clean-clone.ps1'),
+        '-SourceRepository', $repoRoot,
+        '-ExpectedRevision', $revision,
+        '-DestinationRoot', $CleanCloneRoot
+    ) -LogPath $cleanCloneLog
+    $cleanCloneSummary = Select-String -LiteralPath $cleanCloneLog -Pattern "T09_CLEAN_CLONE_PASSED sourceRevision=$revision " -Quiet
+    if ($cleanCloneExitCode -eq 0 -and $cleanCloneSummary) {
+        $cleanCloneStatus = 'passed'
+        $cleanCloneDetails = 'A clone of the canonical public remote obtained every current Git LFS asset, passed provenance/hashes, contained editable sources and setup scripts, and remained clean.'
+    } else {
+        $cleanCloneStatus = 'failed'
+        $cleanCloneDetails = "Clean-clone reproducibility failed or did not emit its success marker (exit code $cleanCloneExitCode)."
+    }
+}
+$cleanCloneTimer.Stop()
+$gates.Add((New-Gate 'Clean clone reproducibility' $cleanCloneStatus $cleanCloneTimer.ElapsedMilliseconds $cleanCloneDetails (Get-RelativeEvidencePath $cleanCloneLog)))
 
 $projectTimer = [System.Diagnostics.Stopwatch]::StartNew()
 $projectLog = Join-Path $logsRoot 'project-health.log'
@@ -396,40 +532,17 @@ if ($interactionStatus -ne 'passed') {
 $presentationTimer.Stop()
 $gates.Add((New-Gate 'Dialogue presentation' $presentationStatus $presentationTimer.ElapsedMilliseconds $presentationDetails (Get-RelativeEvidencePath $presentationLog) $presentationReports))
 
-$packageTimer = [System.Diagnostics.Stopwatch]::StartNew()
 $packageLog = Join-Path $logsRoot 'development-package.log'
-if ($projectStatus -ne 'passed' -or $playerStatus -ne 'passed' -or $interactionStatus -ne 'passed' -or $presentationStatus -ne 'passed') {
-    $packageStatus = 'skipped'
-    $packageDetails = 'Packaging requires passing project-health, player-locomotion, Interaction, and Dialogue presentation gates.'
-    Set-Content -LiteralPath $packageLog -Value $packageDetails -Encoding UTF8
-} else {
-    New-Item -ItemType Directory -Path $PackageRoot -Force | Out-Null
-    $packageArguments = @(
-        'BuildCookRun',
-        "-project=$projectPath",
-        '-nop4',
-        '-utf8output',
-        '-cook',
-        '-stage',
-        '-pak',
-        '-archive',
-        "-archivedirectory=$PackageRoot",
-        '-platform=Win64',
-        '-clientconfig=Development',
-        '-unattended'
-    )
-    $packageExitCode = Invoke-LoggedCommand -Executable $uatPath -Arguments $packageArguments -LogPath $packageLog
-    $packageExecutable = Get-ChildItem -LiteralPath $PackageRoot -Filter 'FPSOne.exe' -File -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
-    if ($packageExitCode -eq 0 -and $packageExecutable) {
-        $packageStatus = 'passed'
-        $packageDetails = 'Development Win64 package completed and FPSOne.exe is present.'
-    } else {
-        $packageStatus = 'failed'
-        $packageDetails = "Development packaging failed or did not produce FPSOne.exe (exit code $packageExitCode)."
-    }
-}
-$packageTimer.Stop()
-$gates.Add((New-Gate 'Development package' $packageStatus $packageTimer.ElapsedMilliseconds $packageDetails (Get-RelativeEvidencePath $packageLog)))
+$packagePrerequisitesPassed = ($projectStatus -eq 'passed' -and $playerStatus -eq 'passed' -and $interactionStatus -eq 'passed' -and $presentationStatus -eq 'passed')
+$packageResult = Invoke-Win64PackageGate `
+    -Name 'Development package' `
+    -Configuration 'Development' `
+    -ArchiveRoot $PackageRoot `
+    -LogPath $packageLog `
+    -PrerequisitesPassed $packagePrerequisitesPassed
+$packageStatus = $packageResult.status
+$packageDetails = $packageResult.details
+$packageExecutable = $packageResult.executable
 
 $launchTimer = [System.Diagnostics.Stopwatch]::StartNew()
 $launchLog = Join-Path $logsRoot 'packaged-launch.log'
@@ -459,15 +572,34 @@ if ($packageStatus -ne 'passed') {
 $launchTimer.Stop()
 $gates.Add((New-Gate 'Packaged launch' $launchStatus $launchTimer.ElapsedMilliseconds $launchDetails (Get-RelativeEvidencePath $launchLog)))
 
+$shippingLog = Join-Path $logsRoot 'shipping-package.log'
+$shippingResult = Invoke-Win64PackageGate `
+    -Name 'Shipping package' `
+    -Configuration 'Shipping' `
+    -ArchiveRoot $ShippingPackageRoot `
+    -LogPath $shippingLog `
+    -PrerequisitesPassed $packagePrerequisitesPassed
+$shippingStatus = $shippingResult.status
+$shippingDetails = $shippingResult.details
+$shippingPackageExecutable = $shippingResult.executable
+
+if ($shippingStatus -eq 'passed') {
+    $gates.Add((New-Gate 'Shipping manual acceptance' 'missing' 0 'Run scripts\record-shipping-acceptance.ps1 against this exact verified executable, then complete delivery.'))
+    $gates.Add((New-Gate 'Versioned Shipping ZIP' 'skipped' 0 'The delivery ZIP is created only after current manual Shipping acceptance passes.'))
+} else {
+    $gates.Add((New-Gate 'Shipping manual acceptance' 'skipped' 0 'Manual acceptance requires a successful Shipping package.'))
+    $gates.Add((New-Gate 'Versioned Shipping ZIP' 'skipped' 0 'The delivery ZIP requires a successful Shipping package and manual acceptance.'))
+}
+
 $diagnosticTimer = [System.Diagnostics.Stopwatch]::StartNew()
 $diagnosticLog = Join-Path $logsRoot 'diagnostics.log'
-if ($testStatus -ne 'passed' -or $projectStatus -ne 'passed' -or $playerStatus -ne 'passed' -or $interactionStatus -ne 'passed' -or $presentationStatus -ne 'passed' -or $packageStatus -ne 'passed' -or $launchStatus -ne 'passed') {
+if ($testStatus -ne 'passed' -or $projectStatus -ne 'passed' -or $playerStatus -ne 'passed' -or $interactionStatus -ne 'passed' -or $presentationStatus -ne 'passed' -or $packageStatus -ne 'passed' -or $launchStatus -ne 'passed' -or $shippingStatus -ne 'passed') {
     $diagnosticStatus = 'skipped'
-    $diagnosticDetails = 'Diagnostics require successful test, project, player, Interaction, package, and packaged-launch logs.'
+    $diagnosticDetails = 'Diagnostics require successful test, project, player, Interaction, Development/Shipping package, and packaged-launch logs.'
     Set-Content -LiteralPath $diagnosticLog -Value $diagnosticDetails -Encoding UTF8
 } else {
     $diagnosticCandidates = @(
-        Select-String -Path @($testLog, $projectLog, $playerLog, $interactionLog, $presentationLog, $presentationPixelLog, $packageLog, $launchLog) -Pattern '(?i)\b(Warning|Error)\b' -ErrorAction SilentlyContinue |
+        Select-String -Path @($testLog, $projectLog, $playerLog, $interactionLog, $presentationLog, $presentationPixelLog, $packageLog, $launchLog, $shippingLog) -Pattern '(?i)\b(Warning|Error)\b' -ErrorAction SilentlyContinue |
             Where-Object {
                 $_.Line -notmatch '(?i)(Success|Completed)\s.*0 error(?:\(s\)|s).*0 warning(?:\(s\)|s)' -and
                 $_.Line -notmatch '(?i)Map check complete:\s*0 Error\(s\), 0 Warning\(s\)'
@@ -586,7 +718,7 @@ $dashboardPath = Join-Path $EvidenceRoot 'index.html'
 $resultPath = Join-Path $EvidenceRoot 'verification-result.json'
 $finalFingerprint = Get-WorkingTreeFingerprint
 $result = [pscustomobject][ordered]@{
-    schemaVersion = 1
+    schemaVersion = 2
     generatedAtUtc = [DateTime]::UtcNow.ToString('o')
     mode = $mode
     revision = $revision
@@ -600,6 +732,15 @@ $result = [pscustomobject][ordered]@{
     }
     gates = @($gates)
     packagePath = [string] $packageExecutable
+    packages = [pscustomobject][ordered]@{
+        development = [string] $packageExecutable
+        shipping = [string] $shippingPackageExecutable
+    }
+    delivery = [pscustomobject][ordered]@{
+        zipPath = ''
+        zipSha256 = ''
+        acceptancePath = ''
+    }
     screenshots = $presentationScreenshots
     visualReview = $visualReview
     roomA = $roomCaptures.roomA

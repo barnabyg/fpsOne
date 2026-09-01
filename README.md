@@ -43,20 +43,38 @@ The project starts on `/Game/Maps/L_Testbed` and uses `/Game/Blueprints/BP_Testb
 
 ## Validate and package
 
-Agents run the complete current-slice validation:
+Agents begin the complete validation and capture current deterministic and visual evidence:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify.ps1 -RequireVisualReview
 ```
 
-Humans run the same repository tests, deterministic compile, player-facing PIE Interaction scenario, Development package and launch smoke test, and diagnostics without agent visual judgement:
+Humans run the same asset, clean-clone, repository, Blueprint, player-facing Interaction, Development/Shipping package, Development launch, and diagnostic gates without agent visual judgement:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify.ps1
 ```
 
-Evidence and the local dashboard are written to `Saved\Verification`; the Development package defaults to `C:\fpsOne-output\Development`. Both locations are outside version control.
+That first run intentionally remains red until the exact Shipping executable completes the guided 2560 × 1440 walkthrough:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\record-shipping-acceptance.ps1
+```
+
+After the walkthrough, agents write the current visual reviews described in [final visual acceptance](docs/visual-acceptance.md) and complete both visual and delivery evidence:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify.ps1 -RequireVisualReview -CompleteVisualReview
+```
+
+Humans complete the same Shipping delivery without the agent-only visual judgement:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify.ps1 -CompleteDelivery
+```
+
+Evidence and the local dashboard are written to `Saved\Verification`. Development and Shipping packages default to `C:\fpsOne-output\Development` and `C:\fpsOne-output\Shipping`; the versioned ZIP and SHA-256 evidence default to `C:\fpsOne-output\Delivery`. These outputs are outside version control.
 
 T04 adds a 2560 × 1440 Room A acceptance image and an agent review linked to its hash and the tested working tree. The initial agent run remains red until that review is completed with `verify.ps1 -RequireVisualReview -CompleteVisualReview`. See [Room A assets, visual review, and manual checks](docs/room-a.md). A normal clone needs Git LFS assets (`git lfs pull`); asset downloads and Blender are unnecessary to open or play it.
 
-The current verifier also requires Room B, open-Door, and conversational-distance captures and reviews for both NPCs. T08 adds one complete-prototype assessment across the four accepted gameplay views; see [final visual acceptance](docs/visual-acceptance.md). The final gate stays red for missing, stale, substituted, or failed visual evidence. See [NPC A and pinned authoring tools](docs/npc-a.md), [NPC B source and manual checks](docs/npc-b.md), and [Room B](docs/room-b.md). Blender 4.5.3, MPFB 2.0.8, and MakeHuman core assets are needed only to recreate or change character source; their SHA-256 pins and C:-only setup are included without tool binaries.
+The verifier also requires Room B, open-Door, and conversational-distance captures and reviews for both NPCs, plus one complete-prototype assessment across the four accepted gameplay views. The final gates stay red for missing, stale, substituted, or failed visual/manual evidence. See [NPC A and pinned authoring tools](docs/npc-a.md), [NPC B source and manual checks](docs/npc-b.md), and [Room B](docs/room-b.md). Blender 4.5.3, MPFB 2.0.8, and MakeHuman core assets are needed only to recreate or change character source; their SHA-256 pins and C:-only setup are included without tool binaries.

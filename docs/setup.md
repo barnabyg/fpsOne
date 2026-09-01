@@ -2,7 +2,7 @@
 
 ## Pinned environment
 
-The T04 implementation targets:
+The completed prototype targets:
 
 | Tool | Version | Required C:-drive location |
 | --- | --- | --- |
@@ -67,7 +67,9 @@ Human-local mode:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify.ps1
 ```
 
-The command validates per-file art provenance and hashes, repository tests, project files, Blueprint compilation, the player-facing Interaction scenario, Development Win64 packaging, a real packaged-window launch, project-originated diagnostics, and evidence freshness. T04 adds the furnished Room A spawn and circulation checks and its 2560 × 1440 capture. Agent mode stays red pending a current Room A visual review; see [the review and completion steps](room-a.md). T05 adds the furnished Room B, Door-transition and Room B captures, and individually linked agent reviews for all three environment views. See [Room B acceptance](room-b.md). T06 and T07 add distinct animated residents with their own conversational captures and current agent reviews. See [NPC A](npc-a.md) and [NPC B](npc-b.md). The complete four-view final-art benchmark still activates with T08. Dialogue, replay, collision, suspended controls, restored controls, and session reset remain required.
+The command validates per-file art provenance and hashes, a separate clone of the canonical public remote with all 190 current Git LFS files materialized, repository tests, project files, Blueprint compilation, the player-facing Interaction scenario, Development and Shipping Win64 packaging, a real Development packaged-window launch, project-originated diagnostics, evidence freshness, and all accepted 2560 × 1440 captures. Dialogue, replay, collision, suspended controls, restored controls, session reset, five slice reviews, and the final four-view benchmark remain required.
+
+The first run is expected to exit 1 after producing current evidence because manual Shipping acceptance (and, in agent mode, visual judgement) cannot be claimed by an unattended command. Do not rebuild or edit the working tree between the following steps.
 
 Generated evidence is under `C:\docs\git\fpsOne\Saved\Verification`:
 
@@ -75,11 +77,33 @@ Generated evidence is under `C:\docs\git\fpsOne\Saved\Verification`:
 - `index.html` — local static dashboard;
 - `logs\` — retained gate logs, the repository-test XML report, and a run-specific Unreal Automation HTML/JSON report; the dashboard links directly to each current report.
 
-The Development package is archived to `C:\fpsOne-output\Development`. Override either location with `-EvidenceRoot` or `-PackageRoot` when necessary; keep both on C:.
+Fresh run-specific Development and Shipping packages are archived below `C:\fpsOne-output\Development` and `C:\fpsOne-output\Shipping`; the exact executable paths appear in the dashboard. Override the parent roots with `-PackageRoot` or `-ShippingPackageRoot`. Clean-clone scratch space defaults to `C:\fpsOne-output\CleanClone`; each verified clone is removed after its evidence is recorded.
+
+Run the guided walkthrough against the exact Shipping executable stored in `verification-result.json`:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\record-shipping-acceptance.ps1
+```
+
+The recorder launches at 2560 × 1440 and writes `Saved\Verification\shipping-manual-acceptance.json` only after every required check is explicitly confirmed with observed evidence and Escape has closed the application. It records the tested revision, complete working-tree fingerprint, executable path/hash, a path/size/SHA-256 manifest for every packaged file, reviewer, resolution, and checklist. Completion rejects any change to the executable, PAK, DLLs, configuration, or other Shipping content.
+
+After writing the current visual reviews, agent completion validates the unchanged evidence and also creates the delivery:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify.ps1 -RequireVisualReview -CompleteVisualReview
+```
+
+Human-local completion uses:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify.ps1 -CompleteDelivery
+```
+
+The final ZIP is `C:\fpsOne-output\Delivery\fpsOne-<12-character-revision>-win64-shipping.zip`. Its SHA-256, both executable locations, manual record, logs, reviews, durations, tool versions, revision/fingerprint, and exceptions appear in the final dashboard.
 
 ## Manual acceptance
 
-Prerequisite: a green canonical validation and `C:\fpsOne-output\Development\Windows\FPSOne.exe` (the exact path is also shown in the dashboard).
+Prerequisite: the first canonical run has passed every deterministic gate and produced the exact run-specific Shipping `Windows\FPSOne.exe` recorded in the dashboard. Use `record-shipping-acceptance.ps1`; the detailed expectations below define what must be observed before typing `PASS`.
 
 1. Launch `FPSOne.exe`; expect Room A, the centre dot, and the closed Door to appear without an editor or menu.
 2. Hold W, S, A, and D separately, including while looking steeply up or down; expect forward, backward, left, and right walking while the player remains on the floor.
@@ -107,4 +131,4 @@ To capture the dialogue and restored HUD for visual inspection, run the function
 
 Captures are retained under `Saved\DialogueReview` at the PIE viewport's actual resolution (recorded by the pixel check; command-line window size does not force the embedded viewport size). The canonical verifier runs this rendered scenario after its headless scenario and checks the actual pixels for dot hiding/restoration and panel dismissal. Both captures and the pixel report appear on the dashboard. This deterministic T03 UI check is separate from the T08 final-art benchmark.
 
-The current package contains both furnished Rooms and both refined animated residents. The complete four-view benchmark remains assigned to T08. Audio remains outside the prototype's scope.
+The Shipping package contains both furnished Rooms and both refined animated residents. Audio remains outside the prototype's scope.

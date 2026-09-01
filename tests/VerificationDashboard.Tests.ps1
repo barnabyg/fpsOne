@@ -33,7 +33,16 @@ Describe 'verification dashboard renderer' {
                     logPath = ''
                 }
             )
-            packagePath = 'C:\fpsOne-output\Development\FPSOne.exe'
+            packagePath = 'C:\fpsOne-output\Development\Windows\FPSOne.exe'
+            packages = @{
+                development = 'C:\fpsOne-output\Development\Windows\FPSOne.exe'
+                shipping = 'C:\fpsOne-output\Shipping\Windows\FPSOne.exe'
+            }
+            delivery = @{
+                zipPath = 'C:\fpsOne-output\Delivery\fpsOne-abc1234-win64-shipping.zip'
+                zipSha256 = 'fixture-delivery-sha256'
+                acceptancePath = 'logs\shipping-acceptance.json'
+            }
             screenshots = @()
             visualReview = @{
                 status = 'not_applicable'
@@ -52,7 +61,11 @@ Describe 'verification dashboard renderer' {
         $dashboard | Should Match 'logs/project-health\.log'
         $dashboard | Should Match 'href="logs/interaction-functional-report/index\.html"'
         $dashboard | Should Match 'href="logs/interaction-functional-report/index\.json"'
-        $dashboard | Should Match 'C:\\fpsOne-output\\Development\\FPSOne\.exe'
+        $dashboard | Should Match 'C:\\fpsOne-output\\Development\\Windows\\FPSOne\.exe'
+        $dashboard | Should Match 'C:\\fpsOne-output\\Shipping\\Windows\\FPSOne\.exe'
+        $dashboard | Should Match 'fpsOne-abc1234-win64-shipping\.zip'
+        $dashboard | Should Match 'fixture-delivery-sha256'
+        $dashboard | Should Match 'logs\\shipping-acceptance\.json'
         $dashboard | Should Match 'CURRENT EVIDENCE'
         $dashboard | Should Match 'Legacy gate without reports'
     }

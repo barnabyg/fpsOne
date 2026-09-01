@@ -73,6 +73,12 @@ $screenshots = if (@($result.screenshots).Count -eq 0) {
     }) -join "`n"
 }
 
+$developmentPackage = if ($result.packages.development) { $result.packages.development } else { $result.packagePath }
+$shippingPackage = [string] $result.packages.shipping
+$deliveryZip = [string] $result.delivery.zipPath
+$deliveryHash = [string] $result.delivery.zipSha256
+$acceptancePath = [string] $result.delivery.acceptancePath
+
 $html = @"
 <!doctype html>
 <html lang="en">
@@ -117,7 +123,11 @@ $html = @"
     <div><dt>Revision</dt><dd>$(ConvertTo-HtmlText $result.revision)</dd></div>
     <div><dt>Working tree fingerprint</dt><dd>$(ConvertTo-HtmlText $result.fingerprint)</dd></div>
     <div><dt>Generated</dt><dd>$(ConvertTo-HtmlText $result.generatedAtUtc)</dd></div>
-    <div><dt>Package</dt><dd>$(ConvertTo-HtmlText $result.packagePath)</dd></div>
+    <div><dt>Development package</dt><dd>$(ConvertTo-HtmlText $developmentPackage)</dd></div>
+    <div><dt>Shipping package</dt><dd>$(ConvertTo-HtmlText $shippingPackage)</dd></div>
+    <div><dt>Delivery ZIP</dt><dd>$(ConvertTo-HtmlText $deliveryZip)</dd></div>
+    <div><dt>Delivery SHA-256</dt><dd>$(ConvertTo-HtmlText $deliveryHash)</dd></div>
+    <div><dt>Shipping acceptance</dt><dd>$(ConvertTo-HtmlText $acceptancePath)</dd></div>
   </section>
 
   <h2>Gate results</h2>
