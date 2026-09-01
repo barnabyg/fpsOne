@@ -37,6 +37,23 @@ function Assert-PathOutsideRepository {
     }
 }
 
+function Assert-CleanSourceRepository {
+    param([string] $Root, [string] $ExpectedRevision)
+
+    if (-not $Root) { return }
+    $status = @(& git -C $Root status --porcelain --untracked-files=all)
+    if ($LASTEXITCODE -ne 0) {
+        throw "Unable to inspect the source repository at '$Root'."
+    }
+    if ($status.Count -ne 0) {
+        throw 'T09 delivery requires a clean source working tree.'
+    }
+    $actualRevision = ([string] (& git -C $Root rev-parse HEAD)).Trim()
+    if ($LASTEXITCODE -ne 0 -or $actualRevision -ne $ExpectedRevision) {
+        throw "The clean source repository is not at delivery revision '$ExpectedRevision'."
+    }
+}
+
 if (-not (Test-Path -LiteralPath $PackageExecutable -PathType Leaf)) {
     throw "Shipping executable was not found at '$PackageExecutable'."
 }
@@ -44,6 +61,7 @@ if (-not (Test-Path -LiteralPath $AcceptancePath -PathType Leaf)) {
     throw "Shipping manual acceptance evidence was not found at '$AcceptancePath'."
 }
 Assert-PathOutsideRepository -Path $DeliveryRoot -Root $RepositoryRoot
+Assert-CleanSourceRepository -Root $RepositoryRoot -ExpectedRevision $Revision
 
 $acceptance = Get-Content -LiteralPath $AcceptancePath -Raw | ConvertFrom-Json
 $requiredCheckIds = @('room-traversal', 'npc-dialogues', 'door-cycle', 'restored-input', 'escape-exit', 'presentation')

@@ -81,4 +81,27 @@ Describe 'Shipping delivery completion' {
                 -ResultPath $script:resultPath
         } | Should Throw 'exactly the required T09 checks'
     }
+
+    It 'rejects delivery from a dirty source repository' {
+        $sourceRepository = Join-Path $TestDrive 'source-repository'
+        New-Item -ItemType Directory -Path $sourceRepository -Force | Out-Null
+        & git -C $sourceRepository init --quiet
+        & git -C $sourceRepository config user.name 'Fixture User'
+        & git -C $sourceRepository config user.email 'fixture@example.invalid'
+        Set-Content -LiteralPath (Join-Path $sourceRepository 'tracked.txt') -Value 'committed' -Encoding UTF8
+        & git -C $sourceRepository add tracked.txt
+        & git -C $sourceRepository commit --quiet -m 'fixture'
+        Set-Content -LiteralPath (Join-Path $sourceRepository 'tracked.txt') -Value 'dirty' -Encoding UTF8
+
+        {
+            & (Join-Path $repoRoot 'scripts\complete-delivery.ps1') `
+                -PackageExecutable $script:packageExecutable `
+                -AcceptancePath $script:acceptancePath `
+                -DeliveryRoot $script:deliveryRoot `
+                -Revision $script:revision `
+                -Fingerprint $script:fingerprint `
+                -ResultPath $script:resultPath `
+                -RepositoryRoot $sourceRepository
+        } | Should Throw 'clean source working tree'
+    }
 }
