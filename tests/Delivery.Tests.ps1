@@ -1,5 +1,32 @@
 $repoRoot = Split-Path -Parent $PSScriptRoot
 
+Describe 'Shipping acceptance recorder prompts' {
+    It 'identifies every repeated confirmation by ordinal and check name' {
+        . (Join-Path $repoRoot 'scripts\shipping-acceptance-prompts.ps1')
+        $responses = [Collections.Queue]::new()
+        @('PASS', 'Room A was intact.', 'PASS', 'Escape closed the build.') |
+            ForEach-Object { $responses.Enqueue($_) }
+        $prompts = [Collections.Generic.List[string]]::new()
+        $messages = [Collections.Generic.List[string]]::new()
+        $checks = @(
+            [pscustomobject]@{ id = 'presentation'; prompt = 'Inspect Room A.' },
+            [pscustomobject]@{ id = 'escape-exit'; prompt = 'Press Escape.' }
+        )
+
+        $recorded = @(Read-FPSOneShippingAcceptanceChecks `
+            -Checks $checks `
+            -ReadResponse { param($prompt) $prompts.Add($prompt); $responses.Dequeue() } `
+            -WriteMessage { param($message) $messages.Add($message) })
+
+        $recorded.Count | Should Be 2
+        $prompts[0] | Should Be 'Type PASS for check 1 of 2 [presentation]'
+        $prompts[2] | Should Be 'Type PASS for check 2 of 2 [escape-exit]'
+        ($messages -contains 'Recording check 1 of 2 [presentation]') | Should Be $true
+        ($messages -contains 'Recorded check 1 of 2; next is [escape-exit].') | Should Be $true
+        ($messages -contains 'Recorded all 2 Shipping acceptance checks.') | Should Be $true
+    }
+}
+
 Describe 'Shipping delivery completion' {
     BeforeEach {
         $packageRoot = Join-Path $TestDrive 'Shipping'

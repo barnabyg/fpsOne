@@ -10,6 +10,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
 . (Join-Path $PSScriptRoot 'package-manifest.ps1')
+. (Join-Path $PSScriptRoot 'shipping-acceptance-prompts.ps1')
 if (-not $VerificationResultPath) {
     $VerificationResultPath = Join-Path $repoRoot 'Saved\Verification\verification-result.json'
 }
@@ -56,7 +57,8 @@ function Get-ShippingProcesses {
 }
 
 Write-Output 'Launching the exact verified Shipping build at 2560 x 1440.'
-Write-Output 'Perform each check in the game window, return here, type PASS, and add concrete observed evidence.'
+Write-Output 'Perform all six checks in the game window and finish with Escape.'
+Write-Output 'After the game closes, return here and record six numbered PASS confirmations with concrete observed evidence.'
 $launchTime = Get-Date
 $completed = $false
 try {
@@ -75,23 +77,7 @@ try {
         throw 'The Shipping application did not open a visible game window within 60 seconds.'
     }
 
-    $recordedChecks = foreach ($check in $checks) {
-        Write-Output ''
-        Write-Output $check.prompt
-        $confirmation = Read-Host 'Type PASS after completing this check'
-        if ($confirmation -cne 'PASS') {
-            throw "Manual Shipping acceptance stopped at '$($check.id)'. No evidence was recorded."
-        }
-        $evidence = Read-Host 'Briefly describe what you directly observed'
-        if ([string]::IsNullOrWhiteSpace($evidence)) {
-            throw "Manual Shipping acceptance requires evidence for '$($check.id)'."
-        }
-        [pscustomobject][ordered]@{
-            id = $check.id
-            status = 'passed'
-            evidence = $evidence.Trim()
-        }
-    }
+    $recordedChecks = @(Read-FPSOneShippingAcceptanceChecks -Checks $checks)
 
     Start-Sleep -Seconds 2
     $remainingGameProcesses = @(Get-ShippingProcesses -StartedAt $launchTime)
