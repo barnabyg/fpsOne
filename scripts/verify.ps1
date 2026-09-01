@@ -173,6 +173,25 @@ if ($CompleteVisualReview -or $CompleteDelivery) {
     $otherFailures = @($result.gates | Where-Object { $_.name -notin $completionNames -and $_.status -notin @('passed', 'not_applicable') })
     if ($otherFailures.Count) { throw 'Deterministic verification gates must all pass before completing delivery.' }
 
+    if ($CompleteVisualReview) {
+        foreach ($view in $acceptanceViews) {
+            $review = Confirm-RoomReview $result $EvidenceRoot $revision $initialFingerprint $view.key $view.name
+            $reviewGate = @($result.gates | Where-Object name -eq "$($view.name) visual review")
+            if ($reviewGate.Count -ne 1) { throw "The $($view.name) visual review gate is missing or duplicated." }
+            $reviewGate[0].status = 'passed'
+            $reviewGate[0].details = 'Current agent review passed all required criteria. Both NPC views additionally require character presentation and reference-game evidence.'
+            $capture = $result.($view.key)
+            $reviewGate[0].reportPaths = @($capture.screenshotPath, $capture.reviewPath)
+        }
+        $finalReview = Confirm-FinalVisualReview $result $EvidenceRoot $revision $initialFingerprint
+        $finalGate = @($result.gates | Where-Object name -eq 'Visual acceptance')
+        if ($finalGate.Count -ne 1) { throw 'The final Visual acceptance gate is missing or duplicated.' }
+        $finalGate[0].status = 'passed'
+        $finalGate[0].details = 'The T08 four-view multimodal review passed every criterion and found the complete apartment coherent at the reference benchmark.'
+        $finalGate[0].reportPaths = @($result.finalVisualAcceptance.reviewPath)
+        $result.visualReview = [pscustomobject]@{ status = 'passed'; details = 'T08 passed one current, revision- and hash-linked multimodal review across the four accepted gameplay views.' }
+    }
+
     $deliveryResultPath = Join-Path $logsRoot 'delivery-result.json'
     $acceptancePath = Join-Path $EvidenceRoot 'shipping-manual-acceptance.json'
     & (Join-Path $PSScriptRoot 'complete-delivery.ps1') `
@@ -197,25 +216,6 @@ if ($CompleteVisualReview -or $CompleteDelivery) {
         zipPath = [string] $deliveryResult.zipPath
         zipSha256 = [string] $deliveryResult.zipSha256
         acceptancePath = Get-RelativeEvidencePath $acceptancePath
-    }
-
-    if ($CompleteVisualReview) {
-        foreach ($view in $acceptanceViews) {
-            $review = Confirm-RoomReview $result $EvidenceRoot $revision $initialFingerprint $view.key $view.name
-            $reviewGate = @($result.gates | Where-Object name -eq "$($view.name) visual review")
-            if ($reviewGate.Count -ne 1) { throw "The $($view.name) visual review gate is missing or duplicated." }
-            $reviewGate[0].status = 'passed'
-            $reviewGate[0].details = 'Current agent review passed all required criteria. Both NPC views additionally require character presentation and reference-game evidence.'
-            $capture = $result.($view.key)
-            $reviewGate[0].reportPaths = @($capture.screenshotPath, $capture.reviewPath)
-        }
-        $finalReview = Confirm-FinalVisualReview $result $EvidenceRoot $revision $initialFingerprint
-        $finalGate = @($result.gates | Where-Object name -eq 'Visual acceptance')
-        if ($finalGate.Count -ne 1) { throw 'The final Visual acceptance gate is missing or duplicated.' }
-        $finalGate[0].status = 'passed'
-        $finalGate[0].details = 'The T08 four-view multimodal review passed every criterion and found the complete apartment coherent at the reference benchmark.'
-        $finalGate[0].reportPaths = @($result.finalVisualAcceptance.reviewPath)
-        $result.visualReview = [pscustomobject]@{ status = 'passed'; details = 'T08 passed one current, revision- and hash-linked multimodal review across the four accepted gameplay views.' }
     }
     $result.generatedAtUtc = [DateTime]::UtcNow.ToString('o')
     $result | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $resultPath -Encoding UTF8
