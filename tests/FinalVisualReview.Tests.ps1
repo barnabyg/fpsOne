@@ -2,7 +2,7 @@ $repoRoot = Split-Path -Parent $PSScriptRoot
 
 Describe 'T08 complete-prototype visual acceptance' {
     BeforeEach {
-        . "$repoRoot\scripts\room-a-review.ps1"
+        . "$repoRoot\scripts\visual-review.ps1"
         $captureRoot = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
         New-Item -ItemType Directory -Path $captureRoot | Out-Null
         $result = [pscustomobject]@{

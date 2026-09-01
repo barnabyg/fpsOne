@@ -2,7 +2,7 @@ $repoRoot = Split-Path -Parent $PSScriptRoot
 
 Describe 'Room A visual evidence linkage' {
     BeforeEach {
-        . "$repoRoot\scripts\room-a-review.ps1"
+        . "$repoRoot\scripts\visual-review.ps1"
         $captureRoot = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
         New-Item -ItemType Directory -Path $captureRoot -Force | Out-Null
         Set-Content "$captureRoot\room.png" 'current image bytes'
