@@ -4,6 +4,9 @@ Describe 'canonical verifier' -Tag 'VerifierSelfTest' {
     It 'records actionable current evidence when Unreal Engine is unavailable' {
         $evidenceRoot = Join-Path $TestDrive 'evidence'
         $packageRoot = Join-Path $TestDrive 'package'
+        $shippingPackageRoot = Join-Path $TestDrive 'shipping-package'
+        $deliveryRoot = Join-Path $TestDrive 'delivery'
+        $cleanCloneRoot = Join-Path $TestDrive 'clean-clone'
         $missingEngineRoot = Join-Path $TestDrive 'missing-engine'
         $verifyScript = Join-Path $repoRoot 'scripts\verify.ps1'
 
@@ -11,6 +14,9 @@ Describe 'canonical verifier' -Tag 'VerifierSelfTest' {
             -EngineRoot $missingEngineRoot `
             -EvidenceRoot $evidenceRoot `
             -PackageRoot $packageRoot `
+            -ShippingPackageRoot $shippingPackageRoot `
+            -DeliveryRoot $deliveryRoot `
+            -CleanCloneRoot $cleanCloneRoot `
             -NoOpenDashboard
 
         $LASTEXITCODE | Should Be 1
@@ -28,5 +34,8 @@ Describe 'canonical verifier' -Tag 'VerifierSelfTest' {
         @($result.gates | Where-Object name -eq 'Project health')[0].details | Should Match 'Unreal Engine 5\.8 was not found'
         @($result.gates | Where-Object name -eq 'Repository tests')[0].status | Should Be 'passed'
         @($result.gates | Where-Object name -eq 'Development package')[0].status | Should Be 'skipped'
+        @($result.gates | Where-Object name -eq 'Shipping package')[0].status | Should Be 'skipped'
+        @($result.gates | Where-Object name -eq 'Shipping manual acceptance')[0].status | Should Be 'skipped'
+        @($result.gates | Where-Object name -eq 'Versioned Shipping ZIP')[0].status | Should Be 'skipped'
     }
 }

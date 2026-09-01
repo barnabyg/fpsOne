@@ -10,7 +10,9 @@ The dashboard is complete when it shows:
 - every required gate from `verification.md`, with status and duration;
 - direct links to retained logs and reports;
 - the current visual-acceptance screenshot and multimodal review when that gate is active, or the ticket-scoped activation condition when it is not yet applicable;
-- the packaged-build artifact path;
+- the Development and Shipping executable paths;
+- the guided Shipping acceptance record tied to the tested executable hash;
+- the versioned delivery ZIP path and SHA-256;
 - all warning exceptions; and
 - a conspicuous stale marker when results do not match the current working tree.
 
