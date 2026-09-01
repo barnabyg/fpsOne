@@ -7,7 +7,8 @@ Describe 'Shipping delivery completion' {
         New-Item -ItemType Directory -Path $windowsRoot -Force | Out-Null
         $script:packageExecutable = Join-Path $windowsRoot 'FPSOne.exe'
         Set-Content -LiteralPath $script:packageExecutable -Value 'shipping executable fixture' -Encoding UTF8
-        Set-Content -LiteralPath (Join-Path $windowsRoot 'FPSOne.pak') -Value 'shipping content fixture' -Encoding UTF8
+        $script:packageContent = Join-Path $windowsRoot 'FPSOne.pak'
+        Set-Content -LiteralPath $script:packageContent -Value 'shipping content fixture' -Encoding UTF8
 
         $script:revision = '0123456789abcdef0123456789abcdef01234567'
         $script:fingerprint = 'sha256:' + ('a' * 64)
@@ -23,6 +24,18 @@ Describe 'Shipping delivery completion' {
             fingerprint = $script:fingerprint
             packageExecutable = $script:packageExecutable
             packageExecutableSha256 = $executableHash
+            packageFiles = @(
+                @{
+                    path = 'Windows\FPSOne.exe'
+                    length = (Get-Item -LiteralPath $script:packageExecutable).Length
+                    sha256 = $executableHash
+                },
+                @{
+                    path = 'Windows\FPSOne.pak'
+                    length = (Get-Item -LiteralPath $script:packageContent).Length
+                    sha256 = (Get-FileHash -LiteralPath $script:packageContent -Algorithm SHA256).Hash.ToLowerInvariant()
+                }
+            )
             resolution = @{ width = 2560; height = 1440 }
             checks = @(
                 @{ id = 'room-traversal'; status = 'passed'; evidence = 'Walked through both furnished Rooms.' },
@@ -64,6 +77,20 @@ Describe 'Shipping delivery completion' {
                 -Fingerprint $script:fingerprint `
                 -ResultPath $script:resultPath
         } | Should Throw 'does not match the current Shipping executable'
+    }
+
+    It 'rejects changes anywhere in the manually accepted Shipping package' {
+        Add-Content -LiteralPath $script:packageContent -Value 'changed after acceptance'
+
+        {
+            & (Join-Path $repoRoot 'scripts\complete-delivery.ps1') `
+                -PackageExecutable $script:packageExecutable `
+                -AcceptancePath $script:acceptancePath `
+                -DeliveryRoot $script:deliveryRoot `
+                -Revision $script:revision `
+                -Fingerprint $script:fingerprint `
+                -ResultPath $script:resultPath
+        } | Should Throw 'complete Shipping package'
     }
 
     It 'rejects incomplete manual checklist evidence' {

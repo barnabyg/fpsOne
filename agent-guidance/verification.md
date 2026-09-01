@@ -60,8 +60,9 @@ manual journey against that executable. Agents then use
 `verify.ps1 -RequireVisualReview -CompleteVisualReview`; the visual completion
 also completes delivery. Humans use `verify.ps1 -CompleteDelivery`. Completion
 rejects a changed revision/fingerprint, changed executable hash, incomplete
-manual checklist, or deterministic failure, then creates the versioned ZIP and
-hash under `C:\fpsOne-output\Delivery`.
+manual checklist, any change to the complete accepted Shipping package, or a
+deterministic failure, then creates the versioned ZIP and hash under
+`C:\fpsOne-output\Delivery`.
 
 Before a ticket introduces the feature exercised by a later gate, the verifier may mark that gate not applicable only when the result names the missing slice and the ticket that activates it. Through T03, repository tests cover the configured input surface, the player-facing world Interaction scenario is required, and the Development package must pass a launch smoke test. T03 requires both NPC exchanges, replay, collision, suspended scanning and walking, bounded mouse look, restored controls, and fresh-session reset alongside the existing Door checks. The four-view final-art agent visual gate activates with T08. These staged exceptions expire when their activating slices land and do not weaken the complete-prototype profile.
 

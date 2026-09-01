@@ -24,6 +24,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'package-manifest.ps1')
 
 function Assert-PathOutsideRepository {
     param([string] $Path, [string] $Root)
@@ -88,13 +89,12 @@ if ($acceptance.packageExecutableSha256 -ne $currentExecutableHash) {
     throw 'Shipping acceptance does not match the current Shipping executable.'
 }
 
-$packageDirectory = Split-Path -Parent $PackageExecutable
-if ((Split-Path -Leaf $packageDirectory) -eq 'Windows') {
-    $packageDirectory = Split-Path -Parent $packageDirectory
-}
+$packageDirectory = Get-FPSOnePackageRoot -PackageExecutable $PackageExecutable
 if (-not (Test-Path -LiteralPath $packageDirectory -PathType Container)) {
     throw "Shipping package directory was not found at '$packageDirectory'."
 }
+$currentPackageManifest = @(Get-FPSOnePackageManifest -PackageRoot $packageDirectory)
+Assert-FPSOnePackageManifest -Expected @($acceptance.packageFiles) -Actual $currentPackageManifest
 
 New-Item -ItemType Directory -Path $DeliveryRoot -Force | Out-Null
 $shortRevision = $Revision.Substring(0, 12).ToLowerInvariant()
@@ -123,6 +123,7 @@ if ($resultDirectory) {
     fingerprint = $Fingerprint
     packageExecutable = [IO.Path]::GetFullPath($PackageExecutable)
     packageExecutableSha256 = $currentExecutableHash
+    packageFiles = $currentPackageManifest
     acceptancePath = [IO.Path]::GetFullPath($AcceptancePath)
     zipPath = [IO.Path]::GetFullPath($zipPath)
     zipSha256 = $zipHash

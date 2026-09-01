@@ -85,7 +85,7 @@ Run the guided walkthrough against the exact Shipping executable stored in `veri
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\record-shipping-acceptance.ps1
 ```
 
-The recorder launches at 2560 × 1440 and writes `Saved\Verification\shipping-manual-acceptance.json` only after every required check is explicitly confirmed with observed evidence and Escape has closed the application. It records the tested revision, complete working-tree fingerprint, executable path/hash, reviewer, resolution, and checklist.
+The recorder launches at 2560 × 1440 and writes `Saved\Verification\shipping-manual-acceptance.json` only after every required check is explicitly confirmed with observed evidence and Escape has closed the application. It records the tested revision, complete working-tree fingerprint, executable path/hash, a path/size/SHA-256 manifest for every packaged file, reviewer, resolution, and checklist. Completion rejects any change to the executable, PAK, DLLs, configuration, or other Shipping content.
 
 After writing the current visual reviews, agent completion validates the unchanged evidence and also creates the delivery:
 

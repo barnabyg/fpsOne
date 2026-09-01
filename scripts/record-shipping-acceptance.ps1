@@ -9,6 +9,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
+. (Join-Path $PSScriptRoot 'package-manifest.ps1')
 if (-not $VerificationResultPath) {
     $VerificationResultPath = Join-Path $repoRoot 'Saved\Verification\verification-result.json'
 }
@@ -27,6 +28,8 @@ if (-not $packageExecutable) {
 if (-not (Test-Path -LiteralPath $packageExecutable -PathType Leaf)) {
     throw "The verified Shipping executable was not found at '$packageExecutable'."
 }
+$packageRoot = Get-FPSOnePackageRoot -PackageExecutable $packageExecutable
+$initialPackageManifest = @(Get-FPSOnePackageManifest -PackageRoot $packageRoot)
 if (-not $OutputPath) {
     $OutputPath = Join-Path (Split-Path -Parent $VerificationResultPath) 'shipping-manual-acceptance.json'
 }
@@ -95,6 +98,8 @@ try {
     if ($remainingGameProcesses.Count -gt 0) {
         throw 'The Shipping application is still running after the Escape-exit check.'
     }
+    $finalPackageManifest = @(Get-FPSOnePackageManifest -PackageRoot $packageRoot)
+    Assert-FPSOnePackageManifest -Expected $initialPackageManifest -Actual $finalPackageManifest
 
     $outputDirectory = Split-Path -Parent $OutputPath
     if ($outputDirectory) {
@@ -108,6 +113,7 @@ try {
         fingerprint = [string] $verification.fingerprint
         packageExecutable = [IO.Path]::GetFullPath($packageExecutable)
         packageExecutableSha256 = (Get-FileHash -LiteralPath $packageExecutable -Algorithm SHA256).Hash.ToLowerInvariant()
+        packageFiles = $finalPackageManifest
         resolution = [pscustomobject][ordered]@{ width = 2560; height = 1440 }
         checks = @($recordedChecks)
     } | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $OutputPath -Encoding UTF8
