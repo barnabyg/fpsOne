@@ -134,12 +134,13 @@ for obj in parts.values():
 
 scene = bpy.context.scene
 scene.render.fps = 30
-scene.frame_start, scene.frame_end = 1, 241
+duration = recipe['animationDuration']
+scene.frame_start, scene.frame_end = 1, int(duration * scene.render.fps) + 1
 rig.animation_data_create()
 relaxed_arms = {}
 for side, sign in (('L', 1), ('R', -1)):
     bone = rig.data.bones['upperarm01.' + side]
-    direction = bone.matrix_local.to_3x3().inverted() @ Vector((sign * 0.14, -0.03, -1))
+    direction = bone.matrix_local.to_3x3().inverted() @ Vector((sign * 0.10, -0.03, -1))
     relaxed_arms[side] = Vector((0, 1, 0)).rotation_difference(direction.normalized()).to_euler('XYZ')
 
 
@@ -149,37 +150,84 @@ def pose(bone, degrees):
     item.rotation_euler = tuple(math.radians(v) for v in degrees)
 
 
+def add_pose(bone, degrees, amount=1.0):
+    item = rig.pose.bones[bone]
+    item.rotation_mode = 'XYZ'
+    for axis, value in enumerate(degrees):
+        item.rotation_euler[axis] += math.radians(value * amount)
+
+
+def pulse(time, start, peak, end):
+    if time <= start or time >= end:
+        return 0.0
+    if time <= peak:
+        phase = (time - start) / (peak - start)
+    else:
+        phase = (end - time) / (end - peak)
+    return math.sin(math.pi * 0.5 * phase) ** 2
+
+
 def animate(name, talking=False):
     action = bpy.data.actions.new(name)
     action.use_fake_user = True
     rig.animation_data.action = action
-    for frame in range(1, 242):
-        t = (frame - 1) / 30
-        breath = math.sin(t * math.tau / 4)
-        shift = math.sin(t * math.tau / 8)
-        gesture = math.sin(math.pi * min(1, max(0, (t - 1) / 3))) ** 2 if talking else 0
+    for frame in range(scene.frame_start, scene.frame_end + 1):
+        t = (frame - scene.frame_start) / scene.render.fps
+        phase = t / duration
+        primary, secondary = recipe['breathCycles']
+        breath = (math.sin(math.tau * primary * phase) +
+                  0.22 * math.sin(math.tau * secondary * phase + 0.35))
+        shift_cycles = recipe['weightShift']['cycles']
+        shift_phases = recipe['weightShift']['phases']
+        shift = (math.sin(math.tau * shift_cycles[0] * phase + shift_phases[0]) +
+                 0.28 * math.sin(math.tau * shift_cycles[1] * phase + shift_phases[1]))
         for bone in rig.pose.bones:
             bone.rotation_mode = 'XYZ'
             bone.rotation_euler = (0, 0, 0)
-        # Relax MPFB's A-pose, keep feet planted, breathe through upper spine.
+        # Relax MPFB's A-pose. The pelvis and legs remain untouched so the feet
+        # stay planted; small opposing spine rotations imply weight transfer.
         for side, sign in (('L', 1), ('R', -1)):
             rig.pose.bones['upperarm01.' + side].rotation_euler = relaxed_arms[side]
-            pose('lowerarm01.' + side, (6, 0, 0))
+            pose('lowerarm01.' + side, (recipe['restElbows'][side], 0, 0))
+            pose('wrist.' + side, (0, 0, sign * (0.7 if side == recipe['gestureSide'] else 0.2)))
+            for finger in range(1, 6):
+                for joint in range(1, 4):
+                    curve = (7, 13, 10)[joint - 1] + (finger - 3) * 0.6
+                    pose(f'finger{finger}-{joint}.{side}', (0, 0, sign * curve))
+        lean = recipe['restLean']
+        pose('spine01', (0.18 * shift, 0, -0.25 * shift))
+        pose('spine02', (lean[0] + 0.55 * breath, lean[1] + 0.14 * shift,
+                         lean[2] + 0.42 * shift))
+        pose('spine03', (0.28 * breath, -0.08 * shift, -0.18 * shift))
+        pose('neck01', (0.18 * breath, 0.22 * shift, 0))
+        pose('head', (0.20 * breath, 0.28 * shift, 0))
+        for glance in recipe['glances']:
+            amount = pulse(t, glance['start'], glance['peak'], glance['end'])
+            add_pose('neck01', (glance['pitch'] * 0.35, glance['yaw'] * 0.35, 0), amount)
+            add_pose('head', (glance['pitch'], glance['yaw'], 0), amount)
+        for adjustment in recipe['handAdjustments']:
+            amount = pulse(t, adjustment['start'], adjustment['peak'], adjustment['end'])
+            side = adjustment['side']
+            sign = 1 if side == 'L' else -1
+            add_pose('wrist.' + side, adjustment['wrist'], amount)
             for finger in range(2, 6):
                 for joint in range(1, 4):
-                    pose(f'finger{finger}-{joint}.{side}', (0, 0, sign * 12))
-        pose('spine02', (0.6 * breath, 0, 0.45 * shift))
-        pose('neck01', (0.35 * breath + 1.2 * gesture, 0.5 * shift, 0))
-        pose('head', (0.4 * breath + 1.5 * gesture, 0.7 * shift, 0))
+                    add_pose(f'finger{finger}-{joint}.{side}',
+                             (0, 0, sign * adjustment['curl']), amount)
         if talking:
-            side = recipe['gestureSide']
-            sign = 1 if side == 'R' else -1
-            upper = rig.pose.bones['upperarm01.' + side]
-            upper.rotation_euler.x += math.radians(-8 * gesture)
-            upper.rotation_euler.z += math.radians(sign * 8 * gesture)
-            pose('lowerarm01.' + side, (6 + 38 * gesture, -sign * 10 * gesture, 0))
-            pose('wrist.' + side, (0, sign * 12 * gesture, sign * 3 * gesture))
-        # Two short eyelid closures per eight-second loop; no mouth animation.
+            for gesture in recipe['talkGestures']:
+                amount = pulse(t, gesture['start'], gesture['peak'], gesture['end'])
+                side = gesture['side']
+                sign = 1 if side == 'L' else -1
+                add_pose('upperarm01.' + side, gesture['upper'], amount)
+                add_pose('lowerarm01.' + side, gesture['lower'], amount)
+                add_pose('wrist.' + side, gesture['wrist'], amount)
+                add_pose('head', gesture['head'], amount)
+                for finger in range(2, 6):
+                    for joint in range(1, 4):
+                        add_pose(f'finger{finger}-{joint}.{side}',
+                                 (0, 0, sign * gesture['curl']), amount)
+        # Irregular short closures across the long loop; no mouth animation.
         blink = max(max(0, 1 - abs(t - centre) / 0.12) for centre in recipe['blinkTimes'])
         for side in ('L', 'R'):
             pose('orbicularis03.' + side, (-22 * blink, 0, 0))
@@ -217,6 +265,12 @@ for action in (idle, talk):
     bpy.ops.export_scene.fbx(filepath=str(OUTPUT / (action.name + '.fbx')), bake_anim=True, **export)
 (OUTPUT / 'recipe.json').write_text(json.dumps(dict(macro=macro, textures=texture_sources,
     rig='MPFB default', parts={name: str(obj.name) for name, obj in parts.items()},
-    materialTints=recipe.get('materialTints', {}),
-    animations=[idle.name, talk.name], author='fpsOne contributors', license='CC0-1.0'), indent=2) + '\n')
+    materialTints=recipe.get('materialTints', {}), animations=[idle.name, talk.name],
+    animation=dict(durationSeconds=duration, fps=scene.render.fps,
+                   restElbows=recipe['restElbows'], restLean=recipe['restLean'],
+                   breathCycles=recipe['breathCycles'], weightShift=recipe['weightShift'],
+                   blinkTimes=recipe['blinkTimes'],
+                   glances=recipe['glances'], handAdjustments=recipe['handAdjustments'],
+                   talkGestures=recipe['talkGestures']),
+    author='fpsOne contributors', license='CC0-1.0'), indent=2) + '\n')
 print('CHARACTER_EXPORT_PASSED NPC_' + resident)

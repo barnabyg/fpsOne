@@ -14,6 +14,12 @@ DOOR_ASSET = "/Game/Blueprints/BP_Door"
 TEST_TARGET_ASSET = "/Game/Blueprints/BP_InteractionTestTarget"
 INTERACTION_COMPONENT_ASSET = "/Game/Blueprints/BPC_Interaction"
 INTERACTABLE_COMPONENT_ASSET = "/Game/Blueprints/BPC_Interactable"
+NPC_PRESENTATIONS = (
+    dict(rest_yaw=0, approach_direction=1.0, view_yaw=180.0,
+         gesture_wrist='wrist_R', extended_presentation=False),
+    dict(rest_yaw=180, approach_direction=-1.0, view_yaw=0.0,
+         gesture_wrist='wrist_L', extended_presentation=True),
+)
 
 
 def require(condition, message):
@@ -70,20 +76,185 @@ def hold_input(world, controller, key, frames, value=1.0):
     yield
 
 
-def smooth_resident_motion(world, resident, steps, wrist='wrist_R'):
-    """Observe the visible wrist while E dismisses/replays a mid-arm gesture."""
+def smooth_resident_motion(world, resident, steps, wrist='wrist_R', settle_seconds=3.2):
+    """Observe the resident through input and any deferred clip transition."""
     require(resident.does_socket_exist(wrist), 'Imported rig must retain its wrist marker')
     previous = resident.get_socket_location(wrist)
     previous_time = unreal.GameplayStatics.get_time_seconds(world)
-    for _ in steps:
-        yield
+    owner = resident.get_owner()
+    owner_location = owner.get_actor_location()
+    planted_feet = (resident.get_socket_location('foot_L'), resident.get_socket_location('foot_R'))
+
+    def observe_frame():
+        nonlocal previous, previous_time
         current = resident.get_socket_location(wrist)
         now = unreal.GameplayStatics.get_time_seconds(world)
+        elapsed = max(0, now - previous_time)
+        wrist_travel = (current - previous).length()
         # Generous motion bound: a restrained hand must not jump tens of cm
         # in a frame. Time scaling keeps this meaningful in headless and RHI runs.
-        require((current - previous).length() < 250 * (now - previous_time) + 1,
-                'Dismissal/replay must not snap the resident arm to another pose')
+        # The clips are baked at 30 fps, so a rendered frame can legitimately
+        # consume a complete authored sample even when the headless world ticks
+        # faster. Evaluate velocity over at least one baked sample while still
+        # rejecting the tens-of-centimetres discontinuity caused by a pose reset.
+        require(wrist_travel < 250 * max(elapsed, 1 / 30) + 1,
+                f'NPC transition must not snap the resident arm to another pose; '
+                f'wrist moved {wrist_travel:.2f} cm in {elapsed:.4f} seconds at clip '
+                f'position {resident.get_position():.2f}')
+        require((owner.get_actor_location() - owner_location).length() < 0.1,
+                'NPC acknowledgement and clip transitions must not translate the resident')
+        for side, planted in zip(('foot_L', 'foot_R'), planted_feet):
+            require((resident.get_socket_location(side) - planted).length() < 4,
+                    'NPC transition must retain visibly planted world-space feet')
         previous, previous_time = current, now
+
+    for _ in steps:
+        yield
+        observe_frame()
+    deadline = unreal.GameplayStatics.get_time_seconds(world) + settle_seconds
+    while unreal.GameplayStatics.get_time_seconds(world) < deadline:
+        yield
+        observe_frame()
+
+
+def visible_resident(npc):
+    residents = [mesh for mesh in npc.get_components_by_class(unreal.SkeletalMeshComponent)
+                 if mesh.get_skeletal_mesh_asset() is not None and mesh.is_visible()]
+    require(len(residents) == 1, 'Each NPC must present one visible imported resident')
+    return residents[0]
+
+
+def component_socket(resident, name):
+    require(resident.does_socket_exist(name), f'Imported rig must retain its {name} marker')
+    return resident.get_socket_transform(
+        name, unreal.RelativeTransformSpace.RTS_COMPONENT).translation
+
+
+def component_rotation(resident, name):
+    require(resident.does_socket_exist(name), f'Imported rig must retain its {name} marker')
+    return resident.get_socket_transform(
+        name, unreal.RelativeTransformSpace.RTS_COMPONENT).rotation
+
+
+def joint_angle(origin, joint, end):
+    first, second = origin - joint, end - joint
+    cosine = (first.x * second.x + first.y * second.y + first.z * second.z) / (
+        first.length() * second.length())
+    return math.degrees(math.acos(max(-1.0, min(1.0, cosine))))
+
+
+def observe_acknowledgement(world, player, npc, resident, rest_yaw, wrist):
+    """Exercise the restrained turn and return while monitoring the full transition."""
+    def transition_steps():
+        radians = math.radians(rest_yaw + 60)
+        npc_location = npc.get_actor_location()
+        player.set_actor_location(
+            npc_location + unreal.Vector(200 * math.cos(radians), 200 * math.sin(radians), 0),
+            False, False)
+        turn_deadline = unreal.GameplayStatics.get_time_seconds(world) + 5
+        while abs((npc.get_actor_rotation().yaw - rest_yaw + 180) % 360 - 180) < 3:
+            require(unreal.GameplayStatics.get_time_seconds(world) < turn_deadline,
+                    'Nearby NPC must begin a restrained acknowledgement turn')
+            yield
+        player.set_actor_location(unreal.Vector(-500, 500, 90), False, False)
+        return_deadline = unreal.GameplayStatics.get_time_seconds(world) + 5
+        while abs((npc.get_actor_rotation().yaw - rest_yaw + 180) % 360 - 180) > 0.5:
+            require(unreal.GameplayStatics.get_time_seconds(world) < return_deadline,
+                    'NPC must return smoothly to its authored rest direction')
+            yield
+
+    yield from smooth_resident_motion(
+        world, resident, transition_steps(), wrist=wrist, settle_seconds=0)
+
+
+def observe_residents_at_rest(world, player, npcs):
+    """Observe the shipped presentation rather than the authored curve data."""
+    player.set_actor_location(unreal.Vector(-500, 500, 90), False, False)
+    residents = [visible_resident(npc) for npc in npcs]
+    for _ in range(300):
+        yield
+
+    samples = [[] for _ in residents]
+    feet = [
+        (component_socket(resident, 'foot_L'), component_socket(resident, 'foot_R'))
+        for resident in residents
+    ]
+    world_feet = [
+        (resident.get_socket_location('foot_L'), resident.get_socket_location('foot_R'))
+        for resident in residents
+    ]
+    start = unreal.GameplayStatics.get_time_seconds(world)
+    next_sample = start
+    while unreal.GameplayStatics.get_time_seconds(world) - start < 24.0:
+        now = unreal.GameplayStatics.get_time_seconds(world)
+        if now >= next_sample:
+            for index, resident in enumerate(residents):
+                left_foot, right_foot = component_socket(resident, 'foot_L'), component_socket(resident, 'foot_R')
+                require((left_foot - feet[index][0]).length() < 0.5 and
+                        (right_foot - feet[index][1]).length() < 0.5,
+                        f'NPC {index + 1} must keep both feet planted throughout idle')
+                require((resident.get_socket_location('foot_L') - world_feet[index][0]).length() < 0.75 and
+                        (resident.get_socket_location('foot_R') - world_feet[index][1]).length() < 0.75,
+                        f'NPC {index + 1} feet must not slide through the world throughout idle')
+                head = component_socket(resident, 'head')
+                samples[index].append(dict(
+                    head=head,
+                    wrist_left=component_socket(resident, 'wrist_L'),
+                    wrist_right=component_socket(resident, 'wrist_R'),
+                    torso_rotation=component_rotation(resident, 'spine02')))
+            next_sample += 1.0
+        yield
+
+    require(all(len(resident_samples) >= 24 for resident_samples in samples),
+            'Idle observation must cover at least 24 one-second samples')
+    for index, (resident, resident_samples) in enumerate(zip(residents, samples)):
+        # A short loop exposes itself when the same head-and-hand pose returns at
+        # eight-second offsets. A 24-second authored performance must differ.
+        repeat_deltas = []
+        for sample_index in range(8):
+            first, second, third = (resident_samples[sample_index],
+                                    resident_samples[sample_index + 8],
+                                    resident_samples[sample_index + 16])
+            repeat_deltas.extend(
+                sum((later[field] - earlier[field]).length()
+                    for field in ('head', 'wrist_left', 'wrist_right'))
+                for earlier, later in ((first, second), (second, third)))
+        require(sum(delta > 0.25 for delta in repeat_deltas) >= len(repeat_deltas) // 2 and
+                sum(repeat_deltas) / len(repeat_deltas) > 0.3,
+                f'NPC {index + 1} idle must not expose an eight-second repeated beat')
+        for side in ('L', 'R'):
+            elbow = joint_angle(component_socket(resident, 'upperarm01_' + side),
+                                component_socket(resident, 'lowerarm01_' + side),
+                                component_socket(resident, 'wrist_' + side))
+            unreal.log(f'T10_REST_ELBOW NPC {index + 1} {side}: {elbow:.1f} degrees')
+            require(100 < elbow < 125,
+                    f'NPC {index + 1} {side} elbow must remain softly bent at rest; got {elbow:.1f} degrees')
+    # Compare centred torso motion so different bodies, hands, or static rest
+    # poses cannot make synchronized whole-body sway appear distinct.
+    correlations = {}
+    for axis in ('x', 'y', 'z'):
+        signals = []
+        for resident_samples in samples:
+            signals.append([
+                getattr(sample['torso_rotation'], axis)
+                for sample in resident_samples[:24]
+            ])
+        if min(max(signal) - min(signal) for signal in signals) < 0.00001:
+            continue
+        centred = [[value - sum(signal) / len(signal) for value in signal]
+                   for signal in signals]
+        denominator = math.sqrt(sum(value * value for value in centred[0]) *
+                                sum(value * value for value in centred[1]))
+        correlations[axis] = abs(sum(first * second for first, second in zip(*centred)) /
+                                 denominator)
+    unreal.log(f'T10_IDLE_CORRELATIONS: {correlations}')
+    require(correlations and max(correlations.values()) < 0.9,
+            f'NPC A and NPC B must not share synchronized whole-body sway; correlations {correlations}')
+    for npc, resident, presentation in zip(npcs, residents, NPC_PRESENTATIONS):
+        yield from observe_acknowledgement(
+            world, player, npc, resident, presentation['rest_yaw'],
+            presentation['gesture_wrist'])
+    unreal.log('T10_NPC_ANIMATION_PASSED')
 
 
 def capture_presentation(world, controller, name):
@@ -166,6 +337,7 @@ def exercise_both_dialogues(world, player, controller, interactable_class, inter
     presentation = controller.get_hud()
     require(len(npcs) == 2, "Both dialogue occupants must exist on launch")
     for index, npc in enumerate(npcs):
+        npc_presentation = NPC_PRESENTATIONS[index]
         require(npc.get_component_by_class(interactable_class) is not None, "NPC must supply the shared Interactable contract")
         residents = [mesh for mesh in npc.get_components_by_class(unreal.SkeletalMeshComponent)
                      if mesh.get_skeletal_mesh_asset() is not None and mesh.is_visible()]
@@ -173,10 +345,10 @@ def exercise_both_dialogues(world, player, controller, interactable_class, inter
         resident = residents[0]
         require(135 < resident.get_socket_location('head').z - npc.get_actor_location().z + 90 < 190,
                 'Both residents must idle at adult standing height')
-        direction = 1.0 if index == 0 else -1.0
+        direction = npc_presentation['approach_direction']
         start = npc.get_actor_location() + unreal.Vector(direction * 150.0, 0.0, 0.0)
         player.set_actor_location(start, False, False)
-        controller.set_control_rotation(unreal.Rotator(yaw=180.0 if index == 0 else 0.0))
+        controller.set_control_rotation(unreal.Rotator(yaw=npc_presentation['view_yaw']))
         yield
         player.set_actor_location(npc.get_actor_location() - unreal.Vector(direction * 100.0, 0.0, 0.0), True, False)
         require((player.get_actor_location().x - npc.get_actor_location().x) * direction > 50.0, "The NPC capsule must block the Player")
@@ -185,21 +357,27 @@ def exercise_both_dialogues(world, player, controller, interactable_class, inter
         yield
         for cycle in range(cycles):
             require(str(property_value(presentation, "PromptText")) == "E — Talk", "Either NPC must present the shared Talk prompt")
-            for expected in expected_exchanges[index]:
-                yield from press_e(world, controller)
+            for line_index, expected in enumerate(expected_exchanges[index]):
+                activation = press_e(world, controller)
+                if line_index == 0:
+                    yield from smooth_resident_motion(
+                        world, resident, activation,
+                        npc_presentation['gesture_wrist'])
+                else:
+                    yield from activation
                 require(bool(property_value(presentation, "DialogueVisible")), "The shared dialogue panel must be visible")
                 require(str(property_value(presentation, "DialogueText")) == expected, "Either NPC must replay its own speaker-labelled lines in order")
                 require(135 < resident.get_socket_location('head').z - npc.get_actor_location().z + 90 < 190,
                         'Both residents must keep adult standing height throughout dialogue')
-            if index == 1 and cycle == 0 and cycles > 1:
+            if npc_presentation['extended_presentation'] and cycle == 0 and cycles > 1:
                 yield from exercise_npc_b_presentation(world, player, controller, npc, resident, interaction)
             yield from smooth_resident_motion(world, resident, press_e(world, controller),
-                                              'wrist_R' if index == 0 else 'wrist_L')
+                                              npc_presentation['gesture_wrist'])
             require(not bool(property_value(presentation, "DialogueVisible")), "Either exchange must dismiss after its last line")
             require(controller.get_hud() == presentation, "Both NPCs must reuse the same presentation")
             require(str(property_value(presentation, 'PromptText')) == 'E — Talk',
                     'Either exchange must immediately restore scanning and its Talk prompt')
-            if index == 1 and cycle == 0 and cycles > 1:
+            if npc_presentation['extended_presentation'] and cycle == 0 and cycles > 1:
                 before = player.get_actor_location()
                 yield from hold_input(world, controller, 'S', 12)
                 require((player.get_actor_location() - before).length() > 5,
@@ -218,7 +396,7 @@ def exercise_npc_b_presentation(world, player, controller, npc, resident, intera
     """Observe NPC B's presentation and suspended controls through a real exchange."""
     yield from exercise_dialogue_controls(world, player, controller, interaction)
     controller.set_control_rotation(unreal.Rotator())
-    yield from wait_for_resident_gesture(resident, 'wrist_L')
+    yield from wait_for_resident_gestures(resident, 'wrist_L')
     require(abs((npc.get_actor_rotation().yaw - 180 + 180) % 360 - 180) < 12.1,
             'NPC B must acknowledge the Player around its Room B facing direction')
 
@@ -240,15 +418,24 @@ def exercise_dialogue_controls(world, player, controller, interaction):
     return stationary
 
 
-def wait_for_resident_gesture(resident, wrist):
-    """Require visible wrist travel, then return at the gesture peak for E tests."""
+def wait_for_resident_gestures(resident, wrist):
+    """Detect two separated gesture beats without coupling the test to curve timings."""
     yield from wait_for(lambda: 0.35 < resident.get_position() < 0.65,
-                        'The resident must reach its conversational rest pose', frames=2400)
+                        'The resident must reach its conversational rest pose', frames=7200)
     resting_wrist = resident.get_socket_location(wrist)
-    yield from wait_for(lambda: 2.35 < resident.get_position() < 2.65,
-                        'The conversational gesture must advance', frames=2400)
-    require((resident.get_socket_location(wrist) - resting_wrist).length() > 5,
-            'The resident must make a visible conversational hand gesture')
+    beats = 0
+    active = False
+    for _ in range(7200):
+        travel = (resident.get_socket_location(wrist) - resting_wrist).length()
+        if not active and travel > 5:
+            beats += 1
+            active = True
+            if beats == 2:
+                return
+        elif active and travel < 3:
+            active = False
+        yield
+    raise AssertionError('The resident must make two visible gesture beats separated by a rest pose')
 
 
 def exercise_door_motion(world, controller, leaf, closed_location, interaction, interactable, opening):
@@ -522,12 +709,15 @@ def interaction_scenario():
     player.set_actor_location(unreal.Vector(-200.0, 0.0, 90.0), True, False)
     require(player.get_actor_location().x > 0.0, "Closed Door did not restore its passage obstruction")
 
-    npcs = unreal.GameplayStatics.get_all_actors_with_tag(world, unreal.Name("DialogueNPC"))
+    npcs = sorted(
+        unreal.GameplayStatics.get_all_actors_with_tag(world, unreal.Name("DialogueNPC")),
+        key=lambda actor: actor.get_actor_location().x)
     require(len(npcs) == 2, "Each Room must contain one Dialogue NPC")
     require(
         sum(npc.get_actor_location().x < 0.0 for npc in npcs) == 1,
         "NPCs must occupy different Rooms",
     )
+    yield from observe_residents_at_rest(world, player, npcs)
     npc = min(npcs, key=lambda actor: actor.get_actor_location().x)
     # Observe the imported rig in the running world, including animation scale.
     # The editable MPFB source publishes its anatomical head marker. A valid
@@ -543,7 +733,7 @@ def interaction_scenario():
     yield
     yield
     require(str(property_value(interaction, "CurrentPrompt")) == "E — Talk", "Focused NPC must offer E — Talk")
-    yield from press_e(world, controller)
+    yield from smooth_resident_motion(world, resident, press_e(world, controller))
     presentation = controller.get_hud()
     require(bool(property_value(presentation, "DialogueVisible")), "E must open the dialogue panel")
     require(135 < resident.get_socket_location('head').z - npc.get_actor_location().z + 90 < 190,
@@ -557,7 +747,7 @@ def interaction_scenario():
     require(str(property_value(presentation, "DialogueText")) == "Resident A: You are welcome to look around.", "The final line must remain visible until E")
     # Schedule E near the visible gesture's peak, then observe actual bone
     # motion across dismissal and immediate replay through the Player input.
-    yield from wait_for_resident_gesture(resident, 'wrist_R')
+    yield from wait_for_resident_gestures(resident, 'wrist_R')
     yield from smooth_resident_motion(world, resident, press_e(world, controller))
     require(not bool(property_value(presentation, "DialogueVisible")), "E after the final line must dismiss dialogue")
     yield from smooth_resident_motion(world, resident, press_e(world, controller))
@@ -571,7 +761,7 @@ def interaction_scenario():
     return_deadline = unreal.GameplayStatics.get_time_seconds(world) + 4.1
     yield from smooth_resident_motion(world, resident, wait_for(
         lambda: unreal.GameplayStatics.get_time_seconds(world) >= return_deadline,
-        'The resident must finish returning to rest', frames=2400))
+        'The resident must finish returning to rest', frames=2400), settle_seconds=0)
     controller.set_control_rotation(unreal.Rotator(yaw=180.0))
     yield
     yield
@@ -624,5 +814,5 @@ def interaction_scenario():
     level_subsystem.editor_request_end_play()
 
 
-unreal.AutomationScheduler.set_latent_command_timeout(60.0)
+unreal.AutomationScheduler.set_latent_command_timeout(180.0)
 unreal.AutomationScheduler.add_latent_command(interaction_scenario())

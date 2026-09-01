@@ -104,7 +104,7 @@ def character_material(name, filename, roughness, masked=False, normal=None):
     return material
 
 
-def add_presentation_graph(blueprint, idle, talk, rest_yaw):
+def add_presentation_graph(blueprint, idle, talk, rest_yaw, talk_gestures):
     construction = unreal.BlueprintGraphEditor.get_graph_editor_by_name(blueprint, 'UserConstructionScript')
     execution = construction.find_graph_entry_pin()
     for index, name in enumerate(('ProxyBody', 'ProxyHead')):
@@ -140,18 +140,27 @@ def add_presentation_graph(blueprint, idle, talk, rest_yaw):
     changed = add_function_call(graph, '/Script/Engine.KismetMathLibrary:NotEqual_BoolBool', -150, -200, 'animation transition')
     connect(equal.find_result_pin(), changed.find_input_pin('A'), 'current speaking state')
     connect(previous.find_result_pin(), changed.find_input_pin('B'), 'previous speaking state')
-    # Both clips share the same pose outside the 1–4 second gesture. Finish a
-    # raised arm before returning to idle, and retain the breathing/blink phase.
+    # Both clips share the complete idle performance outside the authored
+    # gesture windows. Finish a raised hand before replacing the clip, while
+    # retaining breath, glance, blink, weight-shift, and hand-adjustment phase.
     phase = add_function_call(graph, '/Script/Engine.SkeletalMeshComponent:GetPosition', -1050, -1200, 'current animation phase')
     connect(visual.find_result_pin(), phase.find_self_pin(), 'resident phase')
-    before = add_function_call(graph, '/Script/Engine.KismetMathLibrary:LessEqual_DoubleDouble', -750, -1200, 'before gesture')
-    after = add_function_call(graph, '/Script/Engine.KismetMathLibrary:GreaterEqual_DoubleDouble', -750, -1000, 'after gesture')
-    for comparison, boundary in ((before, 1), (after, 4)):
-        connect(phase.find_result_pin(), comparison.find_input_pin('A'), 'clip time')
-        set_pin(comparison.find_input_pin('B'), boundary, 'common pose boundary')
-    resting = add_function_call(graph, '/Script/Engine.KismetMathLibrary:BooleanOR', -450, -1100, 'matching authored poses')
-    connect(before.find_result_pin(), resting.find_input_pin('A'), 'pre-gesture rest')
-    connect(after.find_result_pin(), resting.find_input_pin('B'), 'post-gesture rest')
+    outside_windows = []
+    for index, gesture in enumerate(talk_gestures):
+        y = -1350 + index * 350
+        before = add_function_call(graph, '/Script/Engine.KismetMathLibrary:LessEqual_DoubleDouble', -800, y, 'before gesture')
+        after = add_function_call(graph, '/Script/Engine.KismetMathLibrary:GreaterEqual_DoubleDouble', -800, y + 150, 'after gesture')
+        for comparison, boundary in ((before, gesture['start']), (after, gesture['end'])):
+            connect(phase.find_result_pin(), comparison.find_input_pin('A'), 'clip time')
+            set_pin(comparison.find_input_pin('B'), boundary, 'common pose boundary')
+        outside = add_function_call(graph, '/Script/Engine.KismetMathLibrary:BooleanOR', -550, y + 50, 'outside gesture window')
+        connect(before.find_result_pin(), outside.find_input_pin('A'), 'before raised hand')
+        connect(after.find_result_pin(), outside.find_input_pin('B'), 'after settled hand')
+        outside_windows.append(outside)
+    require(len(outside_windows) == 2, 'T10 resident requires two conversational gesture windows')
+    resting = add_function_call(graph, '/Script/Engine.KismetMathLibrary:BooleanAND', -300, -1100, 'matching authored poses')
+    connect(outside_windows[0].find_result_pin(), resting.find_input_pin('A'), 'outside first gesture')
+    connect(outside_windows[1].find_result_pin(), resting.find_input_pin('B'), 'outside second gesture')
     transition = add_function_call(graph, '/Script/Engine.KismetMathLibrary:BooleanAND', -150, -700, 'safe clip transition')
     connect(changed.find_result_pin(), transition.find_input_pin('A'), 'new requested state')
     connect(resting.find_result_pin(), transition.find_input_pin('B'), 'common pose')
@@ -253,7 +262,7 @@ def build():
     data.saved_looping = True
     data.saved_playing = True
     visual.set_editor_property('animation_data', data)
-    add_presentation_graph(blueprint, idle, talk, RECIPE['restYaw'])
+    add_presentation_graph(blueprint, idle, talk, RECIPE['restYaw'], RECIPE['talkGestures'])
     compile_and_save(blueprint)
     save_blueprint(blueprint)
     level = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
