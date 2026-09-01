@@ -142,6 +142,57 @@ function Invoke-LoggedCommand {
     return [int] $exitCode
 }
 
+function Invoke-Win64PackageGate {
+    param(
+        [string] $Name,
+        [ValidateSet('Development', 'Shipping')]
+        [string] $Configuration,
+        [string] $ArchiveRoot,
+        [string] $LogPath,
+        [bool] $PrerequisitesPassed
+    )
+
+    $timer = [System.Diagnostics.Stopwatch]::StartNew()
+    $executable = ''
+    if (-not $PrerequisitesPassed) {
+        $status = 'skipped'
+        $details = "$Configuration packaging requires passing project-health, player-locomotion, Interaction, and Dialogue presentation gates."
+        Set-Content -LiteralPath $LogPath -Value $details -Encoding UTF8
+    } else {
+        New-Item -ItemType Directory -Path $ArchiveRoot -Force | Out-Null
+        $arguments = @(
+            'BuildCookRun',
+            "-project=$projectPath",
+            '-nop4',
+            '-utf8output',
+            '-cook',
+            '-stage',
+            '-pak',
+            '-archive',
+            "-archivedirectory=$ArchiveRoot",
+            '-platform=Win64',
+            "-clientconfig=$Configuration",
+            '-unattended'
+        )
+        $exitCode = Invoke-LoggedCommand -Executable $uatPath -Arguments $arguments -LogPath $LogPath
+        $executable = Get-ChildItem -LiteralPath $ArchiveRoot -Filter 'FPSOne.exe' -File -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
+        if ($exitCode -eq 0 -and $executable) {
+            $status = 'passed'
+            $details = "$Configuration Win64 package completed and FPSOne.exe is present."
+        } else {
+            $status = 'failed'
+            $details = "$Configuration packaging failed or did not produce FPSOne.exe (exit code $exitCode)."
+        }
+    }
+    $timer.Stop()
+    $gates.Add((New-Gate $Name $status $timer.ElapsedMilliseconds $details (Get-RelativeEvidencePath $LogPath)))
+    return [pscustomobject]@{
+        status = $status
+        details = $details
+        executable = [string] $executable
+    }
+}
+
 $mode = if ($RequireVisualReview) { 'agent' } else { 'human-local' }
 $revision = ([string](Get-GitOutput rev-parse HEAD)).Trim()
 $initialFingerprint = Get-WorkingTreeFingerprint
@@ -479,40 +530,17 @@ if ($interactionStatus -ne 'passed') {
 $presentationTimer.Stop()
 $gates.Add((New-Gate 'Dialogue presentation' $presentationStatus $presentationTimer.ElapsedMilliseconds $presentationDetails (Get-RelativeEvidencePath $presentationLog) $presentationReports))
 
-$packageTimer = [System.Diagnostics.Stopwatch]::StartNew()
 $packageLog = Join-Path $logsRoot 'development-package.log'
-if ($projectStatus -ne 'passed' -or $playerStatus -ne 'passed' -or $interactionStatus -ne 'passed' -or $presentationStatus -ne 'passed') {
-    $packageStatus = 'skipped'
-    $packageDetails = 'Packaging requires passing project-health, player-locomotion, Interaction, and Dialogue presentation gates.'
-    Set-Content -LiteralPath $packageLog -Value $packageDetails -Encoding UTF8
-} else {
-    New-Item -ItemType Directory -Path $PackageRoot -Force | Out-Null
-    $packageArguments = @(
-        'BuildCookRun',
-        "-project=$projectPath",
-        '-nop4',
-        '-utf8output',
-        '-cook',
-        '-stage',
-        '-pak',
-        '-archive',
-        "-archivedirectory=$PackageRoot",
-        '-platform=Win64',
-        '-clientconfig=Development',
-        '-unattended'
-    )
-    $packageExitCode = Invoke-LoggedCommand -Executable $uatPath -Arguments $packageArguments -LogPath $packageLog
-    $packageExecutable = Get-ChildItem -LiteralPath $PackageRoot -Filter 'FPSOne.exe' -File -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
-    if ($packageExitCode -eq 0 -and $packageExecutable) {
-        $packageStatus = 'passed'
-        $packageDetails = 'Development Win64 package completed and FPSOne.exe is present.'
-    } else {
-        $packageStatus = 'failed'
-        $packageDetails = "Development packaging failed or did not produce FPSOne.exe (exit code $packageExitCode)."
-    }
-}
-$packageTimer.Stop()
-$gates.Add((New-Gate 'Development package' $packageStatus $packageTimer.ElapsedMilliseconds $packageDetails (Get-RelativeEvidencePath $packageLog)))
+$packagePrerequisitesPassed = ($projectStatus -eq 'passed' -and $playerStatus -eq 'passed' -and $interactionStatus -eq 'passed' -and $presentationStatus -eq 'passed')
+$packageResult = Invoke-Win64PackageGate `
+    -Name 'Development package' `
+    -Configuration 'Development' `
+    -ArchiveRoot $PackageRoot `
+    -LogPath $packageLog `
+    -PrerequisitesPassed $packagePrerequisitesPassed
+$packageStatus = $packageResult.status
+$packageDetails = $packageResult.details
+$packageExecutable = $packageResult.executable
 
 $launchTimer = [System.Diagnostics.Stopwatch]::StartNew()
 $launchLog = Join-Path $logsRoot 'packaged-launch.log'
@@ -542,40 +570,16 @@ if ($packageStatus -ne 'passed') {
 $launchTimer.Stop()
 $gates.Add((New-Gate 'Packaged launch' $launchStatus $launchTimer.ElapsedMilliseconds $launchDetails (Get-RelativeEvidencePath $launchLog)))
 
-$shippingTimer = [System.Diagnostics.Stopwatch]::StartNew()
 $shippingLog = Join-Path $logsRoot 'shipping-package.log'
-if ($projectStatus -ne 'passed' -or $playerStatus -ne 'passed' -or $interactionStatus -ne 'passed' -or $presentationStatus -ne 'passed') {
-    $shippingStatus = 'skipped'
-    $shippingDetails = 'Shipping packaging requires passing project-health, player-locomotion, Interaction, and Dialogue presentation gates.'
-    Set-Content -LiteralPath $shippingLog -Value $shippingDetails -Encoding UTF8
-} else {
-    New-Item -ItemType Directory -Path $ShippingPackageRoot -Force | Out-Null
-    $shippingArguments = @(
-        'BuildCookRun',
-        "-project=$projectPath",
-        '-nop4',
-        '-utf8output',
-        '-cook',
-        '-stage',
-        '-pak',
-        '-archive',
-        "-archivedirectory=$ShippingPackageRoot",
-        '-platform=Win64',
-        '-clientconfig=Shipping',
-        '-unattended'
-    )
-    $shippingExitCode = Invoke-LoggedCommand -Executable $uatPath -Arguments $shippingArguments -LogPath $shippingLog
-    $shippingPackageExecutable = Get-ChildItem -LiteralPath $ShippingPackageRoot -Filter 'FPSOne.exe' -File -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
-    if ($shippingExitCode -eq 0 -and $shippingPackageExecutable) {
-        $shippingStatus = 'passed'
-        $shippingDetails = 'Shipping Win64 package completed and FPSOne.exe is present.'
-    } else {
-        $shippingStatus = 'failed'
-        $shippingDetails = "Shipping packaging failed or did not produce FPSOne.exe (exit code $shippingExitCode)."
-    }
-}
-$shippingTimer.Stop()
-$gates.Add((New-Gate 'Shipping package' $shippingStatus $shippingTimer.ElapsedMilliseconds $shippingDetails (Get-RelativeEvidencePath $shippingLog)))
+$shippingResult = Invoke-Win64PackageGate `
+    -Name 'Shipping package' `
+    -Configuration 'Shipping' `
+    -ArchiveRoot $ShippingPackageRoot `
+    -LogPath $shippingLog `
+    -PrerequisitesPassed $packagePrerequisitesPassed
+$shippingStatus = $shippingResult.status
+$shippingDetails = $shippingResult.details
+$shippingPackageExecutable = $shippingResult.executable
 
 if ($shippingStatus -eq 'passed') {
     $gates.Add((New-Gate 'Shipping manual acceptance' 'missing' 0 'Run scripts\record-shipping-acceptance.ps1 against this exact verified executable, then complete delivery.'))
