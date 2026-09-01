@@ -159,7 +159,8 @@ function Invoke-Win64PackageGate {
         $details = "$Configuration packaging requires passing project-health, player-locomotion, Interaction, and Dialogue presentation gates."
         Set-Content -LiteralPath $LogPath -Value $details -Encoding UTF8
     } else {
-        New-Item -ItemType Directory -Path $ArchiveRoot -Force | Out-Null
+        $runArchiveRoot = Join-Path $ArchiveRoot ("$($revision.Substring(0, 12))-$([guid]::NewGuid().ToString('N'))")
+        New-Item -ItemType Directory -Path $runArchiveRoot -Force | Out-Null
         $arguments = @(
             'BuildCookRun',
             "-project=$projectPath",
@@ -169,19 +170,20 @@ function Invoke-Win64PackageGate {
             '-stage',
             '-pak',
             '-archive',
-            "-archivedirectory=$ArchiveRoot",
+            "-archivedirectory=$runArchiveRoot",
             '-platform=Win64',
             "-clientconfig=$Configuration",
             '-unattended'
         )
         $exitCode = Invoke-LoggedCommand -Executable $uatPath -Arguments $arguments -LogPath $LogPath
-        $executable = Get-ChildItem -LiteralPath $ArchiveRoot -Filter 'FPSOne.exe' -File -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
-        if ($exitCode -eq 0 -and $executable) {
+        $expectedExecutable = Join-Path $runArchiveRoot 'Windows\FPSOne.exe'
+        if ($exitCode -eq 0 -and (Test-Path -LiteralPath $expectedExecutable -PathType Leaf)) {
+            $executable = $expectedExecutable
             $status = 'passed'
-            $details = "$Configuration Win64 package completed and FPSOne.exe is present."
+            $details = "$Configuration Win64 package completed in a fresh archive and the exact Windows\FPSOne.exe is present."
         } else {
             $status = 'failed'
-            $details = "$Configuration packaging failed or did not produce FPSOne.exe (exit code $exitCode)."
+            $details = "$Configuration packaging failed or did not produce the exact Windows\FPSOne.exe (exit code $exitCode)."
         }
     }
     $timer.Stop()

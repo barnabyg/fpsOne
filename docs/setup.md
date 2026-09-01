@@ -77,7 +77,7 @@ Generated evidence is under `C:\docs\git\fpsOne\Saved\Verification`:
 - `index.html` — local static dashboard;
 - `logs\` — retained gate logs, the repository-test XML report, and a run-specific Unreal Automation HTML/JSON report; the dashboard links directly to each current report.
 
-The Development and Shipping packages are archived to `C:\fpsOne-output\Development` and `C:\fpsOne-output\Shipping`. Override them with `-PackageRoot` or `-ShippingPackageRoot`. Clean-clone scratch space defaults to `C:\fpsOne-output\CleanClone`; each verified clone is removed after its evidence is recorded.
+Fresh run-specific Development and Shipping packages are archived below `C:\fpsOne-output\Development` and `C:\fpsOne-output\Shipping`; the exact executable paths appear in the dashboard. Override the parent roots with `-PackageRoot` or `-ShippingPackageRoot`. Clean-clone scratch space defaults to `C:\fpsOne-output\CleanClone`; each verified clone is removed after its evidence is recorded.
 
 Run the guided walkthrough against the exact Shipping executable stored in `verification-result.json`:
 
@@ -103,7 +103,7 @@ The final ZIP is `C:\fpsOne-output\Delivery\fpsOne-<12-character-revision>-win64
 
 ## Manual acceptance
 
-Prerequisite: the first canonical run has passed every deterministic gate and produced the exact `C:\fpsOne-output\Shipping\Windows\FPSOne.exe` recorded in the dashboard. Use `record-shipping-acceptance.ps1`; the detailed expectations below define what must be observed before typing `PASS`.
+Prerequisite: the first canonical run has passed every deterministic gate and produced the exact run-specific Shipping `Windows\FPSOne.exe` recorded in the dashboard. Use `record-shipping-acceptance.ps1`; the detailed expectations below define what must be observed before typing `PASS`.
 
 1. Launch `FPSOne.exe`; expect Room A, the centre dot, and the closed Door to appear without an editor or menu.
 2. Hold W, S, A, and D separately, including while looking steeply up or down; expect forward, backward, left, and right walking while the player remains on the floor.
