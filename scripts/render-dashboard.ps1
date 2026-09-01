@@ -66,7 +66,10 @@ $screenshots = if (@($result.screenshots).Count -eq 0) {
     '<p class="muted">No screenshot evidence applies to this validation profile.</p>'
 } else {
     (@($result.screenshots) | ForEach-Object {
-        '<figure><img src="{0}" alt="{1}"><figcaption>{1}</figcaption></figure>' -f (ConvertTo-LinkHref $_.path), (ConvertTo-HtmlText $_.name)
+        $metadata = if ($_.sha256) {
+            '<br><span class="muted">SHA-256: {0}<br>Observed frame: {1} ms</span>' -f (ConvertTo-HtmlText $_.sha256), (ConvertTo-HtmlText $_.frameMilliseconds)
+        } else { '' }
+        '<figure><a href="{0}"><img src="{0}" alt="{1}"></a><figcaption>{1}{2}</figcaption></figure>' -f (ConvertTo-LinkHref $_.path), (ConvertTo-HtmlText $_.name), $metadata
     }) -join "`n"
 }
 

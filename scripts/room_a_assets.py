@@ -306,7 +306,9 @@ def build_room_a():
     sun = actor(unreal.DirectionalLight, "AfternoonSun", (0, -400, 500), (-23, 70, 0)).get_component_by_class(unreal.DirectionalLightComponent)
     sun.set_mobility(unreal.ComponentMobility.MOVABLE)
     sun.set_editor_property("atmosphere_sun_light", True)
-    sun.set_editor_property("intensity", 6000.0)
+    # Preserve the late-afternoon direction while retaining facial and fabric
+    # detail in the accepted conversational view.
+    sun.set_editor_property("intensity", 4000.0)
     sun.set_editor_property("use_temperature", True)
     sun.set_editor_property("temperature", 4400.0)
     sun.set_editor_property("light_source_angle", 1.8)

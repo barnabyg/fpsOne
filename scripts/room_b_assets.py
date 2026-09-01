@@ -131,7 +131,8 @@ def build_room_b():
     existing["NPC_B"].set_actor_location(unreal.Vector(310, 25, 90), False, False)
     light = room_b(apartment.actor(unreal.RectLight, "RoomB_WindowDaylight", (410, 0, 178), (0, 180, 0))).get_component_by_class(unreal.RectLightComponent)
     light.set_mobility(unreal.ComponentMobility.MOVABLE)
-    for key, value in (("intensity_units", unreal.LightUnits.LUMENS), ("intensity", 2000.),
+    # Lift the window-facing resident without flattening the warm interior.
+    for key, value in (("intensity_units", unreal.LightUnits.LUMENS), ("intensity", 2800.),
                        ("source_width", 240.), ("source_height", 140.), ("attenuation_radius", 600.),
                        ("use_temperature", True), ("temperature", 5900.)):
         light.set_editor_property(key, value)

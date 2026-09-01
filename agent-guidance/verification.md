@@ -43,6 +43,13 @@ is covered by the same provenance, hash, redistribution, and 2K gates. See
 `docs/npc-b.md`. Human-local mode captures all views without agent judgement;
 T08's complete-prototype assessment remains separate.
 
+From T08, the complete-prototype assessment is active. One final review covers
+exactly four accepted views: Room A, NPC A during Dialogue Interaction, the open
+Door, and Room B with NPC B. It requires the eight documented visual criteria
+for every view plus cross-view coherence evidence. Each image is linked to the
+tested revision, complete working-tree fingerprint, and SHA-256. Any reported
+defect keeps the gate red. See `docs/visual-acceptance.md`.
+
 Before a ticket introduces the feature exercised by a later gate, the verifier may mark that gate not applicable only when the result names the missing slice and the ticket that activates it. Through T03, repository tests cover the configured input surface, the player-facing world Interaction scenario is required, and the Development package must pass a launch smoke test. T03 requires both NPC exchanges, replay, collision, suspended scanning and walking, bounded mouse look, restored controls, and fresh-session reset alongside the existing Door checks. The four-view final-art agent visual gate activates with T08. These staged exceptions expire when their activating slices land and do not weaken the complete-prototype profile.
 
 ## Warning exceptions
