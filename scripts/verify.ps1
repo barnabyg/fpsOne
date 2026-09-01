@@ -287,10 +287,10 @@ if ($assetStatus -ne 'passed' -or $testStatus -ne 'passed') {
         '-ExpectedRevision', $revision,
         '-DestinationRoot', $CleanCloneRoot
     ) -LogPath $cleanCloneLog
-    $cleanCloneSummary = Select-String -LiteralPath $cleanCloneLog -Pattern "T09_CLEAN_CLONE_PASSED revision=$revision" -Quiet
+    $cleanCloneSummary = Select-String -LiteralPath $cleanCloneLog -Pattern "T09_CLEAN_CLONE_PASSED sourceRevision=$revision " -Quiet
     if ($cleanCloneExitCode -eq 0 -and $cleanCloneSummary) {
         $cleanCloneStatus = 'passed'
-        $cleanCloneDetails = 'A separate clean checkout obtained every Git LFS object, passed asset provenance/hashes, contained editable sources and setup scripts, and remained clean.'
+        $cleanCloneDetails = 'A clone of the canonical public remote obtained every current Git LFS asset, passed provenance/hashes, contained editable sources and setup scripts, and remained clean.'
     } else {
         $cleanCloneStatus = 'failed'
         $cleanCloneDetails = "Clean-clone reproducibility failed or did not emit its success marker (exit code $cleanCloneExitCode)."

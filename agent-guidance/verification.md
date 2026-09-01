@@ -18,7 +18,7 @@ The verifier is green only when every required gate passes for the current worki
 2. Validate the Unreal project, configured game map, and referenced content.
 3. Compile every project Blueprint with zero errors and zero warnings.
 4. Run the headless interaction functional tests and export their report. From T03, also run the rendered Dialogue presentation scenario and pixel checks for the hidden/restored centre dot and appearing/dismissing panel; retain both UI screenshots on the dashboard. This deterministic UI regression gate is separate from T08's final-art multimodal acceptance.
-5. Prove a separate clean checkout can materialize all Git LFS content and validate every editable source and license record.
+5. Prove a separate clone of the canonical public remote can materialize all current Git LFS content and validate every editable source and license record.
 6. Cook and package Development and Shipping Win64 builds successfully, and launch-smoke the Development build.
 7. Scan project, test, cook, and package logs with zero project-originated errors or warnings.
 8. In agent mode, capture the four acceptance views and complete the multimodal visual gate below. In human-local mode, report this gate as not applicable.

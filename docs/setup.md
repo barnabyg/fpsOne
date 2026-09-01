@@ -67,7 +67,7 @@ Human-local mode:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify.ps1
 ```
 
-The command validates per-file art provenance and hashes, a separate clean checkout with all 190 Git LFS files materialized, repository tests, project files, Blueprint compilation, the player-facing Interaction scenario, Development and Shipping Win64 packaging, a real Development packaged-window launch, project-originated diagnostics, evidence freshness, and all accepted 2560 × 1440 captures. Dialogue, replay, collision, suspended controls, restored controls, session reset, five slice reviews, and the final four-view benchmark remain required.
+The command validates per-file art provenance and hashes, a separate clone of the canonical public remote with all 190 current Git LFS files materialized, repository tests, project files, Blueprint compilation, the player-facing Interaction scenario, Development and Shipping Win64 packaging, a real Development packaged-window launch, project-originated diagnostics, evidence freshness, and all accepted 2560 × 1440 captures. Dialogue, replay, collision, suspended controls, restored controls, session reset, five slice reviews, and the final four-view benchmark remain required.
 
 The first run is expected to exit 1 after producing current evidence because manual Shipping acceptance (and, in agent mode, visual judgement) cannot be claimed by an unattended command. Do not rebuild or edit the working tree between the following steps.
 
