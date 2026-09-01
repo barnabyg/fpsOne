@@ -16,6 +16,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $projectPath = Join-Path $repoRoot 'FPSOne.uproject'
+. (Join-Path $PSScriptRoot 'visual-review.ps1')
 
 if (-not $EvidenceRoot) {
     $EvidenceRoot = Join-Path $repoRoot 'Saved\Verification'
@@ -143,7 +144,6 @@ if ($CompleteVisualReview) {
     $resultPath = Join-Path $EvidenceRoot 'verification-result.json'
     $result = Get-Content -LiteralPath $resultPath -Raw | ConvertFrom-Json
     if ($result.mode -ne 'agent') { throw 'Only an agent verification run can accept a visual review.' }
-    . (Join-Path $PSScriptRoot 'visual-review.ps1')
     $reviewNames = @($acceptanceViews | ForEach-Object { "$($_.name) visual review" }) + @('Visual acceptance')
     $otherFailures = @($result.gates | Where-Object { $_.name -notin $reviewNames -and $_.status -notin @('passed', 'not_applicable') })
     if ($otherFailures.Count) { throw 'Deterministic verification gates must all pass before completing the visual review.' }
@@ -610,7 +610,7 @@ $result = [pscustomobject][ordered]@{
     finalVisualAcceptance = [pscustomobject][ordered]@{
         profile = 'T08'
         reviewPath = 'final-visual-review.json'
-        views = @('roomA', 'npcA', 'doorTransition', 'roomB')
+        views = @(Get-FinalVisualAcceptanceViews)
     }
     warningExceptions = $warningExceptions
 }

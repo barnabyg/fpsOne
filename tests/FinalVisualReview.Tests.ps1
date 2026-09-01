@@ -7,7 +7,10 @@ Describe 'T08 complete-prototype visual acceptance' {
         New-Item -ItemType Directory -Path $captureRoot | Out-Null
         $result = [pscustomobject]@{
             revision = 'tested-revision'; fingerprint = 'tested-tree'; stale = $false
-            finalVisualAcceptance = @{ profile = 'T08'; reviewPath = 'final-review.json' }
+            finalVisualAcceptance = @{
+                profile = 'T08'; reviewPath = 'final-review.json'
+                views = @('roomA', 'npcA', 'doorTransition', 'roomB')
+            }
         }
         $review = @{
             status = 'passed'; reviewer = 'Multimodal test reviewer'
@@ -51,6 +54,12 @@ Describe 'T08 complete-prototype visual acceptance' {
         $review.views.Remove('roomB')
         $review | ConvertTo-Json -Depth 8 | Set-Content "$captureRoot\final-review.json"
         { Confirm-FinalVisualReview $result $captureRoot 'tested-revision' 'tested-tree' } | Should Throw 'four'
+    }
+
+    It 'rejects a result that declares a different final view set' {
+        $review | ConvertTo-Json -Depth 8 | Set-Content "$captureRoot\final-review.json"
+        $result.finalVisualAcceptance.views = @('roomA', 'npcA', 'doorTransition')
+        { Confirm-FinalVisualReview $result $captureRoot 'tested-revision' 'tested-tree' } | Should Throw 'declared'
     }
 
     It 'keeps explicitly reported visual defects red' {

@@ -1,3 +1,7 @@
+function Get-FinalVisualAcceptanceViews {
+    return @('roomA', 'npcA', 'doorTransition', 'roomB')
+}
+
 function Confirm-RoomReview {
     param($Result, [string] $EvidenceRoot, [string] $Revision, [string] $Fingerprint,
           [string] $View, [string] $Name)
@@ -59,7 +63,12 @@ function Confirm-FinalVisualReview {
     if ($review.coherence.status -ne 'passed' -or [string]::IsNullOrWhiteSpace($review.coherence.evidence)) {
         throw 'Final visual acceptance requires evidence of a coherent apartment across all four views.'
     }
-    $views = @('roomA', 'npcA', 'doorTransition', 'roomB')
+    $views = @(Get-FinalVisualAcceptanceViews)
+    $declaredViews = @($Result.finalVisualAcceptance.views)
+    if ($declaredViews.Count -ne $views.Count -or
+        @(Compare-Object $views $declaredViews -CaseSensitive).Count -ne 0) {
+        throw 'Final visual acceptance result declared an incorrect view set.'
+    }
     if (@($review.views.PSObject.Properties).Count -ne $views.Count) {
         throw 'Final visual acceptance requires exactly four reviewed views.'
     }
