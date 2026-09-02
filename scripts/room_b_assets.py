@@ -33,6 +33,21 @@ def mesh(name, asset, location, scale=(1, 1, 1), yaw=0, collision=True):
     return room_b(apartment.mesh_actor("RoomB_" + name, asset, location, scale, yaw, collision=collision))
 
 
+def exterior_box(name, location, size, surface, layer):
+    return apartment.exterior_box("RoomB_" + name, location, size, surface, layer,
+                                  room_tag="RoomBExterior", art_tag="RoomBArt")
+
+
+def exterior_mesh(name, asset, location, scale, surface, layer):
+    return apartment.exterior_mesh("RoomB_" + name, asset, location, scale, surface, layer,
+                                   room_tag="RoomBExterior", art_tag="RoomBArt")
+
+
+def exterior_model(name, asset, location, scale, layer, yaw=0):
+    return apartment.exterior_mesh("RoomB_" + name, asset, location, scale, None, layer, yaw,
+                                   room_tag="RoomBExterior", art_tag="RoomBArt")
+
+
 def build_room_b():
     apartment.require(unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).load_level("/Game/Maps/L_Testbed"), "Map not found")
     existing = {item.get_actor_label(): item for item in ACTORS.get_all_level_actors()}
@@ -75,8 +90,54 @@ def build_room_b():
     barrier = box("Window_InvisibleBarrier", (435, 0, 161), (2, 260, 160), dark)
     barrier.set_actor_hidden_in_game(True)
     barrier.static_mesh_component.set_cast_shadow(False)
-    box("Courtyard_Parapet", (600, 0, 90), (20, 850, 180), wall)
-    box("Courtyard_Coping", (600, 0, 182), (27, 870, 6), trim)
+    exterior(box("Courtyard_Parapet", (600, 0, 90), (20, 850, 180), wall),
+             "ExteriorForeground")
+    exterior(box("Courtyard_Coping", (600, 0, 182), (27, 870, 6), trim),
+             "ExteriorForeground")
+    # The quieter east courtyard uses the same plaster, stone, charcoal frames,
+    # and late-afternoon warmth as Room A, but its enclosing residential facade
+    # and planted parapet make the view immediately distinct.
+    exterior_plaster = material("ExteriorPlaster")
+    exterior_stone = material("ExteriorStone")
+    exterior_glass = material("ExteriorGlass")
+    exterior_warm = material("ExteriorWarmWindow")
+    exterior_distant = material("ExteriorDistant")
+    for y in (-255, 245):
+        exterior_box("Courtyard_Planter", (680, y, 207), (70, 130, 42), exterior_stone,
+                     "ExteriorForeground")
+    courtyard_plant = apartment.model("potted_plant_02")
+    for index, (x, y, scale, yaw) in enumerate((
+            (660, -265, (1.20, 1.20, 1.20), 15),
+            (675, 245, (1.05, 1.05, 1.05), -20))):
+        exterior_model(f"Courtyard_Greenery_{index}", courtyard_plant, (x, y, 190),
+                       scale, "ExteriorForeground", yaw)
+    exterior_box("Courtyard_Facade", (1030, 0, 80), (46, 920, 440), exterior_plaster,
+                 "ExteriorMiddleDistance")
+    exterior_box("Courtyard_LeftReturn", (835, -470, 80), (430, 30, 440), exterior_stone,
+                 "ExteriorMiddleDistance")
+    exterior_box("Courtyard_RightReturn", (835, 470, 80), (430, 30, 440), exterior_stone,
+                 "ExteriorMiddleDistance")
+    exterior_box("Courtyard_Cornice", (1003, 0, 300), (8, 940, 12), trim,
+                 "ExteriorMiddleDistance")
+    # Recessed dark surrounds, inset glazing, mullions, and sills break up the
+    # neighbouring facade at a believable residential scale.
+    for y in (-285, -95, 95, 285):
+        for z, window_surface in ((75, exterior_glass), (220, exterior_warm if y == 95 else exterior_glass)):
+            exterior_box("Courtyard_WindowReveal", (1005.5, y, z), (3, 112, 102), dark,
+                         "ExteriorMiddleDistance")
+            exterior_box("Courtyard_WindowGlass", (1003.5, y, z), (2, 92, 82), window_surface,
+                         "ExteriorMiddleDistance")
+            exterior_box("Courtyard_WindowMullion", (1001.8, y, z), (2, 5, 82), dark,
+                         "ExteriorMiddleDistance")
+            exterior_box("Courtyard_WindowSill", (1001.5, y, z - 53), (5, 122, 5), trim,
+                         "ExteriorMiddleDistance")
+    # Roofs beyond the low courtyard facade keep a readable horizon and reuse
+    # Room A's restrained cool-distance treatment.
+    for index, (x, y, width, depth, height) in enumerate((
+            (1710, -430, 340, 330, 430), (1840, 0, 430, 360, 520),
+            (1680, 450, 300, 300, 380))):
+        exterior_box(f"Courtyard_DistantBlock_{index}", (x, y, height / 2 - 120),
+                     (width, depth, height), exterior_distant, "ExteriorDistant")
     for y in (-198.75, 198.75):
         box("Skirting", (220, y, 5), (400, 2.5, 10), trim)
     box("East_Skirting", (418.75, 0, 5), (2.5, 400, 10), trim)

@@ -50,6 +50,25 @@ Describe 'Room A visual evidence linkage' {
         $review | ConvertTo-Json -Depth 5 | Set-Content "$captureRoot\review.json"
         (Confirm-RoomReview $result $captureRoot 'revision' 'fingerprint' 'npcB' 'NPC B').status | Should Be 'passed'
     }
+    It 'requires T11 exterior depth, scale, continuity, seams, defects, composition, coherence, and distinctness evidence' {
+        $result | Add-Member -NotePropertyName roomAExterior -NotePropertyValue $result.roomA
+        Set-Content "$captureRoot\room-b-exterior.png" 'distinct counterpart exterior image'
+        $roomBExteriorHash = (Get-FileHash "$captureRoot\room-b-exterior.png" -Algorithm SHA256).Hash.ToLowerInvariant()
+        $result | Add-Member -NotePropertyName roomBExterior -NotePropertyValue @{
+            screenshotPath = 'room-b-exterior.png'; sha256 = $roomBExteriorHash; reviewPath = 'room-b-review.json'
+        }
+        $review.pairedScreenshotSha256 = $roomBExteriorHash
+        $review | ConvertTo-Json -Depth 5 | Set-Content "$captureRoot\review.json"
+        { Confirm-RoomReview $result $captureRoot 'revision' 'fingerprint' 'roomAExterior' 'Room A exterior' } | Should Throw 'depth'
+        foreach ($criterion in @('depth', 'scale', 'lightingContinuity', 'seams', 'renderingDefects', 'interiorComposition', 'propertyCoherence', 'distinctness')) {
+            $review.criteria[$criterion] = @{ status = 'passed'; evidence = "Observed $criterion in the layered exterior view." }
+        }
+        $review | ConvertTo-Json -Depth 5 | Set-Content "$captureRoot\review.json"
+        (Confirm-RoomReview $result $captureRoot 'revision' 'fingerprint' 'roomAExterior' 'Room A exterior').status | Should Be 'passed'
+        $review.pairedScreenshotSha256 = '0' * 64
+        $review | ConvertTo-Json -Depth 5 | Set-Content "$captureRoot\review.json"
+        { Confirm-RoomReview $result $captureRoot 'revision' 'fingerprint' 'roomAExterior' 'Room A exterior' } | Should Throw 'counterpart'
+    }
     It 'checks each T05 view independently, rejecting a substituted Door image' {
         $result | Add-Member -NotePropertyName roomB -NotePropertyValue $result.roomA
         Set-Content "$captureRoot\door.png" 'distinct Door capture'

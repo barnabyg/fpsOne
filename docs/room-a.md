@@ -1,6 +1,6 @@
 # Room A: preparation and acceptance
 
-T04 dresses a 6 × 5 m living room with a 2.7 m ceiling. The warm wood, neutral woven upholstery, sage wall, bronze details, and restrained geometric art form one palette. A south-facing window supplies late-afternoon light; a floor lamp and wall sconce provide warm practical light. The exterior parapet is an inaccessible lighting backdrop, not another playable area. T05 finishes [Room B and the Door transition](room-b.md); both NPCs remain proxies until T06/T07.
+T04 dresses a 6 × 5 m living room with a 2.7 m ceiling. The warm wood, neutral woven upholstery, sage wall, bronze details, and restrained geometric art form one palette. A south-facing window supplies late-afternoon light; a floor lamp and wall sconce provide warm practical light. T11 replaces the flat exterior backdrop with a layered, inaccessible warm rooftop and tree view; its reproduction and dedicated review are documented in [Exterior views](exterior-views.md). T05 finishes [Room B and the Door transition](room-b.md); both NPCs remain proxies until T06/T07.
 
 The accepted PlayerStart is `(-550, -120, 90)` cm with yaw 23° and pitch −6°. NPC A sits to the left of the initial view and the closed Door is visible farther ahead; neither starts under Interaction Focus. The centre dot remains the only initial UI. Test-only occlusion and generic Interactable fixtures are created in an unsaved test setup and are absent from normal gameplay.
 
@@ -57,7 +57,7 @@ Do not fill this template with a pass without inspecting the image. Failed crite
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify.ps1 -RequireVisualReview -CompleteVisualReview
 ```
 
-From T05, Room B and the open-Door image also require separate current reviews using this schema and their own screenshot hashes. Completion accepts only the unchanged tested tree and exact reviewed screenshot, requires evidence for all six criteria, and refuses other failed deterministic gates. It updates the dashboard without recapturing a different image. T08's four-view benchmark including final NPC art remains separate. Human-local verification omits both agent switches and reports judgement as not applicable.
+From T05, Room B and the open-Door image also require separate current reviews using this schema and their own screenshot hashes. From T11, the two dedicated window views require the exterior-specific review described in [Exterior views](exterior-views.md). Completion accepts only the unchanged tested tree and exact reviewed screenshot, requires evidence for all criteria, and refuses other failed deterministic gates. It updates the dashboard without recapturing a different image. T08's four-view benchmark including final NPC art remains separate. Human-local verification omits both agent switches and reports judgement as not applicable.
 
 ## Manual checks
 

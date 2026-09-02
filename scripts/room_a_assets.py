@@ -163,6 +163,29 @@ def box(name, location, size, material, collision=True):
                       tuple(d / 100 for d in size), material=material, collision=collision)
 
 
+def mark_exterior(item, room_tag, layer, art_tag="RoomAArt"):
+    if isinstance(item, list):
+        return [mark_exterior(part, room_tag, layer, art_tag) for part in item]
+    item.set_editor_property("tags", [unreal.Name(art_tag), unreal.Name("ExteriorScenery"),
+                                      unreal.Name(room_tag), unreal.Name(layer)])
+    return item
+
+
+def exterior_mesh(name, mesh, location, scale, material, layer, yaw=0,
+                  room_tag="RoomAExterior", art_tag="RoomAArt"):
+    result = mesh_actor(name, mesh, location, scale, yaw, material, False)
+    for item in result if isinstance(result, list) else [result]:
+        item.static_mesh_component.set_cast_shadow(False)
+    return mark_exterior(result, room_tag, layer, art_tag)
+
+
+def exterior_box(name, location, size, material, layer,
+                 room_tag="RoomAExterior", art_tag="RoomAArt"):
+    return exterior_mesh(name, unreal.load_asset("/Engine/BasicShapes/Cube"), location,
+                         tuple(value / 100 for value in size), material, layer,
+                         room_tag=room_tag, art_tag=art_tag)
+
+
 def practical(name, location, intensity, temperature, radius=350):
     light = actor(unreal.PointLight, name, location).point_light_component
     light.set_mobility(unreal.ComponentMobility.MOVABLE)
@@ -193,6 +216,17 @@ def build_room_a():
     paper = color_material("M_Paper", (0.72, 0.67, 0.53), 0.85)
     ochre = color_material("M_Ochre", (0.40, 0.16, 0.045), 0.8)
     art_white = color_material("M_ArtPaper", (0.68, 0.61, 0.47), 0.9)
+    exterior = {
+        # Solid-colour exterior materials use deliberately low linear albedo so
+        # the 4000-lux afternoon sun retains facade detail instead of clipping.
+        "Plaster": color_material("M_ExteriorPlaster", (0.12, 0.075, 0.040), 0.9),
+        "Brick": color_material("M_ExteriorBrick", (0.075, 0.020, 0.008), 0.92),
+        "Stone": color_material("M_ExteriorStone", (0.090, 0.070, 0.050), 0.95),
+        "Distant": color_material("M_ExteriorDistant", (0.025, 0.034, 0.042), 0.98),
+        "Glass": color_material("M_ExteriorGlass", (0.008, 0.018, 0.028), 0.28, 0.15),
+        "WarmWindow": color_material("M_ExteriorWarmWindow", (0.20, 0.070, 0.012),
+                                     0.42, emission=1.15),
+    }
 
     imported = {identity: model(identity) for identity in
                 ("modern_arm_chair_01", "modern_coffee_table_01", "potted_plant_02", "ceramic_vase_03")}
@@ -237,10 +271,51 @@ def build_room_a():
         box("Window_Mullion", (x, -253, 161), (5, 9, 162), dark)
     for z in (83, 240):
         box("Window_Rail", (-335, -253, z), (315, 9, 5), dark)
-    # A nearby, inaccessible courtyard parapet avoids an unfinished black void
-    # below the atmospheric horizon while keeping the upper glazing open to sky.
-    box("Courtyard_Parapet", (-335, -420, 90), (1100, 20, 180), wall)
-    box("Courtyard_Coping", (-335, -420, 182), (1120, 27, 6), trim)
+    # A nearby, inaccessible parapet anchors the foreground. Its existing
+    # collision and shadow behaviour are retained; all scenery beyond it is
+    # non-colliding and does not alter the accepted interior daylight.
+    mark_exterior(box("Courtyard_Parapet", (-335, -420, 90), (1100, 20, 180), wall),
+                  "RoomAExterior", "ExteriorForeground")
+    mark_exterior(box("Courtyard_Coping", (-335, -420, 182), (1120, 27, 6), trim),
+                  "RoomAExterior", "ExteriorForeground")
+    # Middle distance: irregular warm residential roofs and tree canopy sit on
+    # separate planes, producing genuine parallax during lateral Player motion.
+    for name, location, size, surface in (
+            ("Exterior_MidBlock_West", (-720, -900, 130), (360, 300, 260), exterior["Brick"]),
+            ("Exterior_MidBlock_Centre", (-285, -1040, 155), (430, 280, 310), exterior["Plaster"]),
+            ("Exterior_MidBlock_East", (180, -850, 115), (300, 260, 230), exterior["Stone"]),
+            ("Exterior_MidBlock_ViewEast", (690, -970, 145), (520, 300, 290), exterior["Brick"]),
+            ("Exterior_MidBlock_FarEast", (1220, -1180, 180), (440, 320, 360), exterior["Plaster"])):
+        exterior_box(name, location, size, surface, "ExteriorMiddleDistance")
+    for x, y, width, surface in (
+            (-790, -748, 74, exterior["Glass"]), (-685, -748, 62, exterior["WarmWindow"]),
+            (-390, -898, 82, exterior["Glass"]), (-250, -898, 72, exterior["WarmWindow"]),
+            (120, -718, 65, exterior["Glass"]), (215, -718, 54, exterior["Glass"]),
+            (555, -818, 78, exterior["Glass"]), (690, -818, 70, exterior["WarmWindow"]),
+            (1080, -1018, 76, exterior["Glass"]), (1210, -1018, 70, exterior["Glass"])):
+        exterior_box("Exterior_MidWindow", (x, y, 180), (width, 3, 74), surface,
+                     "ExteriorMiddleDistance")
+    canopy_mesh = next(part for part in imported["potted_plant_02"]
+                       if "leaves" in part.get_name().lower())
+    for index, (x, y, z, scale) in enumerate((
+            (-545, -610, 235, (2.8, 2.4, 2.4)), (-455, -650, 260, (2.4, 2.2, 2.1)),
+            (-110, -590, 220, (2.7, 2.4, 2.5)), (-25, -635, 255, (2.3, 2.0, 2.1)),
+            (470, -650, 225, (2.9, 2.5, 2.6)), (880, -760, 250, (2.6, 2.3, 2.3)))):
+        exterior_box("Exterior_TreeTrunk", (x, y, 125), (22, 22, 190), exterior["Brick"],
+                     "ExteriorMiddleDistance")
+        canopy = exterior_mesh(f"Exterior_TreeCanopy_{index}", canopy_mesh, (x, y, z), scale,
+                               None, "ExteriorMiddleDistance", yaw=index * 37)
+        canopy.static_mesh_component.set_cast_shadow(False)
+    # A cool, simplified skyline sits more than twenty metres away. Its lower
+    # contrast and staggered roofline provide atmospheric depth behind the warm
+    # near buildings without introducing a costly exterior environment.
+    for index, (x, y, width, depth, height) in enumerate((
+            (-970, -2250, 340, 260, 430), (-590, -2100, 280, 240, 350),
+            (-260, -2350, 360, 300, 470), (150, -2180, 300, 260, 390),
+            (510, -2400, 380, 320, 520), (940, -2180, 350, 280, 410),
+            (1350, -2380, 420, 330, 500), (1840, -2250, 500, 360, 450))):
+        exterior_box(f"Exterior_DistantBlock_{index}", (x, y, height / 2),
+                     (width, depth, height), exterior["Distant"], "ExteriorDistant")
     # A blocked opening admits daylight but remains an inaccessible exterior.
     barrier = box("Window_InvisibleBarrier", (-335, -264, 161), (310, 2, 160), dark)
     barrier.set_actor_hidden_in_game(True)

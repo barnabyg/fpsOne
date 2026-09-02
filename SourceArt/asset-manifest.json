@@ -873,6 +873,30 @@
                                      "sha256":  "f6608a01bdaaaa04c906ff47b7c97b4075b65f28fbf098f024e31493414f1908"
                                  },
                                  {
+                                     "path":  "Content/Environment/RoomA/Materials/M_ExteriorBrick.uasset",
+                                     "sha256":  "d921842a8b3e76f29b58d62b7990b730453ae0d8e686c84bc6a024c7a25d56b5"
+                                 },
+                                 {
+                                     "path":  "Content/Environment/RoomA/Materials/M_ExteriorDistant.uasset",
+                                     "sha256":  "d97b0772f0a4be765ab9e08e2acf90ee621a5c0d8daf929e5fee6d1b25731da7"
+                                 },
+                                 {
+                                     "path":  "Content/Environment/RoomA/Materials/M_ExteriorGlass.uasset",
+                                     "sha256":  "fc57353f2d466adc5718185e87a2fbe1ff17700a6c3ee088b68050be4f431d00"
+                                 },
+                                 {
+                                     "path":  "Content/Environment/RoomA/Materials/M_ExteriorPlaster.uasset",
+                                     "sha256":  "8bab21a2fb65c38b6669d798027d2c8c4adfc22ecd2e9974c72210ead5d5df0b"
+                                 },
+                                 {
+                                     "path":  "Content/Environment/RoomA/Materials/M_ExteriorStone.uasset",
+                                     "sha256":  "1194d99f2339078f86304259afc704db8a3eb0a84f51ba33ad2676a1ad125224"
+                                 },
+                                 {
+                                     "path":  "Content/Environment/RoomA/Materials/M_ExteriorWarmWindow.uasset",
+                                     "sha256":  "fcfbdeceefaa76141c73349da78f8f8257a000f0145f585606b76cc3047d7f84"
+                                 },
+                                 {
                                      "path":  "Content/Environment/RoomA/Materials/M_Ochre.uasset",
                                      "sha256":  "d4e9fe187f1df3af1550e4d9253976472165833c861c3062d70a7b47a90084a3"
                                  },

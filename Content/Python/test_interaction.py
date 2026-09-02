@@ -49,6 +49,35 @@ def property_value(instance, name):
         return instance.get_editor_property("_".join(words))
 
 
+def require_layered_exterior_scenery(world):
+    """Observe each published window view as a layered, non-playable assembly."""
+    layer_tags = {"ExteriorForeground", "ExteriorMiddleDistance", "ExteriorDistant"}
+    views = (
+        ("Room A", "RoomAExterior", lambda origin, extent: origin.y + extent.y <= -270),
+        ("Room B", "RoomBExterior", lambda origin, extent: origin.x - extent.x >= 440),
+    )
+    for room_name, room_tag, remains_outside in views:
+        scenery = unreal.GameplayStatics.get_all_actors_with_tag(
+            world, unreal.Name(room_tag)
+        )
+        require(scenery, f"{room_name} must publish exterior scenery beyond its window")
+        observed_layers = set()
+        for item in scenery:
+            tags = {str(tag) for tag in item.tags}
+            observed_layers.update(tags & layer_tags)
+            origin, extent = item.get_actor_bounds(False, False)
+            require(
+                remains_outside(origin, extent),
+                f"{room_name} exterior scenery must remain outside the playable Room: "
+                f"{item.get_name()} at {origin} +/- {extent}",
+            )
+        require(
+            observed_layers == layer_tags,
+            f"{room_name} exterior must provide foreground, middle-distance, and distant depth; "
+            f"observed {sorted(observed_layers)}",
+        )
+
+
 def wait_for(predicate, message, frames=240):
     for _ in range(frames):
         if predicate():
@@ -321,8 +350,11 @@ def capture_room(world, controller, name="room-a-overview", folder="RoomAReview"
                     engine=unreal.SystemLibrary.get_engine_version())
     with open(os.path.join(root, "capture.json"), "w", encoding="utf-8") as stream:
         json.dump(metadata, stream, indent=2)
-    marker = {'-T06Capture': 'T06', '-T07Capture': 'T07'}.get(flag, 'T05')
-    unreal.log("T04_ROOM_A_CAPTURE_PASSED" if flag == "-T04Capture" else f"{marker}_CAPTURE_PASSED {name}")
+    if name in ("room-a-exterior", "room-b-exterior"):
+        unreal.log(f"T11_CAPTURE_PASSED {name}")
+    else:
+        marker = {'-T06Capture': 'T06', '-T07Capture': 'T07'}.get(flag, 'T05')
+        unreal.log("T04_ROOM_A_CAPTURE_PASSED" if flag == "-T04Capture" else f"{marker}_CAPTURE_PASSED {name}")
 
 
 def add_test_fixtures(test_target_class):
@@ -559,15 +591,34 @@ def interaction_scenario():
     controller = unreal.GameplayStatics.get_player_controller(world, 0)
     yield
     yield
+    require_layered_exterior_scenery(world)
     require(str(property_value(controller.get_hud(), "PromptText")) == "",
             "Room A spawn must not initially focus the Door or NPC A")
     yield from capture_room(world, controller)
+    room_a_overview_location = player.get_actor_location()
+    room_a_overview_rotation = controller.get_control_rotation()
+    player.set_actor_location(unreal.Vector(-435, -105, 90), False, False)
+    controller.set_control_rotation(unreal.Rotator(pitch=-3, yaw=-90))
+    yield from capture_room(world, controller, "room-a-exterior", "RoomAExteriorReview", "-T04Capture")
+    player.set_actor_location(room_a_overview_location, False, False)
+    controller.set_control_rotation(room_a_overview_rotation)
     # Sweep the real Player capsule through the circulation aisle; furnishings
     # must leave a usable approach to the shared Door from the accepted spawn.
     for destination in (unreal.Vector(-550, -70, 90), unreal.Vector(-170, -70, 90), unreal.Vector(-170, 0, 90)):
         player.set_actor_location(destination, True, False)
         require((player.get_actor_location() - destination).length() < 5,
                 f"Room A furnishings obstruct the Player's route from spawn to the Door: wanted {destination}, got {player.get_actor_location()}")
+    # Exercise the south glazing boundary through the real Player capsule. The
+    # exterior view is scenery only and must not create a route out of Room A.
+    # Raise the existing Player capsule above the fixed sideboard while keeping
+    # it inside the glazing's vertical span; this isolates the complete window
+    # assembly from furniture and NPC collision without naming its blocker.
+    player.set_actor_location(unreal.Vector(-335, -170, 160), False, False)
+    player.set_actor_location(unreal.Vector(-335, -350, 160), True, False)
+    room_a_window_stop = player.get_actor_location()
+    unreal.log(f"T11_ROOM_A_WINDOW_CONTAINMENT: {room_a_window_stop}")
+    require(-240 < room_a_window_stop.y < -190,
+            f"Room A window must block the Player at the exterior boundary: {room_a_window_stop}")
     test_targets[0].set_actor_hidden_in_game(False)
     player.set_actor_location(unreal.Vector(-200.0, 0.0, 90.0), False, False)
     controller.set_control_rotation(unreal.Rotator())
@@ -669,6 +720,9 @@ def interaction_scenario():
     player.set_actor_location(unreal.Vector(65, 15, 90), False, False)
     controller.set_control_rotation(unreal.Rotator(pitch=-12, yaw=-8))
     yield from capture_room(world, controller, "room-b-overview", "RoomBReview", "-T05Capture")
+    player.set_actor_location(unreal.Vector(185, -115, 90), False, False)
+    controller.set_control_rotation(unreal.Rotator(pitch=-3, yaw=0))
+    yield from capture_room(world, controller, "room-b-exterior", "RoomBExteriorReview", "-T05Capture")
     player.set_actor_location(unreal.Vector(-200, 0, 90), False, False)
     controller.set_control_rotation(unreal.Rotator())
 

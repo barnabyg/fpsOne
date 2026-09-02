@@ -24,8 +24,17 @@ function Confirm-RoomReview {
     if ($review.status -ne 'passed' -or [string]::IsNullOrWhiteSpace($review.reviewer)) {
         throw "$Name needs an evidenced passing agent visual review."
     }
-    $criteria = @('composition', 'lighting', 'materials', 'density', 'renderingDefects', 'uiObstruction')
-    if ($View -in @('npcA', 'npcB')) { $criteria += @('npcPresentation', 'referenceBaseline') }
+    if ($View -in @('roomAExterior', 'roomBExterior')) {
+        $pairedView = if ($View -eq 'roomAExterior') { 'roomBExterior' } else { 'roomAExterior' }
+        if (-not $Result.$pairedView -or $review.pairedScreenshotSha256 -ne $Result.$pairedView.sha256) {
+            throw "$Name review is not paired with the current counterpart exterior screenshot."
+        }
+        $criteria = @('depth', 'scale', 'lightingContinuity', 'seams',
+                      'renderingDefects', 'interiorComposition', 'propertyCoherence', 'distinctness')
+    } else {
+        $criteria = @('composition', 'lighting', 'materials', 'density', 'renderingDefects', 'uiObstruction')
+        if ($View -in @('npcA', 'npcB')) { $criteria += @('npcPresentation', 'referenceBaseline') }
+    }
     foreach ($criterion in $criteria) {
         $finding = $review.criteria.$criterion
         if ($finding.status -ne 'passed' -or [string]::IsNullOrWhiteSpace($finding.evidence)) {

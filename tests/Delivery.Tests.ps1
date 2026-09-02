@@ -66,6 +66,7 @@ Describe 'Shipping delivery completion' {
             resolution = @{ width = 2560; height = 1440 }
             checks = @(
                 @{ id = 'room-traversal'; status = 'passed'; evidence = 'Walked through both furnished Rooms.' },
+                @{ id = 'exterior-views'; status = 'passed'; evidence = 'Inspected both windows closely and laterally; parallax, coherence, collision, and seams passed.' },
                 @{ id = 'npc-dialogues'; status = 'passed'; evidence = 'Completed and replayed both Dialogue Interactions.' },
                 @{ id = 'door-cycle'; status = 'passed'; evidence = 'Opened, crossed, closed, and observed collision.' },
                 @{ id = 'restored-input'; status = 'passed'; evidence = 'Movement and look returned after both dialogues.' },

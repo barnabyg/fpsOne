@@ -65,7 +65,7 @@ Assert-PathOutsideRepository -Path $DeliveryRoot -Root $RepositoryRoot
 Assert-CleanSourceRepository -Root $RepositoryRoot -ExpectedRevision $Revision
 
 $acceptance = Get-Content -LiteralPath $AcceptancePath -Raw | ConvertFrom-Json
-$requiredCheckIds = @('room-traversal', 'npc-dialogues', 'door-cycle', 'restored-input', 'escape-exit', 'presentation')
+$requiredCheckIds = @('room-traversal', 'exterior-views', 'npc-dialogues', 'door-cycle', 'restored-input', 'escape-exit', 'presentation')
 $actualCheckIds = @($acceptance.checks | ForEach-Object { [string] $_.id } | Sort-Object)
 $expectedCheckIds = @($requiredCheckIds | Sort-Object)
 if ($actualCheckIds.Count -ne $expectedCheckIds.Count -or
