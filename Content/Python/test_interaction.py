@@ -227,8 +227,18 @@ def observe_residents_at_rest(world, player, npcs):
                                 component_socket(resident, 'lowerarm01_' + side),
                                 component_socket(resident, 'wrist_' + side))
             unreal.log(f'T10_REST_ELBOW NPC {index + 1} {side}: {elbow:.1f} degrees')
-            require(100 < elbow < 125,
+            require(145 < elbow < 175,
                     f'NPC {index + 1} {side} elbow must remain softly bent at rest; got {elbow:.1f} degrees')
+            index_knuckle = component_socket(resident, 'finger2-1_' + side)
+            little_knuckle = component_socket(resident, 'finger5-1_' + side)
+            index_distal = component_socket(resident, 'finger2-3_' + side)
+            little_distal = component_socket(resident, 'finger5-3_' + side)
+            fan_ratio = (index_distal - little_distal).length() / (
+                index_knuckle - little_knuckle).length()
+            unreal.log(f'T10_HAND_FAN NPC {index + 1} {side}: {fan_ratio:.3f}')
+            require(fan_ratio < 1.30,
+                    f'NPC {index + 1} {side} fingers must form a relaxed curve rather than a rigid fan; '
+                    f'distal-to-knuckle spread ratio was {fan_ratio:.3f}')
     # Compare centred torso motion so different bodies, hands, or static rest
     # poses cannot make synchronized whole-body sway appear distinct.
     correlations = {}

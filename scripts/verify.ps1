@@ -374,6 +374,7 @@ $requiredProjectFiles = @(
     (Join-Path $repoRoot 'Content\Blueprints\BP_InteractionHUD.uasset'),
     (Join-Path $repoRoot 'Content\Blueprints\BP_InteractionTestTarget.uasset'),
     (Join-Path $repoRoot 'Content\Python\test_interaction.py'),
+    (Join-Path $repoRoot 'Content\Python\test_npc_pose.py'),
     (Join-Path $repoRoot 'scripts\validate_player.py')
 )
 $missingProjectFiles = @($requiredProjectFiles | Where-Object { -not (Test-Path -LiteralPath $_ -PathType Leaf) })
@@ -454,7 +455,7 @@ if ($projectStatus -ne 'passed' -or $playerStatus -ne 'passed') {
 } else {
     $interactionArguments = @(
         $projectPath,
-        '-ExecCmds=Automation RunTests Editor.Python.FPSOne.test_interaction',
+        '-ExecCmds=Automation RunTests Editor.Python.FPSOne',
         '-TestExit=Automation Test Queue Empty',
         "-ReportExportPath=$interactionReport",
         '-unattended',
@@ -477,7 +478,7 @@ if ($projectStatus -ne 'passed' -or $playerStatus -ne 'passed') {
     }
     if ($interactionExitCode -eq 0 -and $interactionSummary -and $dialogueSummary -and $npcAnimationSummary -and -not $interactionErrors -and $interactionReports.Count -eq 2) {
         $interactionStatus = 'passed'
-        $interactionDetails = 'The player-facing PIE scenario passed focus, prompts, Door motion/collision/passage, both NPC exchanges, 24-second planted and non-repeating resident presentation, two gesture beats per resident, snap-free replay, movement suspension, bounded look, restored controls, and fresh-session reset checks.'
+        $interactionDetails = 'The player-facing PIE scenarios passed natural arm and hand posture, focus, prompts, Door motion/collision/passage, both NPC exchanges, 24-second planted and non-repeating resident presentation, two gesture beats per resident, snap-free replay, movement suspension, bounded look, restored controls, and fresh-session reset checks.'
     } else {
         $interactionStatus = 'failed'
         $interactionDetails = "Interaction functional tests failed or did not emit their success marker and reports (exit code $interactionExitCode)."

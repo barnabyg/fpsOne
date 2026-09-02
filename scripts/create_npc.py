@@ -193,7 +193,8 @@ def animate(name, talking=False):
             for finger in range(1, 6):
                 for joint in range(1, 4):
                     curve = (7, 13, 10)[joint - 1] + (finger - 3) * 0.6
-                    pose(f'finger{finger}-{joint}.{side}', (0, 0, sign * curve))
+                    splay = sign * (finger - 3) * 0.35 if joint == 1 else 0
+                    pose(f'finger{finger}-{joint}.{side}', (curve, 0, splay))
         lean = recipe['restLean']
         pose('spine01', (0.18 * shift, 0, -0.25 * shift))
         pose('spine02', (lean[0] + 0.55 * breath, lean[1] + 0.14 * shift,
@@ -208,17 +209,15 @@ def animate(name, talking=False):
         for adjustment in recipe['handAdjustments']:
             amount = pulse(t, adjustment['start'], adjustment['peak'], adjustment['end'])
             side = adjustment['side']
-            sign = 1 if side == 'L' else -1
             add_pose('wrist.' + side, adjustment['wrist'], amount)
             for finger in range(2, 6):
                 for joint in range(1, 4):
                     add_pose(f'finger{finger}-{joint}.{side}',
-                             (0, 0, sign * adjustment['curl']), amount)
+                             (adjustment['curl'], 0, 0), amount)
         if talking:
             for gesture in recipe['talkGestures']:
                 amount = pulse(t, gesture['start'], gesture['peak'], gesture['end'])
                 side = gesture['side']
-                sign = 1 if side == 'L' else -1
                 add_pose('upperarm01.' + side, gesture['upper'], amount)
                 add_pose('lowerarm01.' + side, gesture['lower'], amount)
                 add_pose('wrist.' + side, gesture['wrist'], amount)
@@ -226,7 +225,7 @@ def animate(name, talking=False):
                 for finger in range(2, 6):
                     for joint in range(1, 4):
                         add_pose(f'finger{finger}-{joint}.{side}',
-                                 (0, 0, sign * gesture['curl']), amount)
+                                 (gesture['curl'], 0, 0), amount)
         # Irregular short closures across the long loop; no mouth animation.
         blink = max(max(0, 1 - abs(t - centre) / 0.12) for centre in recipe['blinkTimes'])
         for side in ('L', 'R'):
