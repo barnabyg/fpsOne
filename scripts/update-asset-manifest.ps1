@@ -55,7 +55,7 @@ foreach ($directory in @('SourceArt\Authored', 'Content\Environment')) {
         if (-not $covered.ContainsKey($entry.path)) {
             if ($entry.path -notmatch '^SourceArt/Authored/SM_(LinenSofa|Sideboard|FloorLamp|Rug|WritingDesk|DeskChair|GuestDaybed|Bookcase)\.glb$' -and
                 $entry.path -notmatch '^Content/Environment/RoomB/SM_(WritingDesk|DeskChair|GuestDaybed|Bookcase)/' -and
-                $entry.path -notmatch '^Content/Environment/RoomA/(SM_(LinenSofa|Sideboard|FloorLamp|Rug)/|Materials/M_(Piping|Bronze|Shade|Ceiling|Trim|SagePaint|Charcoal|Paper|Ochre|ArtPaper)\.uasset$)') {
+                $entry.path -notmatch '^Content/Environment/RoomA/(SM_(LinenSofa|Sideboard|FloorLamp|Rug)/|Materials/M_(Piping|Bronze|Shade|Ceiling|Trim|SagePaint|Charcoal|Paper|Ochre|ArtPaper|Exterior(Plaster|Brick|Stone|Green|Distant|Glass|WarmWindow))\.uasset$)') {
                 throw "Unclassified generated art requires explicit provenance: $($entry.path)"
             }
             $authored += $entry

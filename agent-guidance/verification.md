@@ -45,6 +45,19 @@ is covered by the same provenance, hash, redistribution, and 2K gates. See
 `docs/npc-b.md`. Human-local mode captures all views without agent judgement;
 T08's complete-prototype assessment remains separate.
 
+From T11, also capture dedicated Room A and Room B window views at 2560 x 1440.
+Each requires a current review with `depth`, `scale`, `lightingContinuity`,
+`seams`, `renderingDefects`, `interiorComposition`, `propertyCoherence`, and
+`distinctness`, backed by visible evidence and both exterior screenshot hashes.
+All seven slice reviews are required for agent completion. The Player
+scenario requires foreground, middle-distance, and distant tagged scenery for
+both views, proves every layer remains outside the playable Rooms, and sweeps
+the real Player capsule against both unchanged window boundaries. See
+`docs/exterior-views.md`. T08's four-view benchmark remains separate.
+The recorded Shipping checklist also requires normal, close, and lateral
+inspection of both windows, including parallax, coherence, seams, clipping,
+collision, and inaccessible exterior confirmation.
+
 From T08, the complete-prototype assessment is active. One final review covers
 exactly four accepted views: Room A, NPC A during Dialogue Interaction, the open
 Door, and Room B with NPC B. It requires the eight documented visual criteria

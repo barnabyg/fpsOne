@@ -41,6 +41,7 @@ if (-not $Reviewer) {
 $checks = @(
     [pscustomobject]@{ id = 'presentation'; prompt = 'At 2560 x 1440, confirm Room A appears without an editor or menu and the visual presentation has no material defect.' },
     [pscustomobject]@{ id = 'room-traversal'; prompt = 'Walk through Room A and Room B with W/A/S/D and mouse look; confirm both furnished Rooms are reachable and collision is plausible.' },
+    [pscustomobject]@{ id = 'exterior-views'; prompt = 'Inspect both windows at normal distance, then close and while moving laterally; confirm layered parallax, same-property scale/lighting, distinct views, intact frames, no seams or clipping, and no route outside.' },
     [pscustomobject]@{ id = 'door-cycle'; prompt = 'Focus the Door, open it, cross it, close it, and confirm the closed Door blocks passage.' },
     [pscustomobject]@{ id = 'npc-dialogues'; prompt = 'Complete and replay both NPC Dialogue Interactions; confirm each has three lines and its own resident presentation.' },
     [pscustomobject]@{ id = 'restored-input'; prompt = 'During each Dialogue Interaction confirm walking pauses; after dismissal confirm movement, look, prompts, and the centre dot return.' },
@@ -57,8 +58,8 @@ function Get-ShippingProcesses {
 }
 
 Write-Output 'Launching the exact verified Shipping build at 2560 x 1440.'
-Write-Output 'Perform all six checks in the game window and finish with Escape.'
-Write-Output 'After the game closes, return here and record six numbered PASS confirmations with concrete observed evidence.'
+Write-Output 'Perform all seven checks in the game window and finish with Escape.'
+Write-Output 'After the game closes, return here and record seven numbered PASS confirmations with concrete observed evidence.'
 $launchTime = Get-Date
 $completed = $false
 try {

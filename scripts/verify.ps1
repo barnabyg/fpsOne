@@ -200,7 +200,9 @@ $revision = ([string](Get-GitOutput rev-parse HEAD)).Trim()
 $initialFingerprint = Get-WorkingTreeFingerprint
 $acceptanceViews = @(
     @{ key = 'roomA'; name = 'Room A'; folder = 'RoomAReview'; image = 'room-a-overview'; marker = 'T04_ROOM_A_CAPTURE_PASSED' },
+    @{ key = 'roomAExterior'; name = 'Room A exterior'; folder = 'RoomAExteriorReview'; image = 'room-a-exterior'; marker = 'T11_CAPTURE_PASSED room-a-exterior' },
     @{ key = 'roomB'; name = 'Room B'; folder = 'RoomBReview'; image = 'room-b-overview'; marker = 'T05_CAPTURE_PASSED room-b-overview' },
+    @{ key = 'roomBExterior'; name = 'Room B exterior'; folder = 'RoomBExteriorReview'; image = 'room-b-exterior'; marker = 'T11_CAPTURE_PASSED room-b-exterior' },
     @{ key = 'doorTransition'; name = 'Open Door'; folder = 'DoorReview'; image = 'open-door-transition'; marker = 'T05_CAPTURE_PASSED open-door-transition' },
     @{ key = 'npcA'; name = 'NPC A'; folder = 'NPCAReview'; image = 'npc-a-conversation'; marker = 'T06_CAPTURE_PASSED npc-a-conversation' },
     @{ key = 'npcB'; name = 'NPC B'; folder = 'NPCBReview'; image = 'npc-b-conversation'; marker = 'T07_CAPTURE_PASSED npc-b-conversation' }
@@ -232,7 +234,11 @@ if ($CompleteVisualReview -or $CompleteDelivery) {
             $reviewGate = @($result.gates | Where-Object name -eq "$($view.name) visual review")
             if ($reviewGate.Count -ne 1) { throw "The $($view.name) visual review gate is missing or duplicated." }
             $reviewGate[0].status = 'passed'
-            $reviewGate[0].details = 'Current agent review passed all required criteria. Both NPC views additionally require character presentation and reference-game evidence.'
+            $reviewGate[0].details = if ($view.key -in @('roomAExterior', 'roomBExterior')) {
+                'Current paired T11 review passed depth, scale, lighting continuity, seams, rendering-defect, unchanged-composition, same-property coherence, and view-distinctness criteria.'
+            } else {
+                'Current agent review passed all required criteria. Both NPC views additionally require character presentation and reference-game evidence.'
+            }
             $capture = $result.($view.key)
             $reviewGate[0].reportPaths = @($capture.screenshotPath, $capture.reviewPath)
         }
@@ -663,7 +669,7 @@ if ($RequireVisualReview) {
     $gates.Add((New-Gate 'Visual acceptance' 'missing' 0 'T08 requires one passing multimodal review of the Room A overview, NPC A at dialogue distance, open-Door transition, and Room B with NPC B.'))
     $visualReview = [pscustomobject]@{
         status = 'pending'
-        details = 'Inspect the four T08 views together and the five retained slice views; write current evidence-linked reviews, then run verify.ps1 -RequireVisualReview -CompleteVisualReview.'
+        details = 'Inspect the four T08 views together and the seven retained slice views, including both T11 exteriors; write current evidence-linked reviews, then run verify.ps1 -RequireVisualReview -CompleteVisualReview.'
     }
 } else {
     $gates.Add((New-Gate 'Visual acceptance' 'not_applicable' 0 'Human-local validation does not use an AI visual gate.'))
@@ -746,7 +752,9 @@ $result = [pscustomobject][ordered]@{
     screenshots = $presentationScreenshots
     visualReview = $visualReview
     roomA = $roomCaptures.roomA
+    roomAExterior = $roomCaptures.roomAExterior
     roomB = $roomCaptures.roomB
+    roomBExterior = $roomCaptures.roomBExterior
     doorTransition = $roomCaptures.doorTransition
     npcA = $roomCaptures.npcA
     npcB = $roomCaptures.npcB
