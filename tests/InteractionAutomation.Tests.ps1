@@ -1,6 +1,6 @@
 $repoRoot = Split-Path -Parent $PSScriptRoot
 
-Describe 'T03 interaction automation' {
+Describe 'Player-facing Interaction automation' {
     It 'enables the editor-only Unreal Python Automation harness' {
         $project = Get-Content -LiteralPath (Join-Path $repoRoot 'FPSOne.uproject') -Raw | ConvertFrom-Json
         $plugin = @($project.Plugins | Where-Object Name -eq 'PythonAutomationTest')
@@ -14,12 +14,19 @@ Describe 'T03 interaction automation' {
         Test-Path -LiteralPath (Join-Path $repoRoot 'Content\Python\test_interaction.py') | Should Be $true
     }
 
+    It 'contains the focused live neutral-pose regression' {
+        $poseTest = Join-Path $repoRoot 'Content\Python\test_npc_pose.py'
+        Test-Path -LiteralPath $poseTest | Should Be $true
+        (Get-Content -LiteralPath $poseTest -Raw) | Should Match 'NPC_NEUTRAL_POSE_PASSED'
+    }
+
     It 'runs the Interaction scenario as a required verifier gate' {
         $verifier = Get-Content -LiteralPath (Join-Path $repoRoot 'scripts\verify.ps1') -Raw
 
-        $verifier | Should Match 'Automation RunTests Editor\.Python\.FPSOne\.test_interaction'
+        $verifier | Should Match 'Automation RunTests Editor\.Python\.FPSOne'
         $verifier | Should Match 'T02_INTERACTION_FUNCTIONAL_TEST_PASSED'
         $verifier | Should Match 'T03_DIALOGUE_FUNCTIONAL_TEST_PASSED'
+        $verifier | Should Match 'T10_NPC_ANIMATION_PASSED'
         $verifier | Should Not Match "Interaction functional tests' 'not_applicable'"
     }
 }

@@ -38,7 +38,9 @@ Copy-Item -LiteralPath (Join-Path $repoRoot 'SourceArt') -Destination $stageRoot
 foreach ($name in @('bootstrap_project.py', 'interaction_assets.py', 'dialogue_assets.py', 'room_a_assets.py', 'room_b_assets.py', 'npc_assets.py', 'character_recipes.py')) {
     Copy-Item -LiteralPath (Join-Path $PSScriptRoot $name) -Destination "$stageRoot\scripts"
 }
-Copy-Item -LiteralPath (Join-Path $repoRoot 'Content\Python\test_interaction.py') -Destination "$stageRoot\Content\Python"
+foreach ($name in @('test_interaction.py', 'test_npc_pose.py')) {
+    Copy-Item -LiteralPath (Join-Path $repoRoot "Content\Python\$name") -Destination "$stageRoot\Content\Python"
+}
 $stageProject = Join-Path $stageRoot 'FPSOne.uproject'
 $common = @('-unattended', '-nop4', '-nosplash', '-NullRHI', '-stdout', '-FullStdOutLogOutput')
 Invoke-StagingCheck -Arguments (@($stageProject, "-ExecutePythonScript=$stageRoot\scripts\bootstrap_project.py") + $common) `
@@ -53,7 +55,7 @@ Invoke-StagingCheck -Arguments (@($stageProject, "-ExecutePythonScript=$stageRoo
     -LogPath (Join-Path $transactionRoot 'npc-a-generation.log') -SuccessMarker 'NPC_A_GENERATION_PASSED'
 Invoke-StagingCheck -Arguments (@($stageProject, "-ExecutePythonScript=$stageRoot\scripts\npc_assets.py", '-NPCB') + $common) `
     -LogPath (Join-Path $transactionRoot 'npc-b-generation.log') -SuccessMarker 'NPC_B_GENERATION_PASSED'
-Invoke-StagingCheck -Arguments (@($stageProject, '-ExecCmds=Automation RunTests Editor.Python.FPSOne.test_interaction', '-TestExit=Automation Test Queue Empty', "-ReportExportPath=$transactionRoot\interaction-report") + $common) `
+Invoke-StagingCheck -Arguments (@($stageProject, '-ExecCmds=Automation RunTests Editor.Python.FPSOne', '-TestExit=Automation Test Queue Empty', "-ReportExportPath=$transactionRoot\interaction-report") + $common) `
     -LogPath (Join-Path $transactionRoot 'interaction.log') -SuccessMarker 'T03_DIALOGUE_FUNCTIONAL_TEST_PASSED'
 
 $paths = @(

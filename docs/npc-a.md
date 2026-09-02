@@ -10,13 +10,14 @@ using the same source and presentation workflow.
 inherited proxy art. `CharacterVisual` uses the imported MPFB skeleton, without
 Nanite or mesh collision. The capsule still blocks the Player. The shared
 Interaction component remembers its `DialogueActor` during an exchange and
-releases it on dismissal; it contains no NPC-type branches. The resident plays
-an eight-second breathing idle, two short blinks per cycle, and a restrained
-right-hand conversational gesture while it is the active speaker. Clip changes
-wait for a common rest pose and retain breathing/blink phase: dismissal lets
-the current arm movement settle without delaying control restoration; replay
-can continue that movement. A new gesture can wait until the next eight-second
-cycle. It
+releases it on dismissal; it contains no NPC-type branches. T10 gives the
+resident a 24-second authored performance with planted feet, relaxed curved
+hands, softly bent elbows, restrained breathing and weight transfer, irregular
+blinks and glances, and occasional hand adjustments. Its active-speaker clip
+adds two distinct understated right-hand gesture beats. Clip changes wait until
+the raised hand reaches one of the shared rest intervals and retain the complete
+idle phase: dismissal restores controls immediately while the movement settles,
+and replay continues without a pose reset. It
 smoothly turns at most 12 degrees toward a Player within 300 cm and returns to
 rest outside that range. This is a small whole-body acknowledgement, not gaze
 tracking or navigation. No voice, lip-sync, cinematic face system, or movement
@@ -58,7 +59,7 @@ and eyelash maps are retained at native size rather than upscaled.
 
 The script bakes the macro shape, removes helpers and clothing-covered body
 faces, subdivides exposed skin once, and exports `SK_NPC_A.fbx`, `A_Idle.fbx`,
-and `A_Talk.fbx`. The 30 fps clips span frames 1–241. Export uses selection
+and `A_Talk.fbx`. The 30 fps, 24-second clips span frames 1–721. Export uses selection
 only, `-Y` forward, `Z` up, face smoothing, no leaf bones, no NLA strips, one
 action per animation file, and no animation simplification. The explicit
 `ResidentARig` root is intentional: Unreal's legacy FBX importer strips a root
@@ -132,16 +133,21 @@ linked by `Saved/Verification/index.html`.
    resident, no proxy primitives, grounded feet, readable eyes and hair, and
    `E — Talk` when directly focused within 250 cm. Try walking through the NPC
    from the front and side; expect blocking collision.
-2. Watch for at least eight seconds. Expect slight breathing and natural short
-   blinks; move a little to either side and beyond 300 cm. Expect a slow small
-   acknowledgement followed by a return to rest, without walking or tracking
-   the Player through a full turn.
-3. Press E and leave a line visible for eight seconds. Expect a restrained
-   right-hand gesture, no speech audio or mouth animation, hidden dot, paused
-   walking, and limited mouse look. Advance three times to dismiss, then
-   replay, including dismissal halfway through a raised-arm gesture. Expect the
-   arm to settle without a snap and scanning, walking, and free look to return
-   immediately. Replay during that return should remain smooth.
+2. Watch for at least 24 seconds from the front and an oblique angle. Expect
+   planted feet; relaxed shoulders, bent elbows and curved fingers; quiet
+   breathing, uneven weight transfer, short blinks, small glances, and an
+   occasional hand adjustment without an obvious repeated sway. Check that the
+   feet neither float nor slide in world space and that arms, hands, and clothing
+   do not penetrate the body; elbows, neutral wrists, and fingers must remain
+   anatomically plausible. Compare NPC B: the two residents must not move in
+   step. Move a little to either side and beyond 300 cm; expect a small
+   acknowledgement and natural return to rest without a foot slide or pose snap.
+3. Press E and hold/replay the exchange long enough to see both restrained
+   right-hand gesture beats. Expect no speech audio or mouth animation, a
+   hidden dot, paused walking, and limited mouse look. Dismiss and immediately
+   replay halfway through each raised-arm movement. Expect smooth settling or
+   continuation, planted world-space feet, plausible joints without mesh
+   penetration, and immediate restoration of scanning, walking, and free look.
 4. Open the Door and speak with NPC B. Expect its unchanged dialogue to work;
    NPC A should continue idling rather than gesture for NPC B's exchange.
 5. Exit with Escape and relaunch. Expect the Door closed, both dialogues reset,

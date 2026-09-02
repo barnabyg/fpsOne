@@ -21,7 +21,8 @@ $env:BLENDER_USER_RESOURCES = "$tools\blender-user"
 ```
 
 `scripts/character_recipes.py` holds both residents' macro prescriptions, selected
-parts, material maps, scale, rest orientation, gesture side, and blink timing.
+parts, material maps, scale, rest orientation, rest posture, irregular idle
+timing, glances, hand adjustments, dialogue beats, and blink timing.
 `scripts/create_npc.py` implements their common source workflow. NPC B uses the
 MakeHuman `female_elegantsuit01`, `shoes03`, `ponytail01`, `eyebrow001`, `high-poly`
 eyes, brown-eye material, `eyelashes01`, and middle-aged Asian female skin.
@@ -31,7 +32,7 @@ materials, the `ResidentBRig` skeleton, and `B_Idle` / `B_Talk` actions. Relativ
 texture paths work outside the author's checkout. `recipe.json` records macro
 values, retained texture archive paths, upstream SHA-256 and final SHA-256.
 Textures are at most 2K. The export emits `SK_NPC_B.fbx` plus both 30 fps,
-eight-second clips, with the same axis, scale, bone, and animation settings as
+24-second clips, with the same axis, scale, bone, and animation settings as
 NPC A. Reproduction promises equivalent geometry and behavior, not identical
 Blender metadata or Unreal asset GUIDs.
 
@@ -51,10 +52,12 @@ scenario, then publishes assets and the manifest transactionally. NPC B faces
 the Room B approach at yaw 180 degrees. Attention is clamped to 12 degrees
 relative to each resident's own rest direction and returns to rest beyond 300 cm.
 
-Both residents breathe and blink while idle; NPC B uses a restrained left-hand
-conversational gesture with its own blink timing. Idle/talk transitions preserve
-phase and wait for a common rest pose, so dismissal restores controls immediately
-while a raised arm settles. The shared Interaction owns the active speaker;
+Both residents keep planted feet and share a relaxed rest-pose vocabulary while
+using different breathing, weight-shift, glance, blink, and hand-adjustment
+timing. NPC B's mannerism favours two restrained left-hand conversational beats,
+distinct from NPC A's right-hand movements. Idle/talk transitions preserve the
+complete 24-second phase and wait for a common rest interval, so dismissal
+restores controls immediately while a raised arm settles. The shared Interaction owns the active speaker;
 speaking to one resident does not activate the other's talk animation. There is
 no navigation, voice, lip-sync, or added dialogue system.
 
@@ -101,16 +104,23 @@ by `Saved/Verification/index.html` at 2560 x 1440.
    full-size residents, grounded feet and no proxy shapes or broken materials.
 2. Walk into NPC B from the front and sides. Expect blocking collision and a
    usable approach around the resident, desk, guest bed, and Door.
-3. Watch for at least eight seconds, then move to either side and beyond 300 cm.
-   Expect subtle breathing, brief blinks, a small smooth acknowledgement and
-   return to its Room B facing direction, without walking or a full-body spin.
+3. Watch for at least 24 seconds from the front and an oblique angle. Expect
+   planted feet, relaxed arms and hands, subtle breathing, weight transfer,
+   brief blinks, small glances, and occasional hand/finger adjustment without a
+   repeated pendulum beat. Check that the feet neither float nor slide in world
+   space and that arms, hands, and clothing do not penetrate the body; elbows,
+   neutral wrists, and fingers must remain anatomically plausible. Compare NPC A
+   and expect different timing and mannerisms. Move to either side and beyond
+   300 cm; expect a small smooth acknowledgement and return to its Room B facing
+   direction without a foot slide or pose snap.
 4. Focus within 250 cm and press E. Expect `Resident B: I have just finished
-   tidying the desk.` Hold the line for eight seconds to see the left-hand
-   gesture. Expect hidden dot/prompt, suspended walking and bounded mouse look.
-   NPC A should keep idling while NPC B speaks.
-5. Advance the three lines, dismiss during a gesture, and replay immediately.
-   Expect smooth settling, immediate restored movement/scanning/free look,
-   unchanged neutral dialogue, and independent repeatability for both residents.
+   tidying the desk.` Hold/replay long enough to see both distinct left-hand
+   gesture beats. Expect hidden dot/prompt, suspended walking and bounded mouse
+   look while NPC A keeps idling.
+5. Advance the three lines, dismiss during each raised-hand beat, and replay
+   immediately. Expect smooth settling or continuation, immediate restored
+   movement/scanning/free look, world-space foot planting, plausible joints
+   without mesh penetration, unchanged dialogue, and independent residents.
 6. Exit during dialogue with the Door open and relaunch. Expect the Door closed,
    no dialogue panel, normal input, and both residents available from line one.
 

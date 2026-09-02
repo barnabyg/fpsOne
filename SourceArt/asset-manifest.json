@@ -64,39 +64,39 @@
                        "generatedFiles":  [
                                               {
                                                   "path":  "Content/Environment/RoomA/modern_arm_chair_01/modern_arm_chair_01_2k/Materials/modern_arm_chair_01_legs.uasset",
-                                                  "sha256":  "d37d30866dc86ace6be58161d8bc5b2534ae309bbb8763fb6d7d7643a4e5ac7b"
+                                                  "sha256":  "22f13d6aecdb61d69cfaab50b471509cf0be1c196e0b6e1a5d27bfa89da829fe"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/modern_arm_chair_01/modern_arm_chair_01_2k/Materials/modern_arm_chair_01_pillow.uasset",
-                                                  "sha256":  "bc25906a18079e1a5f47add6b6c9d9c95a8c93a32c9b579e21e259c8e966dcf3"
+                                                  "sha256":  "7ebac0c6fadd8d81afebb6642bec58af60a2b7f57681e41eae5325e0aea19c9c"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/modern_arm_chair_01/modern_arm_chair_01_2k/StaticMeshes/modern_arm_chair_01_2k.uasset",
-                                                  "sha256":  "fae2177e422bec031db34e28e6e23a5e1fbfcf322e2c4fa583a4be031e8fd934"
+                                                  "sha256":  "ecee0f9abc2be16e4ecf7c9d10f81ec6634f629796aaa7d979931afb67aba1a8"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/modern_arm_chair_01/modern_arm_chair_01_2k/Textures/modern_arm_chair_01_legs_diff.uasset",
-                                                  "sha256":  "00210683e21a9abfd085120571c7ff8fcfae17981e03f1b7aef107acceffda8b"
+                                                  "sha256":  "2043c90445d6c4bf57b545e6d2890573c7294209611802bb6cb2e16fc90c7b6b"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/modern_arm_chair_01/modern_arm_chair_01_2k/Textures/modern_arm_chair_01_legs_metal-modern_arm_chair_01_legs_rough.uasset",
-                                                  "sha256":  "abb955032878b1fca2487a82723b48ccf8c25eaa7be106ac7d6f1e562ad043fb"
+                                                  "sha256":  "8b9e61e90f43c9f5a0716dd04744bb8a3c8d246cd6d6c7b313e8d7b3f48bbbfb"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/modern_arm_chair_01/modern_arm_chair_01_2k/Textures/modern_arm_chair_01_legs_nor_gl.uasset",
-                                                  "sha256":  "bb2282200deb21105c22200c6d34069aa21891ed7f0300d9dcab9e1fd7af50f7"
+                                                  "sha256":  "f03e81b086592bca8327752dd18829f0d9b7ac592cf3079a51ff6b6994817822"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/modern_arm_chair_01/modern_arm_chair_01_2k/Textures/modern_arm_chair_01_pillow_diff.uasset",
-                                                  "sha256":  "d5b1472e8320a5d32b07c716536f7056570f99a86fb362acb1c9d653fb2f7793"
+                                                  "sha256":  "878267e000aa054c5093d957ca1980d920e3cb3fee5d5173b29924ac794510de"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/modern_arm_chair_01/modern_arm_chair_01_2k/Textures/modern_arm_chair_01_pillow_metal-modern_arm_chair_01_pillow_rough.uasset",
-                                                  "sha256":  "87f4b8aa620b9b65a3f45f627cab76bb4228a28cc0a7914b9422a27cb2593119"
+                                                  "sha256":  "73f9944568f2fece815f4aeaadc9f739a93a593ecb9565c9e076e99aea737634"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/modern_arm_chair_01/modern_arm_chair_01_2k/Textures/modern_arm_chair_01_pillow_nor_gl.uasset",
-                                                  "sha256":  "e9a4a12ad7619f086285b2292e34aaa5b385aa863d011c77eca22f6e67873a89"
+                                                  "sha256":  "182d360cf90ee589a3e998b81f850d592753569936d9a1bb02b1ba61996b9447"
                                               }
                                           ]
                    },
@@ -145,23 +145,23 @@
                        "generatedFiles":  [
                                               {
                                                   "path":  "Content/Environment/RoomA/modern_coffee_table_01/modern_coffee_table_01_2k/Materials/modern_coffee_table_01.uasset",
-                                                  "sha256":  "86824242e70ed1418481628be263b4662be89ea46a4ed41f535d0ee83a8997c1"
+                                                  "sha256":  "2d93601549d24a5e674d4059b59ce0ec1dec2c9c60f478649c7e0c0c716fb7f1"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/modern_coffee_table_01/modern_coffee_table_01_2k/StaticMeshes/modern_coffee_table_01_2k.uasset",
-                                                  "sha256":  "f4a1089725821c15a2b568dd82080246b99799d25e1926771ee962870189830c"
+                                                  "sha256":  "5037bc4e341a7701da5c9f598d98389b87e72173419465b57531b0e5d94a0eaf"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/modern_coffee_table_01/modern_coffee_table_01_2k/Textures/modern_coffee_table_01_diff.uasset",
-                                                  "sha256":  "bf0de1210c1ef1e8175c2044637e17baa802bf1612b2695326aa532f2bfc0bc3"
+                                                  "sha256":  "dedf0facca8a8d4089ae0d2c8751c481e6429e64c2a3d8b66880cca2523dcb90"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/modern_coffee_table_01/modern_coffee_table_01_2k/Textures/modern_coffee_table_01_nor_gl.uasset",
-                                                  "sha256":  "4000b07a1ebb7fdc60a2509393f2fbfd702e2430a86a4364dd84c9e6869f3c81"
+                                                  "sha256":  "7664c2ff3dfb8d0289c339914e8f37262d05de6053da9e9ac5c5bb28d3ced01d"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/modern_coffee_table_01/modern_coffee_table_01_2k/Textures/modern_coffee_table_01_rough.uasset",
-                                                  "sha256":  "34e1f52606edc8449641106e244e77c75c2abe58b417fb1640c664bcb9f2caea"
+                                                  "sha256":  "ca34e87e6662e171164cd4019974ee8503f67c5c6de53232f5f6be3e8129f424"
                                               }
                                           ]
                    },
@@ -228,47 +228,47 @@
                        "generatedFiles":  [
                                               {
                                                   "path":  "Content/Environment/RoomA/potted_plant_02/potted_plant_02_2k/Materials/potted_plant_02_leaves.uasset",
-                                                  "sha256":  "44900e5887c78553aabed650bab225d96f736c887bd7112d23ff6be6a4d7d7f1"
+                                                  "sha256":  "5303c7cae37293cc266d06e3328f5c0370c0097b0159714b7b278ca73511af25"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/potted_plant_02/potted_plant_02_2k/Materials/potted_plant_02_pot.uasset",
-                                                  "sha256":  "c3968376bad4b68029b0fccd4eed4d8c8c09566d74c46f1a1974e551a617f60c"
+                                                  "sha256":  "01525bb54df889da24e02073503e1963033ed9295306b0cef524bf55181069bf"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/potted_plant_02/potted_plant_02_2k/StaticMeshes/potted_plant_02_dirt.uasset",
-                                                  "sha256":  "952753d405b1ffb1c15de9be87ecd584758096b781ff90ff95b7801b8a045678"
+                                                  "sha256":  "7caf5eea1a72c753fdc1cf8d173814a913c866f4bd9b7c202e260beb10c30361"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/potted_plant_02/potted_plant_02_2k/StaticMeshes/potted_plant_02_leaves.uasset",
-                                                  "sha256":  "330132461ad3a0d6baaa9ac815f5a1f3521b88aa7afd615487fd34483120a425"
+                                                  "sha256":  "517e55ba95172a402930c13d201f53deb7991eec9e89b6fa31c639299f3060ee"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/potted_plant_02/potted_plant_02_2k/StaticMeshes/potted_plant_02_pot.uasset",
-                                                  "sha256":  "ff5b4af5e2566d7d92e2527296c8fb3b908a86aa086ae90fda3a167445ffa58f"
+                                                  "sha256":  "f14c3d24398ad54324dd584382f4420d0e7bb06cd35247a948e58cf239f55104"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/potted_plant_02/potted_plant_02_2k/Textures/potted_plant_02_leaves_diff.uasset",
-                                                  "sha256":  "5f0e85df946658a5fc358cfd06694f07f1d1b05362761f58adfd186406472e2b"
+                                                  "sha256":  "4903f9d91e6428f0e77523ae439da99ec072a5afe5c88748b3fd0bbded5d13e1"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/potted_plant_02/potted_plant_02_2k/Textures/potted_plant_02_leaves_nor_gl.uasset",
-                                                  "sha256":  "787a0b27e7e7453a8754e1de14eefb3f224e26a0ec46ee643a0022f72603fbdb"
+                                                  "sha256":  "566981e0b46cccace96ab8f5b72b0e71a7e22563f378fb27ba813561080e6c06"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/potted_plant_02/potted_plant_02_2k/Textures/potted_plant_02_leaves_rough.uasset",
-                                                  "sha256":  "8368e2178c2e6d764f1e5b428991d240757ce8bd36abab536edd0b6b1e444cdc"
+                                                  "sha256":  "fd762d0857a41b7cfb203a3dcdfa62ca1ddf6ef37ace38ae486fa2ebb57225be"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/potted_plant_02/potted_plant_02_2k/Textures/potted_plant_02_pot_diff.uasset",
-                                                  "sha256":  "e5f71d7f917c390bc59948dc1d14a80b60a5fc13c634250a2ec4ffac66d6a76b"
+                                                  "sha256":  "93bceb1929f1807e243dc0bd49cb9f808073b93709a6c19aaa11dc134b4c6311"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/potted_plant_02/potted_plant_02_2k/Textures/potted_plant_02_pot_nor_gl.uasset",
-                                                  "sha256":  "aad8d9efacf484fdb92f9f42baabcf8374f0ddcc6cbf97386315ad83ba4939ba"
+                                                  "sha256":  "566d95038f9863a41840e28ff5826a25263b78eb7bc482d4578622fe94e7cce2"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/potted_plant_02/potted_plant_02_2k/Textures/potted_plant_02_pot_rough.uasset",
-                                                  "sha256":  "432cd23ceb8cb27f1ffcf23ce5d3314aecee8d5685441394220f60ff8eec3cba"
+                                                  "sha256":  "d1b3ca27c0a83e8c561633459567a5e05f06a23f44f4591ee737cc39469bd165"
                                               }
                                           ]
                    },
@@ -317,23 +317,23 @@
                        "generatedFiles":  [
                                               {
                                                   "path":  "Content/Environment/RoomA/ceramic_vase_03/ceramic_vase_03_2k/Materials/ceramic_vase_03.uasset",
-                                                  "sha256":  "c17aa96a21cb726bca2d78c72de8e706d7891c43cc02ec92e977e2766e4fe013"
+                                                  "sha256":  "e798c2873ad00d1b9409f5f613c0406153094f32cb93483a5ad5ef520232b4ad"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/ceramic_vase_03/ceramic_vase_03_2k/StaticMeshes/ceramic_vase_03_2k.uasset",
-                                                  "sha256":  "4328af324b350155950948b84966dd0192109cbf8cd23b35c61fcfcfc1f68ad4"
+                                                  "sha256":  "23738be0ee3541cf4f078f55c929180eed90628a7511f89adff76e44530df1fa"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/ceramic_vase_03/ceramic_vase_03_2k/Textures/ceramic_vase_03_diff.uasset",
-                                                  "sha256":  "6a02cf00d767a9816bf61f8d283d3b39dbb1170554993ddf01cd2077834f6374"
+                                                  "sha256":  "05ca657898b3254ab298de8560e3db4b9c492b3a7a2f386a54fdf2beeac35085"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/ceramic_vase_03/ceramic_vase_03_2k/Textures/ceramic_vase_03_nor_gl.uasset",
-                                                  "sha256":  "81e54a9d3910d13ed55a9675aacc2af0dc7f532bdf1229cc3b5a11e2488838b0"
+                                                  "sha256":  "0c84d67198949f28562780f764d3e10ed2cf286c8bd46f319695ce36061e9b44"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/ceramic_vase_03/ceramic_vase_03_2k/Textures/ceramic_vase_03_rough.uasset",
-                                                  "sha256":  "a67befe46a28f071f8d3a28ccadd55078d105939a3e9b6f74a8c4748693cf136"
+                                                  "sha256":  "0960191bf1d7da9065af6717339b2e8ced5c55335f42e8200093c6b1c7f14e9c"
                                               }
                                           ]
                    },
@@ -370,23 +370,23 @@
                        "generatedFiles":  [
                                               {
                                                   "path":  "Content/Environment/RoomA/Materials/M_Floor.uasset",
-                                                  "sha256":  "3e792fdbdda4bc767d3354dcc89d02b17f83be95b042802e33e6abf4c6b41fb8"
+                                                  "sha256":  "61eae2aaff10454905e2e8c4f9cbfb5a57761adf36d975fb7d602c4a9d8c5360"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/Materials/M_Oak.uasset",
-                                                  "sha256":  "d7f8be5843289ed67ccb0efce94b38313a97463e9f9314c964075f4c2780830e"
+                                                  "sha256":  "684daed4d55b08bdf55969f5d7082ff1af8db3ac97b66135780724e29d2c5cf1"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/Textures/wood_floor_diff_2k.uasset",
-                                                  "sha256":  "f9f7ef5e220093418229d0f17f5631cf046ba6d98538b8081a96d26807fb24df"
+                                                  "sha256":  "2ac72a4499d98211ce6aab696e8526da1ac1c6c09cc24382d87ef9ece6a51445"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/Textures/wood_floor_nor_dx_2k.uasset",
-                                                  "sha256":  "f2866c79d0d63a1fbff48f71cc03bbc87625452f74e90f8f3977c894fd98af80"
+                                                  "sha256":  "ee11fd3b804fc453bcf68a13db8445d59db2746468635fe05bb8685bd8cb0a7f"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/Textures/wood_floor_rough_2k.uasset",
-                                                  "sha256":  "ec3a99b5d077d57a4aba7cc23c0a206f4cf3c8a1d5e4e3361e8984652a1fa63a"
+                                                  "sha256":  "65faab9aa2ca90c9a4a71887312954d42ad0a7a31eaba88ac55810e5dc0b688d"
                                               }
                                           ]
                    },
@@ -423,23 +423,23 @@
                        "generatedFiles":  [
                                               {
                                                   "path":  "Content/Environment/RoomA/Materials/M_Linen.uasset",
-                                                  "sha256":  "f218a225a8e31f490037dde7ab3cd308e1b0471f9b4797cfd71e038b01cf22ca"
+                                                  "sha256":  "badd6ba4e58e7af690b312ad66375d22b943f22272c2b7cdb0a8a53dd04797c2"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/Materials/M_Rug.uasset",
-                                                  "sha256":  "c21b0cc4d9e2f3aba0bb20bafdeee18104a61e52168e10f5e4e18d775da7c173"
+                                                  "sha256":  "43a5fd66adc36df9ce58736e62d2fc3217ccf9f4acbf7dce18c5193f98d08c64"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/Textures/fabric_pattern_07_col_1_2k.uasset",
-                                                  "sha256":  "3a73cf66abd74bb666c59ad62a0b04864f7ced365964e44e29b3c94851286740"
+                                                  "sha256":  "0107a57420c3f1ddec049fce33c27db5ef7552e12c02b8a14e918e5788e8eab2"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/Textures/fabric_pattern_07_nor_dx_2k.uasset",
-                                                  "sha256":  "8d9d84678f06a366e481622eed017f86ff78edacb24dad6d1adecfaf41ba193b"
+                                                  "sha256":  "12751cb7f26967c12055faf5e543ccdf6f22f0336e92cb5359504ec6ca01f212"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/Textures/fabric_pattern_07_rough_2k.uasset",
-                                                  "sha256":  "dc453058d414fb33c23676e88139902d533be515d155e479fc340da54b265bf8"
+                                                  "sha256":  "65811b2daa7902e3ffa71f9fdee47706667113859bf4f74b2a839d884e2b76ed"
                                               }
                                           ]
                    },
@@ -476,19 +476,19 @@
                        "generatedFiles":  [
                                               {
                                                   "path":  "Content/Environment/RoomA/Materials/M_WarmPlaster.uasset",
-                                                  "sha256":  "1c893ec5e1907fbc89be655bb35187114559091d4011243456400062e3b1dbef"
+                                                  "sha256":  "98dd588ecc771e2264973fa119ee48e641afca0818500bd55e0aa2587ee9853d"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/Textures/white_plaster_02_diff_2k.uasset",
-                                                  "sha256":  "0ca1a31e51c2a3a74a3fc2d0e852a0584d32b8af9ddc3d3c1790310ddbfb8001"
+                                                  "sha256":  "dc6409c4918f40ca3dd48415f93cc317f1a23942b102fe7608fb6818b3054127"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/Textures/white_plaster_02_nor_dx_2k.uasset",
-                                                  "sha256":  "f0358dfc1377fce8cfbd5abc84e43572f5b21a8491b39ffbc6e28d9dbb51b1ac"
+                                                  "sha256":  "3c9e7df8aa8ac16507a776c36fbea01d695fe0e5aafd605f373d2b95d8783344"
                                               },
                                               {
                                                   "path":  "Content/Environment/RoomA/Textures/white_plaster_02_rough_2k.uasset",
-                                                  "sha256":  "8d323c411f4db7974d6015f1e33c59bf25d995688c255771aa483b1ed1232960"
+                                                  "sha256":  "a4cab98be73930bdb6d010f33f4b8dc5ccc9fbcdb552aca248114fc7443caa63"
                                               }
                                           ]
                    },
@@ -496,7 +496,7 @@
                        "id":  "makehuman_npc_a",
                        "source":  "https://static.makehumancommunity.org/assets/assetpacks/makehuman_system_assets.html",
                        "author":  "MakeHuman team; Data Collection AB; Joel Palmius; Jonas Hauquier; fpsOne contributors (pose and animation)",
-                       "version":  "MPFB 2.0.8 / core pack sha256:b542127a8e25547c7c29c19f2d1d2adb9a664c80396ecd694095dbc8028a0107 / fpsOne NPC A recipe 1",
+                       "version":  "MPFB 2.0.8 / core pack sha256:b542127a8e25547c7c29c19f2d1d2adb9a664c80396ecd694095dbc8028a0107 / fpsOne NPC A recipe 2",
                        "license":  "CC0-1.0",
                        "publicRedistribution":  true,
                        "licenseEvidence":  "https://static.makehumancommunity.org/about/license.html",
@@ -526,11 +526,11 @@
                                             },
                        "files":  [
                                      {
-                                         "sha256":  "f0d2123458e254d51617cb410a1991c7466dedea5db58be0c1b12f250f9aa8e8",
+                                         "sha256":  "8c3503165bd8587f1b131565a59c57a8c5fb7999ac1b62a46b664736458ec54b",
                                          "path":  "SourceArt/Characters/NPC_A/A_Idle.fbx"
                                      },
                                      {
-                                         "sha256":  "ed0de5b013040ec81be644914bdc1c4078bc85fd62f1dfd8b871a9620233dba7",
+                                         "sha256":  "a66b6b7eef8c59a2998461034eeb24d6b6a569c14e236a7205bd6a3570bc655a",
                                          "path":  "SourceArt/Characters/NPC_A/A_Talk.fbx"
                                      },
                                      {
@@ -546,15 +546,15 @@
                                          "path":  "SourceArt/Characters/NPC_A/LICENSE.txt"
                                      },
                                      {
-                                         "sha256":  "2a2dc7359977c4132dc424c21fb0f0f1069cf182a28ccab4c5e400ce4ee6d946",
+                                         "sha256":  "4e7198262fb9540647cfc21db770de4f31737af96d8dbbec6277f4103526fb43",
                                          "path":  "SourceArt/Characters/NPC_A/NPC_A.blend"
                                      },
                                      {
-                                         "sha256":  "5c2631d68848afb91177bf3787e5bd953a5a6bcd1829945b5ee336c426d37135",
+                                         "sha256":  "44b49eafa1cd226d8a47d04732d489b1ad04e45f5bc194a5f5c4e420968efd4e",
                                          "path":  "SourceArt/Characters/NPC_A/recipe.json"
                                      },
                                      {
-                                         "sha256":  "3ede58e2d8431e4f83eda94aba0a52913fe03adfdbec585443d9862b0c272961",
+                                         "sha256":  "dd2c63dab1327391b52cf33261ad229a2ce48b994bb52b51a8695aaa62f3c890",
                                          "path":  "SourceArt/Characters/NPC_A/SK_NPC_A.fbx"
                                      },
                                      {
@@ -597,79 +597,79 @@
                        "generatedFiles":  [
                                               {
                                                   "path":  "Content/Characters/NPC_A/A_Idle.uasset",
-                                                  "sha256":  "155f1ba6d974a6468805ee72d964f9990029459b42a5307e5f05030a0ecec0d5"
+                                                  "sha256":  "820ec20ab1f87daa0ffcca63fbb4cc746c746161e6888e1c1304e7f88c9800de"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_A/A_Talk.uasset",
-                                                  "sha256":  "9430bc717fc6c7bb01f25e9e9705ac45338926dd672c2a21079f286545c8796b"
+                                                  "sha256":  "75b22fcc20ab69d5936bad24b08956e48ff952d8cb5a76722784d606f09061cd"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_A/Materials/M_Brows.uasset",
-                                                  "sha256":  "35abb39d9734b4bb6f8b6fe9ad555d06c66898fab921dc6cc417ea8c7cc57149"
+                                                  "sha256":  "f208638994ee809bfeeb10e1d0d2bc7a63b9ee8cd84229762aaf58b264eb6c3e"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_A/Materials/M_Eyes.uasset",
-                                                  "sha256":  "c6535d415cb1ebb3d5f322b72895d30aea8e1bf35b1ba76f2dbd3948531b7184"
+                                                  "sha256":  "ba2cc1390c96da1f35587626787bec5b83356c4b41a951eba4edcb87a0e2d75e"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_A/Materials/M_Hair.uasset",
-                                                  "sha256":  "c619f5199fc8c9b405a47fa5a84d2cc41fc2e6c396901de98b5c246bab8eba9c"
+                                                  "sha256":  "89793c75d0b73a8c1ee448f05c64c388865907685d247497dc483a59cc2ce908"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_A/Materials/M_Lashes.uasset",
-                                                  "sha256":  "eef31d0a53c2eb118de8ddd9a145defa27fe92e49c73549b9480b64a70b77b36"
+                                                  "sha256":  "f9e03af10721e08527cd19f5b4831d3b1b3d6ffba0ba37acf8bb7617401ea7fa"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_A/Materials/M_ShirtDenim.uasset",
-                                                  "sha256":  "5f97e3d41f4de4bfa3efb1ca0b04e197fe5d6f23c6e04de314f810739ed8eb59"
+                                                  "sha256":  "0138b65f4e834c53c7d589ff6e000e66e72e9ba1cbd16810e6e6d109d989cbc8"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_A/Materials/M_Shoes.uasset",
-                                                  "sha256":  "a655cf721f796958c92d5eb15354358086db7f95da60d17a2b2946046d6212ca"
+                                                  "sha256":  "11ebbc4d829cbd0fad157521aae74369804e8d9104fb6e9422b4b38de405397e"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_A/Materials/M_Skin.uasset",
-                                                  "sha256":  "a08746dd09ab44906c314c8cdc8c6d0e5362745bf5948f9f240cdd48c03a9622"
+                                                  "sha256":  "c887835d0a14a2ca4448070b18db5b5fc2b683348f9adf00aba5494d339f9eba"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_A/SK_NPC_A.uasset",
-                                                  "sha256":  "0ddb9cd53f6d4ca9131bf77e4e92520d7b902adc1759182a6007945e12f43023"
+                                                  "sha256":  "f4da9ee988f3c93276296916517cf1a2ff59d81aeeb50f1909e1c78ae2249ea8"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_A/SK_NPC_A_Skeleton.uasset",
-                                                  "sha256":  "6b037cc20f856a426de74678d11ccaac2af985ad7d5a08486a545503d170eec9"
+                                                  "sha256":  "7d864932bd5084f29325a5707bf839882d83ce159aa5ae559ea3026d3b8b3b7b"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_A/Textures/brown_eye.uasset",
-                                                  "sha256":  "c1a36050e1ce2212077df3ca6fcda91168919ae0aab3e54f13c4703cb72c1f58"
+                                                  "sha256":  "9e970c249771d22b7616edc8b61e72ea37aaf4407a0de2efa52cbec09773887b"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_A/Textures/eyebrow002.uasset",
-                                                  "sha256":  "8592317dc40f2a771f950ee9b105b9d0e2f25d724c1b65e3fad63d36e389dea1"
+                                                  "sha256":  "69567c614b8079de67a2742c1d72efda56bde22c07d75755cd4bb87b6d00ee6b"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_A/Textures/eyelashes01.uasset",
-                                                  "sha256":  "7df98f01a75c1917570d7c2c927a4d757f619218002406b7c2db5233406c07e7"
+                                                  "sha256":  "6b90dc394f71e00f0707abe100e8aa0630ecfc4f3a53e00d24c3160214640dcb"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_A/Textures/male_casualsuit03_diffuse.uasset",
-                                                  "sha256":  "fbce5d73534e4a78e4691ec8205ee95bd219a21064c0d7ffe3036012c645eb2e"
+                                                  "sha256":  "791dc53872c6efd86c70d857acd64f555b839ba85951806c3f965f9ddc3d1d32"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_A/Textures/male_casualsuit03_normal.uasset",
-                                                  "sha256":  "bf589b6b984b21fae74d7c8c4919838920e6bef8940ec54a8bac5fdadac4a52d"
+                                                  "sha256":  "45552d77103b35a8a81923f7de8332aef2a19bffa1c384b11583ac1f5c74fe0f"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_A/Textures/middleage_lightskinned_male_diffuse.uasset",
-                                                  "sha256":  "f9dbcf7f5811f73e58c7f98b7e72e0f3b88762fb2d0752298fb34d441a0df54b"
+                                                  "sha256":  "8524232cfc171f9f1572f2d92f083c05e0c860d038beb6a8d9cf41738962fde6"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_A/Textures/shoes01_diffuse.uasset",
-                                                  "sha256":  "bb953fc0700e3528a390221557ee281cc47dd9bdada6c6013b1476ffa42e5928"
+                                                  "sha256":  "3eebd09905202946204b4cf0ecfdf5784182f657941e7ca79d1a9e008fe0a16e"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_A/Textures/short02_diffuse.uasset",
-                                                  "sha256":  "0c2ed0b956ed770c7c6c16e2a44c19608c6f486a6e730d63dc03e27ce9650f19"
+                                                  "sha256":  "daeb270208aee7e10905a074ce95c94dbe3d8e631201c12d447e2391722cb08f"
                                               }
                                           ]
                    },
@@ -677,7 +677,7 @@
                        "id":  "makehuman_npc_b",
                        "source":  "https://static.makehumancommunity.org/assets/assetpacks/makehuman_system_assets.html",
                        "author":  "MakeHuman team; Data Collection AB; Joel Palmius; Jonas Hauquier; fpsOne contributors (pose and animation)",
-                       "version":  "MPFB 2.0.8 / core pack sha256:b542127a8e25547c7c29c19f2d1d2adb9a664c80396ecd694095dbc8028a0107 / fpsOne NPC B recipe 1",
+                       "version":  "MPFB 2.0.8 / core pack sha256:b542127a8e25547c7c29c19f2d1d2adb9a664c80396ecd694095dbc8028a0107 / fpsOne NPC B recipe 2",
                        "license":  "CC0-1.0",
                        "publicRedistribution":  true,
                        "licenseEvidence":  "https://static.makehumancommunity.org/about/license.html",
@@ -708,11 +708,11 @@
                        "files":  [
                                      {
                                          "path":  "SourceArt/Characters/NPC_B/B_Idle.fbx",
-                                         "sha256":  "2b715336d1511784fa406677b5f2bfdf891b4be97496b90a2c61746f5ecd8798"
+                                         "sha256":  "ae95c46e90d99061eacd3d2e23ea7e03360579bbe8ba871239b485b7080517e5"
                                      },
                                      {
                                          "path":  "SourceArt/Characters/NPC_B/B_Talk.fbx",
-                                         "sha256":  "f81c7bc8039f3ec85d7c7c06e5a270374482b22daad1a68e0c92386719e9e83e"
+                                         "sha256":  "98a7ae8722c58030aea5f67521ba220e5c70ca63419fe03d241eb3d031043782"
                                      },
                                      {
                                          "path":  "SourceArt/Characters/NPC_B/core-material-notice.mhmat",
@@ -728,15 +728,15 @@
                                      },
                                      {
                                          "path":  "SourceArt/Characters/NPC_B/NPC_B.blend",
-                                         "sha256":  "88595686ca6452df306970af9ee7ddd2cf9e98f15c7196a76b848029b86fbbd8"
+                                         "sha256":  "4082d11d18841a0d5aa3ab7c97df87432d7054d66d40db2be32aee478b545db0"
                                      },
                                      {
                                          "path":  "SourceArt/Characters/NPC_B/recipe.json",
-                                         "sha256":  "acb55f18e978b6f317ae8af49247b1b85243acb1e63229b00d7548617fc01c3e"
+                                         "sha256":  "589845b152a40e3e1a31b3414b3f266873176079caecc69eb4ed9ca95c28ce74"
                                      },
                                      {
                                          "path":  "SourceArt/Characters/NPC_B/SK_NPC_B.fbx",
-                                         "sha256":  "46942ea6b8374bbcb9421e8003592ce7d90defbc7515ad6772d4f694c02824d0"
+                                         "sha256":  "d8501ece58a55139ffaa19d9cfabdb072a5d11c46ffd3ecb029f12f901ee1441"
                                      },
                                      {
                                          "path":  "SourceArt/Characters/NPC_B/Textures/brown_eye.png",
@@ -778,79 +778,79 @@
                        "generatedFiles":  [
                                               {
                                                   "path":  "Content/Characters/NPC_B/B_Idle.uasset",
-                                                  "sha256":  "d8f0b72bf86eb004a263ffbc6c6b587e84b858b1a092aa0bb0d170cf0db4a8e4"
+                                                  "sha256":  "e539903e3eea8b17b7bbdf00528c9acba1f903ef63a2414ceeaf37abd5096f54"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_B/B_Talk.uasset",
-                                                  "sha256":  "27457855d6b6e4553c2ae2f281b294d196e4b112c38b2e11a3aeda214a5ecf62"
+                                                  "sha256":  "3af47aecb75f5a23960147275d7b5916bd1f54e22ca2d9a7c261d722b402a218"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_B/Materials/M_BlouseSkirt.uasset",
-                                                  "sha256":  "e79d986a7fc8914d6b153c3953a7a8de221133f038e3e12dc403b124cea873f7"
+                                                  "sha256":  "bb06e1d79aa525a06f42cdbf0c64628ef4f468e096094b343673d2735c410daf"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_B/Materials/M_Brows.uasset",
-                                                  "sha256":  "92e92aabe54172bd682a0ca1704106394d261272468579b60a9648069dd9f8d4"
+                                                  "sha256":  "354bdc604f16a45866a3de4c6318bd1aad09a42de0687a7e076f85a7520b324e"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_B/Materials/M_Eyes.uasset",
-                                                  "sha256":  "37f3900756b2358f80878ec1fa2b3b4d9c7b0fd6cff68f1a982e09ddecda497f"
+                                                  "sha256":  "33bdf49dc745655eabac19b905798ec94ce16f0825acfc33b5610becd3ac2f37"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_B/Materials/M_Hair.uasset",
-                                                  "sha256":  "9ff7b96d018162118e625c504fbfd401eb7dfb3fed4eec06ae4c93a72a983512"
+                                                  "sha256":  "0775bbe4df0c131530a301352ba3f9ddeba61d13961ae79bee594e5c1aa5e9d9"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_B/Materials/M_Lashes.uasset",
-                                                  "sha256":  "709bf3aee994fea8681e8ce809ce97c59af65db4a31d2993dc9c752b78cd2d3b"
+                                                  "sha256":  "1b5c005b38fe73b197e1a2e8d48135c921b49632266f361eb7b61adcf4dcecaa"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_B/Materials/M_Shoes.uasset",
-                                                  "sha256":  "49e7fb3e9b2a5beb078a3d85816e65c7e7dbd7448c7565dd67f8c6354f39db2c"
+                                                  "sha256":  "7305cab540460fcc3bc5de4a5631bfb74b6e8d7e8336dae41241a9c651396479"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_B/Materials/M_Skin.uasset",
-                                                  "sha256":  "2345038627655caffa31685b69014332f3dc794b6a0a4a0fef7683cbf13ee3f8"
+                                                  "sha256":  "33d2dd8e5e0a043a69821868ec368b606cfb3850e40a8ff30e95590450394041"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_B/SK_NPC_B.uasset",
-                                                  "sha256":  "c41efa0f0991919496e2419c4773dcc9f6a30307a3fddf693c795ffff69fb3c5"
+                                                  "sha256":  "28e4020a902b15820e6f0a646f5e6e1210bac4757e93fc8e7e57c4106deb67df"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_B/SK_NPC_B_Skeleton.uasset",
-                                                  "sha256":  "0d919b475d89d60d07c54223b0c78768706278b3c9023141ba6536044e44c8cf"
+                                                  "sha256":  "e9aeb7e57d740f5c326682c22398ab11fe54b72e6ca54e25a8ba1eeec884f847"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_B/Textures/brown_eye.uasset",
-                                                  "sha256":  "6b35874cb4099c5383db36fd2fe50a299c17bb22f523efed20d852c27e184b34"
+                                                  "sha256":  "4d8184effe3cb67d7fa8c95eb2bdbc9e8d6a1fecfba02750f9e4815112b30120"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_B/Textures/eyebrow001.uasset",
-                                                  "sha256":  "8e1d6d3ccb815b7313b19243a3b9e46b533d93059d38d160706475024c8277af"
+                                                  "sha256":  "fd28cb8da7cefe597939528df68941a482854ab045a6e86b0a556b11263c305a"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_B/Textures/eyelashes01.uasset",
-                                                  "sha256":  "4ab350bc07f0cf45c78dca2f35b73b83f2524ae2713b433c215ad03c5a22438b"
+                                                  "sha256":  "3b9441d5342e260e47ff828d782f72236e8940481558e3f9992d01bcd8beb196"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_B/Textures/female_elegantsuit01_diffuse.uasset",
-                                                  "sha256":  "1b72c9893e2319d0555c8b5f86e8020ea11e3edd437399d409af4c23065848f9"
+                                                  "sha256":  "194fa43342a185319f783393f741b04def788c63b5fb15af39534b3b9d10394a"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_B/Textures/female_elegantsuit01_normal.uasset",
-                                                  "sha256":  "6508abfce3a44c11053b883f49e708a024867f7c2f12d2cb191371aedffb3449"
+                                                  "sha256":  "506352fceb961544ba6078e10f6b392eaa591899c77941952ead98ccd8dc84d2"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_B/Textures/middleage_lightskinned_female_diffuse2.uasset",
-                                                  "sha256":  "37c93aff8d81c5e725b74a7eecf2eb0e23b4d20f2e32bcf0b552455ed63396d8"
+                                                  "sha256":  "6aeb12b5958353bf006b4babc12e2634a76b964f8f9c944c8380d966d0a26649"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_B/Textures/ponytail01_diffuse.uasset",
-                                                  "sha256":  "dfafbe4e29ae1dd291edb3f7b87cc42f3cebd09d4b3ada0fd0ac9b568742d6b6"
+                                                  "sha256":  "06e4d920b23483d25d38a74a0a8031a20e19d9aae1e3c52f6bfd58a46d7c3ce9"
                                               },
                                               {
                                                   "path":  "Content/Characters/NPC_B/Textures/shoes03_diffuse.uasset",
-                                                  "sha256":  "e45580ec962d9dc12d142945b176e88f7eb74157358c4909b3663cb13d8d2988"
+                                                  "sha256":  "109f38cc6e672a950c81df2b4806bf9d1ecf7ac3edec4d5d741610820b89e413"
                                               }
                                           ]
                    }
@@ -858,179 +858,179 @@
     "projectAuthoredFiles":  [
                                  {
                                      "path":  "Content/Environment/RoomA/Materials/M_ArtPaper.uasset",
-                                     "sha256":  "4413542f08a74968ebfd8f287eef7ad9bb79ba42a4c085a80d60aea2da1c27ba"
+                                     "sha256":  "0fa951ce43c59d7d114595ce7af73ae355a8ef715d019b1297d2f4aa17b1da53"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomA/Materials/M_Bronze.uasset",
-                                     "sha256":  "dc9fa596bc5c0d6aa1b03cf7db40c107720a54544925e238dd8d2b7a121f7023"
+                                     "sha256":  "3e1ea29e7594ed5c21d5df1fad1358ac6d0611780a06dd8d2d2dd7b8338d438b"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomA/Materials/M_Ceiling.uasset",
-                                     "sha256":  "ed06b30ff252da2054d40ceb76f7058f6cef1b5df6eeaa13905be88800636c8d"
+                                     "sha256":  "6680650190f0ffce4e37da659742539410cd5f4127f8ae789c94fc53358f24e7"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomA/Materials/M_Charcoal.uasset",
-                                     "sha256":  "7b664aad555f5191b32bfc860ddd9c8c47a93a91daea357e15c4ab46d3e4c4ed"
+                                     "sha256":  "f6608a01bdaaaa04c906ff47b7c97b4075b65f28fbf098f024e31493414f1908"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomA/Materials/M_Ochre.uasset",
-                                     "sha256":  "f067eac857761f299470b400b6667062264dd9b1a65b7a5224e4c77fa53d7d21"
+                                     "sha256":  "d4e9fe187f1df3af1550e4d9253976472165833c861c3062d70a7b47a90084a3"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomA/Materials/M_Paper.uasset",
-                                     "sha256":  "89c9648c070fd7778cec7885f1a37c461830d1ed970b305da5c6706dd92e3bcf"
+                                     "sha256":  "de2268d514398f6128d0f09a16de75accf1a4819af12017c7b0e5d869805d279"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomA/Materials/M_Piping.uasset",
-                                     "sha256":  "ed770241ce14efa1ef60ae17c4dd28ed3348da1d45190900704ba7883dea1805"
+                                     "sha256":  "092c9cfe5875cee5b638d454301532c8836dcd83c0d994556cf57a31ea262b3f"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomA/Materials/M_SagePaint.uasset",
-                                     "sha256":  "6f530300324e92920f14e5f2ac770d5b7fa1e8a8b310783bc5c12546f3f5d91a"
+                                     "sha256":  "c869cda9a355ec2b1d42bcc1bbc7ca6e05a1a7337e1a7a918fc720dfc3b1faf6"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomA/Materials/M_Shade.uasset",
-                                     "sha256":  "8deac46259bddaa455e3b07f2553162ae04a964ca4691ef49ded979280d21208"
+                                     "sha256":  "fada4d4702fd0fb135e9da5164133f60539585bdbc1ed2a50cb9e8107d92c0c3"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomA/Materials/M_Trim.uasset",
-                                     "sha256":  "f050d5c14e7004a4cf1603a70822a24356dd9895ed413c601c28492df475432d"
+                                     "sha256":  "d943c28204550c589f414c1294b942e2c8d41da6eb5d99c19f4f29cd99448ca3"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomA/SM_FloorLamp/SM_FloorLamp/Materials/Bronze.uasset",
-                                     "sha256":  "8a91d2b9a6116ee017f3dbb0214e34756abea527a92e045bb482bed11678765d"
+                                     "sha256":  "90ea7dfd5ec087c149e842ab289d3d128604b05822d0fc87e366fdb6fdab4595"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomA/SM_FloorLamp/SM_FloorLamp/Materials/Shade.uasset",
-                                     "sha256":  "6ca8e2e879734e7a0ca0becd4a0fee199901e3626f584addc2ef9c2f6c44c827"
+                                     "sha256":  "35b14da17a1fcb392d6b51e8504caad1aeb8f65e4a0f152ec500936f39d65b76"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomA/SM_FloorLamp/SM_FloorLamp/StaticMeshes/SM_FloorLamp.uasset",
-                                     "sha256":  "d8c2d2feda7ea74521fab182e7a7c43a469014572ea51e60a50675834662fb3e"
+                                     "sha256":  "86af254b853f591b25c192bb8d82f03e2d464b5444cc9e18e5e52dcef482a1c5"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomA/SM_LinenSofa/SM_LinenSofa/Materials/Bronze.uasset",
-                                     "sha256":  "51d6564a6a42a938d779574b244948760db3d2d04d90c75231961916175bb3f1"
+                                     "sha256":  "c579bc14d19fdc74636c1af568992a1ca54477437dbb830c4d022a5756f621d2"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomA/SM_LinenSofa/SM_LinenSofa/Materials/Linen.uasset",
-                                     "sha256":  "8e68bf8888a775bb529ac3f96216f9975c48a9c7615d22ab1c2c58bc52692a68"
+                                     "sha256":  "c6fa3ffb874dde2e12900f736e7bad7a92972bbf76421dddf3262728cba53ad2"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomA/SM_LinenSofa/SM_LinenSofa/Materials/Piping.uasset",
-                                     "sha256":  "a8164764541e7b857556da3e4898c5e162c18c4aaeb81361cb82226a5e661083"
+                                     "sha256":  "1b2d0a9129634f838b559c5c1e079b33fd71b1ce4caa7c38c8ed950cc614ed16"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomA/SM_LinenSofa/SM_LinenSofa/Materials/Rug.uasset",
-                                     "sha256":  "fee3f67bb33e1d9ad7719f8fcce36c959cba3560f466bfb8e993f84dd93ae7c1"
+                                     "sha256":  "522e9bb3eb2d36920bdd7b20b570b580b69350269586a0b95ae68995b5488682"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomA/SM_LinenSofa/SM_LinenSofa/StaticMeshes/SM_LinenSofa.uasset",
-                                     "sha256":  "c61f17828ad06ec68617155f797648e6c1cbe654a4a74e53606c27be61b36776"
+                                     "sha256":  "e1f6ff5b03f4d7c438cab03754ef33dfaf91a665889fa5f80fbcf355ff0faecc"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomA/SM_Rug/SM_Rug/Materials/Piping.uasset",
-                                     "sha256":  "1870d3593d283969a8db31ef85322f862e6ab9200cd1f6de53bee8b28c0fe3f2"
+                                     "sha256":  "23c72e85bce0a33cf9c60a514e83274e582dfd3a672f9e4f345ff4a815b369af"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomA/SM_Rug/SM_Rug/Materials/Rug.uasset",
-                                     "sha256":  "51cf58f5b2a28c9d0ecbb869ea910b5659637facfb0be9bb05e30fb1d2258283"
+                                     "sha256":  "29381ead868bc9c0f1b033c0ada8e9f25be6c471d5716877ff7dce16046d42bc"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomA/SM_Rug/SM_Rug/StaticMeshes/SM_Rug.uasset",
-                                     "sha256":  "37dd9ab1bae5b47b395f7a7037a83b1b8296d71a1e982fefed58397c8dffff2a"
+                                     "sha256":  "4dc61adbb76d02bb4ae2725e83be51502dae693ce80e398a108e4fd56c76e635"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomA/SM_Sideboard/SM_Sideboard/Materials/Bronze.uasset",
-                                     "sha256":  "756a5c95e479aa8edef24d7774cfd9c2a9ec355614a4c11289bc5eb741872583"
+                                     "sha256":  "82f256e8dc34251548ce2d0dbaa9b20f521e73b8fa580ac07ec9a13b03a5c91f"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomA/SM_Sideboard/SM_Sideboard/Materials/Oak.uasset",
-                                     "sha256":  "0398d016753b53694e7c43861c88f1202bbed6262dfb803fc99f30a7b8762d4a"
+                                     "sha256":  "9a1e779318b87f5eceb9c720c9edb94fad09b6c248302fe11ae3a92cbac31685"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomA/SM_Sideboard/SM_Sideboard/StaticMeshes/SM_Sideboard.uasset",
-                                     "sha256":  "23ee6b92de6338755bc5bf5d448e4d6caf7cfcf0a44b969f4ed56c01c4a2cc3b"
+                                     "sha256":  "edb39d61ef8e10bb693fea505222bf101dab316d629b85607fee05b50768c2de"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomB/SM_Bookcase/SM_Bookcase/Materials/Linen.uasset",
-                                     "sha256":  "8e3bec1b9e1641243549e9ef9f5a5c2198486f2c7255181aecec2f15290e8d74"
+                                     "sha256":  "0b03e4bd36202ada2ec5cf7884d43da0c748b8e9cf9911759af93adcfd0d388a"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomB/SM_Bookcase/SM_Bookcase/Materials/Oak.uasset",
-                                     "sha256":  "171980d52a28eae49d0211a116bf0e0f6e07d13b3d9e0f97a762f8b06ec536b9"
+                                     "sha256":  "b89289e1e24f66e1fc563e5953bb645fe2ea0cf68ac09de989a25e3ebaa34b92"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomB/SM_Bookcase/SM_Bookcase/Materials/Piping.uasset",
-                                     "sha256":  "aee6502d21b6efe3861de53d4c7ab0537d99a62155de9a8dec90a8fe95b636c7"
+                                     "sha256":  "d232d1b69dbdc7813700818f2f2a8abbbde911b5c418a1a63f3a8e8061e1c656"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomB/SM_Bookcase/SM_Bookcase/Materials/Rug.uasset",
-                                     "sha256":  "9c10941907f4194411799bc789ea280a7b75ba570cd2925d828c556b0031f49a"
+                                     "sha256":  "cdcc6ff0d6a2d13f05b172d71a523309bb156cada9078702f7766ab7167179f5"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomB/SM_Bookcase/SM_Bookcase/Materials/Shade.uasset",
-                                     "sha256":  "c658c1dcba843052d11f9389dcb4fc30423eae06e11c6067f0ca805f2e34481c"
+                                     "sha256":  "95313955722ef6da93a78ab8ce6f9d3a62d43598f6a03a23ab5e22f3ce4d19b4"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomB/SM_Bookcase/SM_Bookcase/StaticMeshes/SM_Bookcase.uasset",
-                                     "sha256":  "efa3396d62a922e80628bd201bc750f2da847ff9b0f805c8a0e2e2b92489afa3"
+                                     "sha256":  "2b75bd1129ce5416b305c666ffa353652181a9d23440b1f604140b2b5156279b"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomB/SM_DeskChair/SM_DeskChair/Materials/Oak.uasset",
-                                     "sha256":  "613ba55361ac4f46187dbdeb82ba068741e845e217988049f31c824014563288"
+                                     "sha256":  "daf6e3d6bd2770f86a3bbe4a4a0973f716bd8eb2419078964406665aa2b468bd"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomB/SM_DeskChair/SM_DeskChair/Materials/Piping.uasset",
-                                     "sha256":  "38c0ea720ff14b7b7650035ccf13d237d044ff2d843f6f7fe3b87edba81347db"
+                                     "sha256":  "17d4e49972a72b315db4c860a504e9c49d3e98a534347c7408374a69f72dbad3"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomB/SM_DeskChair/SM_DeskChair/Materials/Rug.uasset",
-                                     "sha256":  "09c8ccb98cfd8ec481a3463435b84095f1eb2cfd0a2670664918716d66c81d71"
+                                     "sha256":  "e0b36be0b1bcff302a5e905d36cee3fcc9d7ff269fe06c281457227abc349d52"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomB/SM_DeskChair/SM_DeskChair/StaticMeshes/SM_DeskChair.uasset",
-                                     "sha256":  "d431d726baa10bca10e735fd4a56820df1182daee85f52910f604cce1da4ea91"
+                                     "sha256":  "d5b6e5c53dcfd3e8cabf6d1e6a058952d0c749af8dd9b171eabcd85f3941aab6"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomB/SM_GuestDaybed/SM_GuestDaybed/Materials/Linen.uasset",
-                                     "sha256":  "d57ff43461efcc5eeef4d3ccd477369cc57021414327789e033cc9609f1b02a7"
+                                     "sha256":  "9f35db77bd1c6be9320637f243fea58dd960da71c004d4dfa55f99e6641f81c7"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomB/SM_GuestDaybed/SM_GuestDaybed/Materials/Oak.uasset",
-                                     "sha256":  "4127519e3bc230c618be2aba852acd188323d616fc720e2b5f4f6a46e4fc1157"
+                                     "sha256":  "d9cf3d98c14ae2cd56088677be75c94f6a2770e5597e74e11df577b529380820"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomB/SM_GuestDaybed/SM_GuestDaybed/Materials/Piping.uasset",
-                                     "sha256":  "4ed90b9800e5f6a31c67111e463774e8bcd457159a1e62e24bf348d8764ec57e"
+                                     "sha256":  "cd39071e7d94baf414c27f47b9ee3d6a7906da1d5d24e658e63b44ce183f8bf1"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomB/SM_GuestDaybed/SM_GuestDaybed/Materials/Rug.uasset",
-                                     "sha256":  "a1eaadd03d174f3fdd74995f24abde4e8b9f96faaf29b7cd8aff6f7796d2ed02"
+                                     "sha256":  "a9d2364512ff6c3c9e3a03b656613a4ef4c0ac0a6ab9894e0cc69a184a3edc1d"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomB/SM_GuestDaybed/SM_GuestDaybed/StaticMeshes/SM_GuestDaybed.uasset",
-                                     "sha256":  "3878fa08f14bea59a62a0f851afa64955c2067796bb5ac9750acf6cc3aabb71c"
+                                     "sha256":  "12182de652de59e0d80703e94f65621717bc191d4612245defc188385891a775"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomB/SM_WritingDesk/SM_WritingDesk/Materials/Bronze.uasset",
-                                     "sha256":  "8d4ee644b7326475ff3ca37a6c2038c27f060e95cccd09c20c82a4d47848bc24"
+                                     "sha256":  "ffa18ed5a7a60df8f537843df958671d1467b40589c9997c45cb64fcae4a9ca4"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomB/SM_WritingDesk/SM_WritingDesk/Materials/Oak.uasset",
-                                     "sha256":  "5dc00abe284fdebd704840b4e5d6a35b07ab44ca1b1d7aaccd0a7f640adf98ed"
+                                     "sha256":  "06e2f24a212a2c1c99a8e074b9e844e1018b3fbdeebeee56c4e5bf8ea08dbc3e"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomB/SM_WritingDesk/SM_WritingDesk/Materials/Piping.uasset",
-                                     "sha256":  "b05a8bce3687a8707ffcfad939a969be17aa9f203231844ac8aafae81675e667"
+                                     "sha256":  "c7a3f0b1eb309bae286afb6fd0f50f2ebdc8540fc498ead9bc53cb4dc74b74f1"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomB/SM_WritingDesk/SM_WritingDesk/Materials/Shade.uasset",
-                                     "sha256":  "8b1b514e227e03181f4a6abc586c86d59b33d2a55015664c1537ed3558dea462"
+                                     "sha256":  "a601c799b8d4d18e514e423549ba63f1943e919d2f607068045fb6df9e39c6c4"
                                  },
                                  {
                                      "path":  "Content/Environment/RoomB/SM_WritingDesk/SM_WritingDesk/StaticMeshes/SM_WritingDesk.uasset",
-                                     "sha256":  "d90c2cd4b459c5c28691b8420a30c115ba9d14e60be859ae5f8f416974e45f25"
+                                     "sha256":  "fc2027f5be17ea35c61975353e211e066162a8fd480e651c79718a7ab4b532f8"
                                  },
                                  {
                                      "path":  "SourceArt/Authored/SM_Bookcase.glb",

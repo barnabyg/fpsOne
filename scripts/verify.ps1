@@ -374,6 +374,7 @@ $requiredProjectFiles = @(
     (Join-Path $repoRoot 'Content\Blueprints\BP_InteractionHUD.uasset'),
     (Join-Path $repoRoot 'Content\Blueprints\BP_InteractionTestTarget.uasset'),
     (Join-Path $repoRoot 'Content\Python\test_interaction.py'),
+    (Join-Path $repoRoot 'Content\Python\test_npc_pose.py'),
     (Join-Path $repoRoot 'scripts\validate_player.py')
 )
 $missingProjectFiles = @($requiredProjectFiles | Where-Object { -not (Test-Path -LiteralPath $_ -PathType Leaf) })
@@ -454,7 +455,7 @@ if ($projectStatus -ne 'passed' -or $playerStatus -ne 'passed') {
 } else {
     $interactionArguments = @(
         $projectPath,
-        '-ExecCmds=Automation RunTests Editor.Python.FPSOne.test_interaction',
+        '-ExecCmds=Automation RunTests Editor.Python.FPSOne',
         '-TestExit=Automation Test Queue Empty',
         "-ReportExportPath=$interactionReport",
         '-unattended',
@@ -467,6 +468,7 @@ if ($projectStatus -ne 'passed' -or $playerStatus -ne 'passed') {
     $interactionExitCode = Invoke-LoggedCommand -Executable $editorPath -Arguments $interactionArguments -LogPath $interactionLog
     $interactionSummary = Select-String -LiteralPath $interactionLog -Pattern 'T02_INTERACTION_FUNCTIONAL_TEST_PASSED' -Quiet
     $dialogueSummary = Select-String -LiteralPath $interactionLog -Pattern 'T03_DIALOGUE_FUNCTIONAL_TEST_PASSED' -Quiet
+    $npcAnimationSummary = Select-String -LiteralPath $interactionLog -Pattern 'T10_NPC_ANIMATION_PASSED' -Quiet
     $interactionErrors = Select-String -LiteralPath $interactionLog -Pattern 'LogPython: Error' -Quiet
     foreach ($name in @('index.html', 'index.json')) {
         $reportPath = Join-Path $interactionReport $name
@@ -474,9 +476,9 @@ if ($projectStatus -ne 'passed' -or $playerStatus -ne 'passed') {
             $interactionReports += Get-RelativeEvidencePath $reportPath
         }
     }
-    if ($interactionExitCode -eq 0 -and $interactionSummary -and $dialogueSummary -and -not $interactionErrors -and $interactionReports.Count -eq 2) {
+    if ($interactionExitCode -eq 0 -and $interactionSummary -and $dialogueSummary -and $npcAnimationSummary -and -not $interactionErrors -and $interactionReports.Count -eq 2) {
         $interactionStatus = 'passed'
-        $interactionDetails = 'The player-facing PIE scenario passed focus, prompts, Door motion/collision/passage, both NPC exchanges, replay, movement suspension, bounded look, restored controls, and fresh-session reset checks.'
+        $interactionDetails = 'The player-facing PIE scenarios passed natural arm and hand posture, focus, prompts, Door motion/collision/passage, both NPC exchanges, 24-second planted and non-repeating resident presentation, two gesture beats per resident, snap-free replay, movement suspension, bounded look, restored controls, and fresh-session reset checks.'
     } else {
         $interactionStatus = 'failed'
         $interactionDetails = "Interaction functional tests failed or did not emit their success marker and reports (exit code $interactionExitCode)."

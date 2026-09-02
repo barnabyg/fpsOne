@@ -85,6 +85,145 @@
     "B_Idle",
     "B_Talk"
   ],
+  "animation": {
+    "durationSeconds": 24.0,
+    "fps": 30,
+    "restElbows": {
+      "L": -20.0,
+      "R": -17.0
+    },
+    "restLean": [
+      0.4,
+      0.8,
+      -0.7
+    ],
+    "breathCycles": [
+      4,
+      3
+    ],
+    "weightShift": {
+      "cycles": [
+        2,
+        5
+      ],
+      "phases": [
+        0.7,
+        -0.5
+      ]
+    },
+    "blinkTimes": [
+      1.4,
+      6.2,
+      11.1,
+      17.0,
+      22.6
+    ],
+    "glances": [
+      {
+        "start": 2.4,
+        "peak": 3.3,
+        "end": 4.3,
+        "yaw": 2.0,
+        "pitch": -0.4
+      },
+      {
+        "start": 9.8,
+        "peak": 11.2,
+        "end": 12.7,
+        "yaw": -3.5,
+        "pitch": 0.7
+      },
+      {
+        "start": 17.0,
+        "peak": 18.4,
+        "end": 19.6,
+        "yaw": 2.8,
+        "pitch": 0.3
+      }
+    ],
+    "handAdjustments": [
+      {
+        "start": 5.2,
+        "peak": 6.0,
+        "end": 6.9,
+        "side": "R",
+        "wrist": [
+          -1.0,
+          1.6,
+          0.8
+        ],
+        "curl": 3.5
+      },
+      {
+        "start": 14.0,
+        "peak": 15.0,
+        "end": 16.0,
+        "side": "L",
+        "wrist": [
+          1.4,
+          -1.2,
+          -1.0
+        ],
+        "curl": -2.5
+      }
+    ],
+    "talkGestures": [
+      {
+        "start": 2.0,
+        "peak": 3.4,
+        "end": 4.8,
+        "side": "L",
+        "upper": [
+          -5.0,
+          -1.0,
+          9.0
+        ],
+        "lower": [
+          16.0,
+          5.0,
+          0.0
+        ],
+        "wrist": [
+          -1.0,
+          -10.0,
+          -4.0
+        ],
+        "head": [
+          0.6,
+          -1.2,
+          0.0
+        ],
+        "curl": -2.0
+      },
+      {
+        "start": 9.2,
+        "peak": 10.6,
+        "end": 12.0,
+        "side": "L",
+        "upper": [
+          -8.0,
+          2.0,
+          6.0
+        ],
+        "lower": [
+          20.0,
+          -3.0,
+          -1.0
+        ],
+        "wrist": [
+          3.0,
+          -5.0,
+          6.0
+        ],
+        "head": [
+          1.2,
+          0.7,
+          0.0
+        ],
+        "curl": 4.0
+      }
+    ]
+  },
   "author": "fpsOne contributors",
   "license": "CC0-1.0"
 }
