@@ -29,7 +29,7 @@ Saved/
 *.opensdf
 *.sdf
 
-# Local packages are generated outside Git by default
+# Legacy or manually selected package output directories
 Package/
 StagedBuilds/
 Build/Windows/FileOpenOrder/

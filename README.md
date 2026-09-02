@@ -17,6 +17,12 @@ Epic sign-in and licence acceptance are the only credential-bound setup steps. R
 
 The wizard stores only the non-secret Unreal installation path in the ignored `.env` file. It never requests or stores Epic credentials. See [docs/setup.md](docs/setup.md) for exact locations and troubleshooting.
 
+After cloning the repository, materialize the Unreal assets managed by Git LFS:
+
+```powershell
+git lfs pull
+```
+
 ## Controls
 
 | Input | Action |
@@ -31,7 +37,9 @@ Sprinting, jumping, crouching, controller input, weapons, and menu behavior are 
 
 Look at either NPC within 250 cm for `E — Talk`. E opens a shared speaker-labelled bottom panel, advances its three lines, then dismisses it. During dialogue, walking and Interaction scanning pause, the dot and prompt hide, and mouse look is limited around the starting view. Controls return on dismissal; either exchange can be replayed.
 
-## Open the editable project
+## Run the application
+
+### From the Unreal Editor
 
 Open `FPSOne.uproject` from Epic Games Launcher or run:
 
@@ -39,7 +47,27 @@ Open `FPSOne.uproject` from Epic Games Launcher or run:
 & 'C:\Program Files\Epic Games\UE_5.8\Engine\Binaries\Win64\UnrealEditor.exe' "$PWD\FPSOne.uproject"
 ```
 
-The project starts on `/Game/Maps/L_Testbed` and uses `/Game/Blueprints/BP_TestbedGameMode` with `/Game/Blueprints/BP_Player` as its default pawn. Look directly at the Door from within 250 cm to see `E — Open` or `E — Close`; the centre dot remains visible during free movement and no outline or glow is used. `/Game/Blueprints/BP_TestbedPlayerController` disables motion input at the controlled-player boundary; no controller mappings are present.
+When the project finishes loading, select **Play** in the editor toolbar to start the application in the editor. It opens on `/Game/Maps/L_Testbed`. Use the controls above; press Escape to exit the running application.
+
+### From a packaged build
+
+The canonical verifier creates Development and Shipping Windows builds. To create them, run this command from the repository root:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify.ps1
+```
+
+The first verification pass is expected to report incomplete manual acceptance after it creates the packages. Launch the generated Development application using the exact run-specific path recorded by the verifier:
+
+```powershell
+$verification = Get-Content .\Saved\Verification\verification-result.json -Raw | ConvertFrom-Json
+$developmentExecutable = [string] $verification.packages.development
+& $developmentExecutable
+```
+
+Packaged builds are written below `Saved\Packages\Development` and `Saved\Packages\Shipping`; they are generated locally and ignored by Git. Use the Development build for routine play. The Shipping build is reserved for the guided acceptance and delivery workflow described below and in [docs/setup.md](docs/setup.md).
+
+The project uses `/Game/Blueprints/BP_TestbedGameMode` with `/Game/Blueprints/BP_Player` as its default pawn. Look directly at the Door from within 250 cm to see `E — Open` or `E — Close`; the centre dot remains visible during free movement and no outline or glow is used. `/Game/Blueprints/BP_TestbedPlayerController` disables motion input at the controlled-player boundary; no controller mappings are present.
 
 ## Validate and package
 
@@ -73,7 +101,7 @@ Humans complete the same Shipping delivery without the agent-only visual judgeme
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify.ps1 -CompleteDelivery
 ```
 
-Evidence and the local dashboard are written to `Saved\Verification`. Development and Shipping packages default to `C:\fpsOne-output\Development` and `C:\fpsOne-output\Shipping`; the versioned ZIP and SHA-256 evidence default to `C:\fpsOne-output\Delivery`. These outputs are outside version control.
+Evidence and the local dashboard are written to `Saved\Verification`. Development and Shipping packages default to `Saved\Packages\Development` and `Saved\Packages\Shipping`; the versioned ZIP and SHA-256 evidence default to `Saved\Delivery`. Temporary clean-clone verification uses `Saved\CleanClone`. The repository's `Saved/` ignore rule keeps all of these generated outputs out of version control.
 
 T04 adds a 2560 × 1440 Room A acceptance image and an agent review linked to its hash and the tested working tree. The initial agent run remains red until that review is completed with `verify.ps1 -RequireVisualReview -CompleteVisualReview`. See [Room A assets, visual review, and manual checks](docs/room-a.md). A normal clone needs Git LFS assets (`git lfs pull`); asset downloads and Blender are unnecessary to open or play it.
 

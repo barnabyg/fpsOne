@@ -93,7 +93,7 @@ Deliver both the editable project and a locally generated packaged Windows ZIP. 
 - Use Deferred Rendering, DirectX 12, Shader Model 6, Lumen GI and reflections with hardware ray tracing, Virtual Shadow Maps, Nanite on supported opaque environment meshes, and TSR. Keep deforming NPC meshes off Nanite.
 - Render at 2560 × 1440, initially from 75 percent internal resolution through TSR. Preserve the Lumen, Nanite, Virtual Shadow Maps, and TSR stack; reduce optional expensive reflection, shadow, resolution, and decorative-light settings first if interactivity suffers.
 - Performance is observational and low priority. Record readily available timing with visual evidence but do not build an extensive performance harness or hard FPS gate.
-- Produce a Development build for profiling and a Shipping Win64 build for delivery. Package the final output as a versioned local ZIP outside Git.
+- Produce a Development build for profiling and a Shipping Win64 build for delivery. Package the final output as a versioned local ZIP under the project's Git-ignored `Saved` directory.
 - Provide setup, asset preparation, controls, editor startup, testing, packaging, clean-clone, and manual acceptance documentation.
 - Work on `codex/minimal-fps-prototype`, create one cohesive verified implementation commit, and leave the branch unpushed for review.
 

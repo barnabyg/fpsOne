@@ -77,7 +77,7 @@ Generated evidence is under `C:\docs\git\fpsOne\Saved\Verification`:
 - `index.html` — local static dashboard;
 - `logs\` — retained gate logs, the repository-test XML report, and a run-specific Unreal Automation HTML/JSON report; the dashboard links directly to each current report.
 
-Fresh run-specific Development and Shipping packages are archived below `C:\fpsOne-output\Development` and `C:\fpsOne-output\Shipping`; the exact executable paths appear in the dashboard. Override the parent roots with `-PackageRoot` or `-ShippingPackageRoot`. Clean-clone scratch space defaults to `C:\fpsOne-output\CleanClone`; each verified clone is removed after its evidence is recorded.
+Fresh run-specific Development and Shipping packages are archived below `Saved\Packages\Development` and `Saved\Packages\Shipping`; the exact executable paths appear in the dashboard. Override the parent roots with `-PackageRoot` or `-ShippingPackageRoot`. Clean-clone scratch space defaults to `Saved\CleanClone`; each verified clone is removed after its evidence is recorded. These locations are beneath the project and ignored by Git through the repository's `Saved/` rule.
 
 Run the guided walkthrough against the exact Shipping executable stored in `verification-result.json`:
 
@@ -99,7 +99,7 @@ Human-local completion uses:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify.ps1 -CompleteDelivery
 ```
 
-The final ZIP is `C:\fpsOne-output\Delivery\fpsOne-<12-character-revision>-win64-shipping.zip`. Its SHA-256, both executable locations, manual record, logs, reviews, durations, tool versions, revision/fingerprint, and exceptions appear in the final dashboard.
+The final ZIP is `Saved\Delivery\fpsOne-<12-character-revision>-win64-shipping.zip`. Its SHA-256, both executable locations, manual record, logs, reviews, durations, tool versions, revision/fingerprint, and exceptions appear in the final dashboard.
 
 ## Manual acceptance
 

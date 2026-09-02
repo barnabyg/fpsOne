@@ -1,6 +1,20 @@
 $repoRoot = Split-Path -Parent $PSScriptRoot
 
 Describe 'canonical verifier' -Tag 'VerifierSelfTest' {
+    It 'keeps every generated default beneath the ignored Saved directory' {
+        $verifyScript = Join-Path $repoRoot 'scripts\verify.ps1'
+        $scriptText = Get-Content -LiteralPath $verifyScript -Raw
+
+        $scriptText | Should Match 'Join-Path \$repoRoot ''Saved'''
+        $scriptText | Should Match 'Join-Path \$savedRoot ''Packages\\Development'''
+        $scriptText | Should Match 'Join-Path \$savedRoot ''Packages\\Shipping'''
+        $scriptText | Should Match 'Join-Path \$savedRoot ''Delivery'''
+        $scriptText | Should Match 'Join-Path \$savedRoot ''CleanClone'''
+        $cleanCloneScript = Get-Content -LiteralPath (Join-Path $repoRoot 'scripts\test-clean-clone.ps1') -Raw
+        $cleanCloneScript | Should Match 'Join-Path \$SourceRepository ''Saved\\CleanClone'''
+        (Get-Content -LiteralPath (Join-Path $repoRoot '.gitignore') -Raw) | Should Match '(?m)^Saved/\r?$'
+    }
+
     It 'records actionable current evidence when Unreal Engine is unavailable' {
         $evidenceRoot = Join-Path $TestDrive 'evidence'
         $packageRoot = Join-Path $TestDrive 'package'

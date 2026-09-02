@@ -23,7 +23,7 @@ The verifier is green only when every required gate passes for the current worki
 7. Scan project, test, cook, and package logs with zero project-originated errors or warnings.
 8. In agent mode, capture the four acceptance views and complete the multimodal visual gate below. In human-local mode, report this gate as not applicable.
 9. Manually walk the exact Shipping executable through both Rooms, both Dialogue Interactions, the complete Door cycle, restored input, and Escape exit at 2560 × 1440.
-10. Create the versioned Shipping ZIP outside Git, record its SHA-256, and generate the local verification dashboard described by `verification-dashboard.md`.
+10. Create the versioned Shipping ZIP under the Git-ignored `Saved` directory, record its SHA-256, and generate the local verification dashboard described by `verification-dashboard.md`.
 
 Run focused gates while iterating, then run the complete command after all changes. A failed or skipped gate required by the active mode keeps verification red. A visual gate marked not applicable in human-local mode does not prevent the deterministic suite from passing.
 
@@ -75,7 +75,7 @@ also completes delivery. Humans use `verify.ps1 -CompleteDelivery`. Completion
 rejects a changed revision/fingerprint, changed executable hash, incomplete
 manual checklist, any change to the complete accepted Shipping package, or a
 deterministic failure, then creates the versioned ZIP and hash under
-`C:\fpsOne-output\Delivery`.
+`Saved\Delivery`.
 
 From T10, the Player-facing scenario observes both live residents for at least
 24 seconds. It requires planted feet, softly bent resting elbows, motion that

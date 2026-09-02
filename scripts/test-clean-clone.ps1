@@ -6,7 +6,7 @@ param(
 
     [string] $ExpectedRevision,
 
-    [string] $DestinationRoot = 'C:\fpsOne-output\CleanClone'
+    [string] $DestinationRoot
 )
 
 $ErrorActionPreference = 'Stop'
@@ -14,6 +14,9 @@ if (-not $SourceRepository) {
     $SourceRepository = Split-Path -Parent $PSScriptRoot
 }
 $SourceRepository = [IO.Path]::GetFullPath($SourceRepository)
+if (-not $DestinationRoot) {
+    $DestinationRoot = Join-Path $SourceRepository 'Saved\CleanClone'
+}
 if (-not $ExpectedRevision) {
     $ExpectedRevision = ([string] (& git -C $SourceRepository rev-parse HEAD)).Trim()
     if ($LASTEXITCODE -ne 0) { throw 'Unable to resolve the source repository revision.' }

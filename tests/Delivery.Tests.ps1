@@ -93,6 +93,60 @@ Describe 'Shipping delivery completion' {
         $result.acceptancePath | Should Be $script:acceptancePath
     }
 
+    It 'allows delivery beneath an ignored project directory' {
+        $sourceRepository = Join-Path $TestDrive 'source-repository'
+        New-Item -ItemType Directory -Path $sourceRepository -Force | Out-Null
+        & git -C $sourceRepository init --quiet
+        & git -C $sourceRepository config user.name 'Fixture User'
+        & git -C $sourceRepository config user.email 'fixture@example.invalid'
+        Set-Content -LiteralPath (Join-Path $sourceRepository '.gitignore') -Value 'Saved/' -Encoding UTF8
+        Set-Content -LiteralPath (Join-Path $sourceRepository 'tracked.txt') -Value 'committed' -Encoding UTF8
+        & git -C $sourceRepository add .gitignore tracked.txt
+        & git -C $sourceRepository commit --quiet -m 'fixture'
+        $sourceRevision = ([string] (& git -C $sourceRepository rev-parse HEAD)).Trim()
+        $acceptance = Get-Content -LiteralPath $script:acceptancePath -Raw | ConvertFrom-Json
+        $acceptance.revision = $sourceRevision
+        $acceptance | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $script:acceptancePath -Encoding UTF8
+        $ignoredDeliveryRoot = Join-Path $sourceRepository 'Saved\Delivery'
+
+        & (Join-Path $repoRoot 'scripts\complete-delivery.ps1') `
+            -PackageExecutable $script:packageExecutable `
+            -AcceptancePath $script:acceptancePath `
+            -DeliveryRoot $ignoredDeliveryRoot `
+            -Revision $sourceRevision `
+            -Fingerprint $script:fingerprint `
+            -ResultPath $script:resultPath `
+            -RepositoryRoot $sourceRepository
+
+        $result = Get-Content -LiteralPath $script:resultPath -Raw | ConvertFrom-Json
+        Test-Path -LiteralPath $result.zipPath -PathType Leaf | Should Be $true
+        $result.zipPath | Should Match ([regex]::Escape($ignoredDeliveryRoot))
+        @(& git -C $sourceRepository status --porcelain --untracked-files=all).Count | Should Be 0
+    }
+
+    It 'rejects delivery beneath a project directory that is not ignored' {
+        $sourceRepository = Join-Path $TestDrive 'source-repository'
+        New-Item -ItemType Directory -Path $sourceRepository -Force | Out-Null
+        & git -C $sourceRepository init --quiet
+        & git -C $sourceRepository config user.name 'Fixture User'
+        & git -C $sourceRepository config user.email 'fixture@example.invalid'
+        Set-Content -LiteralPath (Join-Path $sourceRepository 'tracked.txt') -Value 'committed' -Encoding UTF8
+        & git -C $sourceRepository add tracked.txt
+        & git -C $sourceRepository commit --quiet -m 'fixture'
+        $sourceRevision = ([string] (& git -C $sourceRepository rev-parse HEAD)).Trim()
+
+        {
+            & (Join-Path $repoRoot 'scripts\complete-delivery.ps1') `
+                -PackageExecutable $script:packageExecutable `
+                -AcceptancePath $script:acceptancePath `
+                -DeliveryRoot (Join-Path $sourceRepository 'Artifacts\Delivery') `
+                -Revision $sourceRevision `
+                -Fingerprint $script:fingerprint `
+                -ResultPath $script:resultPath `
+                -RepositoryRoot $sourceRepository
+        } | Should Throw 'must be ignored by Git'
+    }
+
     It 'rejects manual evidence for a different Shipping executable' {
         Add-Content -LiteralPath $script:packageExecutable -Value 'changed'
 

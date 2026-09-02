@@ -26,15 +26,21 @@ param(
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'package-manifest.ps1')
 
-function Assert-PathOutsideRepository {
+function Assert-DeliveryRootSafe {
     param([string] $Path, [string] $Root)
 
     if (-not $Root) { return }
     $resolvedPath = [IO.Path]::GetFullPath($Path).TrimEnd('\')
     $resolvedRoot = [IO.Path]::GetFullPath($Root).TrimEnd('\')
-    if ($resolvedPath.Equals($resolvedRoot, [StringComparison]::OrdinalIgnoreCase) -or
-        $resolvedPath.StartsWith($resolvedRoot + '\', [StringComparison]::OrdinalIgnoreCase)) {
-        throw "DeliveryRoot must be outside the Git working tree ('$resolvedRoot')."
+    if ($resolvedPath.Equals($resolvedRoot, [StringComparison]::OrdinalIgnoreCase)) {
+        throw 'DeliveryRoot cannot be the Git working-tree root.'
+    }
+    if ($resolvedPath.StartsWith($resolvedRoot + '\', [StringComparison]::OrdinalIgnoreCase)) {
+        $relativePath = $resolvedPath.Substring($resolvedRoot.Length).TrimStart('\')
+        & git -C $resolvedRoot check-ignore --quiet -- $relativePath
+        if ($LASTEXITCODE -ne 0) {
+            throw "DeliveryRoot inside the Git working tree must be ignored by Git ('$resolvedPath')."
+        }
     }
 }
 
@@ -61,7 +67,7 @@ if (-not (Test-Path -LiteralPath $PackageExecutable -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $AcceptancePath -PathType Leaf)) {
     throw "Shipping manual acceptance evidence was not found at '$AcceptancePath'."
 }
-Assert-PathOutsideRepository -Path $DeliveryRoot -Root $RepositoryRoot
+Assert-DeliveryRootSafe -Path $DeliveryRoot -Root $RepositoryRoot
 Assert-CleanSourceRepository -Root $RepositoryRoot -ExpectedRevision $Revision
 
 $acceptance = Get-Content -LiteralPath $AcceptancePath -Raw | ConvertFrom-Json

@@ -24,22 +24,23 @@ param(
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $projectPath = Join-Path $repoRoot 'FPSOne.uproject'
+$savedRoot = Join-Path $repoRoot 'Saved'
 . (Join-Path $PSScriptRoot 'visual-review.ps1')
 
 if (-not $EvidenceRoot) {
-    $EvidenceRoot = Join-Path $repoRoot 'Saved\Verification'
+    $EvidenceRoot = Join-Path $savedRoot 'Verification'
 }
 if (-not $PackageRoot) {
-    $PackageRoot = 'C:\fpsOne-output\Development'
+    $PackageRoot = Join-Path $savedRoot 'Packages\Development'
 }
 if (-not $ShippingPackageRoot) {
-    $ShippingPackageRoot = 'C:\fpsOne-output\Shipping'
+    $ShippingPackageRoot = Join-Path $savedRoot 'Packages\Shipping'
 }
 if (-not $DeliveryRoot) {
-    $DeliveryRoot = 'C:\fpsOne-output\Delivery'
+    $DeliveryRoot = Join-Path $savedRoot 'Delivery'
 }
 if (-not $CleanCloneRoot) {
-    $CleanCloneRoot = 'C:\fpsOne-output\CleanClone'
+    $CleanCloneRoot = Join-Path $savedRoot 'CleanClone'
 }
 if (-not $EngineRoot) {
     $environmentPath = Join-Path $repoRoot '.env'
@@ -269,7 +270,7 @@ if ($CompleteVisualReview -or $CompleteDelivery) {
     $acceptanceGate[0].details = 'The exact Shipping executable passed the complete guided 2560 x 1440 manual journey.'
     $acceptanceGate[0].reportPaths = @((Get-RelativeEvidencePath $acceptancePath))
     $zipGate[0].status = 'passed'
-    $zipGate[0].details = "Versioned Shipping ZIP created outside Git with SHA-256 $($deliveryResult.zipSha256)."
+    $zipGate[0].details = "Versioned Shipping ZIP created under the Git-ignored Saved directory with SHA-256 $($deliveryResult.zipSha256)."
     $zipGate[0].reportPaths = @((Get-RelativeEvidencePath $deliveryResultPath))
     $result.delivery = [pscustomobject][ordered]@{
         zipPath = [string] $deliveryResult.zipPath
