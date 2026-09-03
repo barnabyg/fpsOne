@@ -532,7 +532,7 @@ if ($interactionStatus -ne 'passed') {
     )
     if ($presentationExitCode -eq 0 -and $presentationSummary -and $pixelExitCode -eq 0) {
         $presentationStatus = 'passed'
-        $presentationDetails = 'Rendered pixel checks confirm the centre dot hides/restores and the charcoal dialogue panel appears/dismisses; the rendered Interaction scenario also passed.'
+        $presentationDetails = 'Rendered pixel checks confirm the centre dot hides/restores and the framed dialogue inset and warm accent appear/dismiss; the rendered Interaction scenario also passed.'
     } else {
         $presentationStatus = 'failed'
         $presentationDetails = "Rendered Dialogue presentation failed (scenario exit $presentationExitCode; pixels exit $pixelExitCode)."
