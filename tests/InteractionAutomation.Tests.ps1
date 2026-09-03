@@ -29,4 +29,15 @@ Describe 'Player-facing Interaction automation' {
         $verifier | Should Match 'T10_NPC_ANIMATION_PASSED'
         $verifier | Should Not Match "Interaction functional tests' 'not_applicable'"
     }
+
+    It 'authors and verifies the framed dialogue presentation' {
+        $generator = Get-Content -LiteralPath (Join-Path $repoRoot 'scripts\dialogue_assets.py') -Raw
+        $pixelTest = Get-Content -LiteralPath (Join-Path $repoRoot 'scripts\test-dialogue-presentation.ps1') -Raw
+
+        $generator | Should Match 'bronze dialogue frame'
+        $generator | Should Match 'dialogue warm edge'
+        $generator | Should Match 'CONVERSATION'
+        $generator | Should Match 'E   CONTINUE'
+        $pixelTest | Should Match 'warm dialogue accent'
+    }
 }

@@ -37,15 +37,23 @@ try {
     if ($dotPixels -lt 1 -or $dotPixels -gt 16) {
         throw "Expected a small visible dot only after dismissal; found $dotPixels contrasting central pixels."
     }
-    # Sample inside the backing, away from its text and the restored Talk prompt.
+    # Sample inside the inset, away from its text and the restored Talk prompt.
     $panelX = [int]($dialogue.Width * 0.15)
     $panelY = $dialogue.Height - 70
     $before = $dialogue.GetPixel($panelX, $panelY)
     $after = $restored.GetPixel($panelX, $panelY)
     if ([int]$after.R - [int]$before.R -lt 40) {
-        throw 'The charcoal dialogue backing did not appear and dismiss in the rendered views.'
+        throw 'The inset dialogue backing did not appear and dismiss in the rendered views.'
     }
-    Write-Output "T03_PRESENTATION_PIXELS_PASSED: $($dialogue.Width)x$($dialogue.Height); dot hidden during dialogue and restored afterward; charcoal panel dismisses."
+    # The warm left edge is a stable authored pixel target and proves the new
+    # framed treatment was rendered rather than only a generic dark backing.
+    $accentX = [int][Math]::Floor($dialogue.Width * 0.13) + 4
+    $accentY = $dialogue.Height - 100
+    $accent = $dialogue.GetPixel($accentX, $accentY)
+    if ([int]$accent.R - [int]$accent.G -lt 25 -or [int]$accent.G - [int]$accent.B -lt 20) {
+        throw "The warm dialogue accent was not visible at the expected location; sampled RGB $($accent.R),$($accent.G),$($accent.B)."
+    }
+    Write-Output "T03_PRESENTATION_PIXELS_PASSED: $($dialogue.Width)x$($dialogue.Height); dot hidden/restored; framed dialogue inset and warm accent appear/dismiss."
 } finally {
     $dialogue.Dispose()
     $restored.Dispose()

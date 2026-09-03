@@ -67,25 +67,64 @@ def create_presentation():
         set_pin(add.find_input_pin("B"), offset, "screen offset")
         return add.find_result_pin()
 
-    def draw_panel(execution, text_name, y, width_ratio, height, bottom):
-        backing = add_function_call(graph, "/Script/Engine.HUD:DrawRect", 200, y, "charcoal panel")
-        set_pin(backing.find_input_pin("RectColor"), "(R=0.03,G=0.03,B=0.03,A=0.82)", "panel colour")
-        connect(coordinate(draw.find_output_pin("SizeX"), (1-width_ratio)/2, 0, -700, y-300), backing.find_input_pin("ScreenX"), "panel X")
-        connect(coordinate(draw.find_output_pin("SizeY"), 1, -bottom-height, -700, y-180), backing.find_input_pin("ScreenY"), "panel Y")
-        connect(coordinate(draw.find_output_pin("SizeX"), width_ratio, 0, -700, y-60), backing.find_input_pin("ScreenW"), "panel width")
-        set_pin(backing.find_input_pin("ScreenH"), height, "panel height")
-        text = add_function_call(graph, "/Script/Engine.HUD:DrawText", 500, y, "speaker-labelled panel text")
-        value = add_get(graph, text_name, 200, y-180)
-        connect(value.find_result_pin(), text.find_input_pin("Text"), "panel text")
-        set_pin(text.find_input_pin("TextColor"), "(R=0.92,G=0.92,B=0.92,A=1.0)", "text colour")
-        set_pin(text.find_input_pin("Scale"), "1.4", "text scale")
-        connect(coordinate(draw.find_output_pin("SizeX"), (1-width_ratio)/2, 24, 0, y-300), text.find_input_pin("ScreenX"), "text X")
-        connect(coordinate(draw.find_output_pin("SizeY"), 1, -bottom-height+24, 0, y-150), text.find_input_pin("ScreenY"), "text Y")
-        connect(execution, backing.find_execute_pin(), "draw panel")
-        connect(backing.find_then_pin(), text.find_execute_pin(), "draw content")
+    def draw_rect(execution, description, colour, x_ratio, x_offset,
+                  y_offset, width_ratio, width_offset, height, node_y):
+        rect = add_function_call(graph, "/Script/Engine.HUD:DrawRect", 200, node_y, description)
+        set_pin(rect.find_input_pin("RectColor"), colour, description + " colour")
+        connect(coordinate(draw.find_output_pin("SizeX"), x_ratio, x_offset, -700, node_y-300), rect.find_input_pin("ScreenX"), description + " X")
+        connect(coordinate(draw.find_output_pin("SizeY"), 1, y_offset, -700, node_y-180), rect.find_input_pin("ScreenY"), description + " Y")
+        connect(coordinate(draw.find_output_pin("SizeX"), width_ratio, width_offset, -700, node_y-60), rect.find_input_pin("ScreenW"), description + " width")
+        set_pin(rect.find_input_pin("ScreenH"), height, description + " height")
+        connect(execution, rect.find_execute_pin(), "draw " + description)
+        return rect.find_then_pin()
+
+    def draw_text(execution, value_pin, literal, description, colour, scale,
+                  x_ratio, x_offset, y_offset, node_y):
+        text = add_function_call(graph, "/Script/Engine.HUD:DrawText", 500, node_y, description)
+        if value_pin is not None:
+            connect(value_pin, text.find_input_pin("Text"), description + " text")
+        else:
+            set_pin(text.find_input_pin("Text"), literal, description + " text")
+        set_pin(text.find_input_pin("TextColor"), colour, description + " colour")
+        set_pin(text.find_input_pin("Scale"), scale, description + " scale")
+        connect(coordinate(draw.find_output_pin("SizeX"), x_ratio, x_offset, 0, node_y-300), text.find_input_pin("ScreenX"), description + " X")
+        connect(coordinate(draw.find_output_pin("SizeY"), 1, y_offset, 0, node_y-150), text.find_input_pin("ScreenY"), description + " Y")
+        connect(execution, text.find_execute_pin(), "draw " + description)
         return text.find_then_pin()
 
-    draw_panel(branch.find_then_pin(), "DialogueText", 0, 0.8, 120, 48)
+    def draw_dialogue_panel(execution):
+        # A compact, layered lower-third keeps the resident readable while giving
+        # the exchange a deliberate game-UI hierarchy at any viewport width.
+        width_ratio = 0.74
+        x_ratio = (1-width_ratio)/2
+        height = 154
+        bottom = 46
+        panel_y = -bottom-height
+        execution = draw_rect(execution, "dialogue drop shadow", "(R=0.0,G=0.0,B=0.0,A=0.38)", x_ratio, 10, panel_y+10, width_ratio, 0, height, 0)
+        execution = draw_rect(execution, "bronze dialogue frame", "(R=0.50,G=0.32,B=0.12,A=0.96)", x_ratio, 0, panel_y, width_ratio, 0, height, 500)
+        execution = draw_rect(execution, "dialogue inset", "(R=0.018,G=0.020,B=0.022,A=0.91)", x_ratio, 2, panel_y+2, width_ratio, -4, height-4, 1000)
+        execution = draw_rect(execution, "dialogue warm edge", "(R=0.88,G=0.58,B=0.22,A=1.0)", x_ratio, 2, panel_y+2, 0, 6, height-4, 1500)
+        execution = draw_rect(execution, "dialogue header plate", "(R=0.10,G=0.075,B=0.045,A=0.98)", x_ratio, 24, panel_y-15, 0, 196, 34, 2000)
+        execution = draw_rect(execution, "dialogue header rule", "(R=0.88,G=0.58,B=0.22,A=1.0)", x_ratio, 24, panel_y+17, 0, 196, 2, 2500)
+        execution = draw_text(execution, None, "CONVERSATION", "dialogue header", "(R=0.93,G=0.72,B=0.38,A=1.0)", "0.82", x_ratio, 40, panel_y-8, 3000)
+        value = add_get(graph, "DialogueText", 200, 3350)
+        execution = draw_text(execution, value.find_result_pin(), None, "speaker-labelled dialogue", "(R=0.96,G=0.95,B=0.91,A=1.0)", "1.45", x_ratio, 34, panel_y+52, 3500)
+        execution = draw_rect(execution, "dialogue footer rule", "(R=0.50,G=0.32,B=0.12,A=0.72)", x_ratio, 30, panel_y+116, width_ratio, -60, 1, 4000)
+        return draw_text(execution, None, "E   CONTINUE", "dialogue advance hint", "(R=0.79,G=0.72,B=0.60,A=0.92)", "0.78", 1-x_ratio, -132, panel_y+124, 4500)
+
+    def draw_prompt_panel(execution):
+        width_ratio = 0.25
+        x_ratio = (1-width_ratio)/2
+        height = 72
+        bottom = 110
+        panel_y = -bottom-height
+        execution = draw_rect(execution, "prompt shadow", "(R=0.0,G=0.0,B=0.0,A=0.32)", x_ratio, 5, panel_y+5, width_ratio, 0, height, 6000)
+        execution = draw_rect(execution, "prompt frame", "(R=0.50,G=0.32,B=0.12,A=0.90)", x_ratio, 0, panel_y, width_ratio, 0, height, 6500)
+        execution = draw_rect(execution, "prompt inset", "(R=0.018,G=0.020,B=0.022,A=0.86)", x_ratio, 2, panel_y+2, width_ratio, -4, height-4, 7000)
+        value = add_get(graph, "PromptText", 200, 7350)
+        return draw_text(execution, value.find_result_pin(), None, "interaction prompt", "(R=0.96,G=0.95,B=0.91,A=1.0)", "1.25", x_ratio, 22, panel_y+23, 7500)
+
+    draw_dialogue_panel(branch.find_then_pin())
     dot = add_function_call(graph, "/Script/Engine.HUD:DrawText", -500, 700, "centre dot")
     set_pin(dot.find_input_pin("Text"), "·", "centre dot")
     set_pin(dot.find_input_pin("TextColor"), "(R=0.65,G=0.65,B=0.65,A=0.55)", "dot colour")
@@ -98,7 +137,7 @@ def create_presentation():
     prompt_branch = graph.add_branch_node()
     connect(dot.find_then_pin(), prompt_branch.find_execute_pin(), "prompt decision")
     connect(empty.find_result_pin(), prompt_branch.find_condition_pin(), "prompt emptiness")
-    draw_panel(prompt_branch.find_else_pin(), "PromptText", 1450, 0.25, 72, 110)
+    draw_prompt_panel(prompt_branch.find_else_pin())
     compile_and_save(panel)
     save_blueprint(panel)
     return panel

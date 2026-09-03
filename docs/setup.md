@@ -129,6 +129,6 @@ To capture the dialogue and restored HUD for visual inspection, run the function
 & 'C:\Program Files\Epic Games\UE_5.8\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' "$PWD\FPSOne.uproject" '-ExecCmds=Automation RunTests Editor.Python.FPSOne.test_interaction' '-TestExit=Automation Test Queue Empty' -T03Capture -ResX=2560 -ResY=1440 -unattended -nop4 -nosplash
 ```
 
-Captures are retained under `Saved\DialogueReview` at the PIE viewport's actual resolution (recorded by the pixel check; command-line window size does not force the embedded viewport size). The canonical verifier runs this rendered scenario after its headless scenario and checks the actual pixels for dot hiding/restoration and panel dismissal. Both captures and the pixel report appear on the dashboard. This deterministic T03 UI check is separate from the T08 final-art benchmark.
+Captures are retained under `Saved\DialogueReview` at the PIE viewport's actual resolution (recorded by the pixel check; command-line window size does not force the embedded viewport size). The canonical verifier runs this rendered scenario after its headless scenario and checks the actual pixels for dot hiding/restoration, the framed dialogue inset and warm accent, and panel dismissal. Both captures and the pixel report appear on the dashboard. This deterministic T03 UI check is separate from the T08 final-art benchmark.
 
 The Shipping package contains both furnished Rooms and both refined animated residents. Audio remains outside the prototype's scope.
